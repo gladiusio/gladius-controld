@@ -28,15 +28,13 @@ func ConnectMarket() *generated.Market {
 }
 
 // MarketPools - List all available market pools
-func MarketPools() {
+func MarketPools() ([]common.Address, error) {
 	market := ConnectMarket()
 
 	pools, err := market.GetAllPools(nil)
 	if err != nil {
-		log.Fatalf("Failed to retrieve pools: %v", err)
+		return nil, err
 	}
 
-	for _, pool := range pools {
-		fmt.Println("Pool: ", pool.String())
-	}
+	return pools, nil
 }
