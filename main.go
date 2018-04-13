@@ -21,6 +21,8 @@ func main() {
 		router.Use(loggingMiddleware)
 	}
 
+	router.Use(responseMiddleware)
+
 	// Base API Sub-Routes
 	apiRouter := router.PathPrefix("/api").Subrouter()
 	apiRouter.HandleFunc("/", handlers.APIHandler)
@@ -30,7 +32,7 @@ func main() {
 	statusRouter.HandleFunc("/", handlers.StatusHandler).
 		Methods("GET", "PUT").
 		Name("status")
-	statusRouter.HandleFunc("/tx/{tx:0[xX][0-9a-fA-F]{64}}", handlers.StatusHandler).
+	statusRouter.HandleFunc("/tx/{tx:0[xX][0-9a-fA-F]{64}}", handlers.StatusTxHandler).
 		Methods("GET").
 		Name("status-tx")
 
@@ -44,6 +46,13 @@ func main() {
 		Name("market-pools-create")
 
 	log.Fatal(http.ListenAndServe(port, router))
+}
+
+func responseMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Content-Type", "application/json")
+		next.ServeHTTP(w, r)
+	})
 }
 
 func loggingMiddleware(next http.Handler) http.Handler {
