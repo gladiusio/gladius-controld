@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	//"fmt"
 	"encoding/json"
 	"github.com/nfeld9807/rest-api/internal/blockchain"
 	"net/http"
@@ -20,7 +19,6 @@ func MarketPoolsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	length := int(len(pools))
-
 	response := make([]string, length)
 
 	for i, pool := range pools {
@@ -28,9 +26,6 @@ func MarketPoolsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonResponse, _ := json.Marshal(response)
-
-	//response := fmt.Sprintf("%s", pools.String())
-
 	ResponseHandler(w, r, "null", string(jsonResponse))
 }
 

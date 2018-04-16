@@ -1,7 +1,6 @@
 package blockchain
 
 import (
-	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/nfeld9807/rest-api/internal/blockchain/generated"
 	"log"
@@ -17,12 +16,12 @@ func ConnectMarket() *generated.Market {
 		log.Fatalf("Failed to instantiate a Market contract: %v", err)
 	}
 
-	owner, err := market.Owner(nil)
-	if err != nil {
-		log.Fatalf("Failed to retrieve owner: %v", err)
-	}
+	//owner, err := market.Owner(nil)
+	//if err != nil {
+	//log.Fatalf("Failed to retrieve owner: %v", err)
+	//}
 
-	fmt.Println("Owner: ", owner.String())
+	//fmt.Println("Owner: ", owner.String())
 
 	return market
 }
