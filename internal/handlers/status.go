@@ -19,6 +19,7 @@ func StatusTxHandler(w http.ResponseWriter, r *http.Request) {
 
 	txHash := vars["tx"]
 	transaction, isPending, err := blockchain.Tx(common.HexToHash(txHash))
+	complete := !isPending
 
 	if transaction == nil || err != nil {
 		ErrorHandler(w, r, "Transaction not found", err, http.StatusNotFound)
@@ -32,12 +33,20 @@ func StatusTxHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var receiptResponseJSON []byte
+	status := []byte("null")
 
-	if !isPending {
+	if complete {
 		receipt, err := blockchain.TxReceipt(common.HexToHash(txHash))
 		if receipt == nil || err != nil {
 			ErrorHandler(w, r, "Receipt not found", err, http.StatusNotFound)
 			return
+		}
+
+		statusResponse := !(receipt.Status == 0)
+		if statusResponse {
+			status = []byte("true")
+		} else {
+			status = []byte("false")
 		}
 
 		receiptJSON, err := receipt.MarshalJSON()
@@ -53,6 +62,6 @@ func StatusTxHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 
-	response := fmt.Sprintf("{ \"isPending\": %t, \"transaction\": %s, \"receipt\": %s }", isPending, transactionJSON, receiptResponseJSON)
+	response := fmt.Sprintf("{ \"txHash\": \"%s\", \"complete\": %t, \"status\": %s, \"transaction\": %s, \"receipt\": %s }", txHash, complete, status, transactionJSON, receiptResponseJSON)
 	ResponseHandler(w, r, "null", response)
 }

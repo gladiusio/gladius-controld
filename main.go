@@ -27,6 +27,11 @@ func main() {
 	apiRouter := router.PathPrefix("/api").Subrouter()
 	apiRouter.HandleFunc("/", handlers.APIHandler)
 
+	// Wallet Management
+	walletRouter := apiRouter.PathPrefix("/keystore").Subrouter()
+	walletRouter.HandleFunc("/create", handlers.KeystoreCreationHandler).
+		Methods("POST")
+
 	// Status Sub-Routes
 	statusRouter := apiRouter.PathPrefix("/status").Subrouter()
 	statusRouter.HandleFunc("/", handlers.StatusHandler).
@@ -35,6 +40,36 @@ func main() {
 	statusRouter.HandleFunc("/tx/{tx:0[xX][0-9a-fA-F]{64}}", handlers.StatusTxHandler).
 		Methods("GET").
 		Name("status-tx")
+
+	// Node Sub-Routes
+	nodeRouter := apiRouter.PathPrefix("/node").Subrouter()
+	// Retrieve owned Node if available
+	nodeRouter.HandleFunc("/", handlers.NodeFactoryNodeAddressHandler).
+		Methods("GET")
+	// Node for address
+	nodeRouter.HandleFunc("/{nodeAddress:0[xX][0-9a-fA-F]{40}}", nil)
+	// Node Creation
+	nodeRouter.HandleFunc("/create", handlers.NodeFactoryCreateNodeHandler).
+		Methods("POST")
+	// Node Data
+	nodeRouter.HandleFunc("/{nodeAddress:0[xX][0-9a-fA-F]{40}}/data", nil)
+	// Node application to Pool
+	nodeRouter.HandleFunc("/{nodeAddress:0[xX][0-9a-fA-F]{40}}/apply/{poolAddress:0[xX][0-9a-fA-F]{40}}", nil)
+	// Node application status
+	nodeRouter.HandleFunc("/{nodeAddress:0[xX][0-9a-fA-F]{40}}/application/{poolAddress:0[xX][0-9a-fA-F]{40}}", nil)
+
+	// Pool Sub-Routes
+	poolRouter := apiRouter.PathPrefix("/pool").Subrouter()
+	// Retrieve owned Pool if available
+	poolRouter.HandleFunc("/", nil)
+	// Pool object, data, public key, etc
+	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}", nil)
+	// Pool data, both public and private data can be set here
+	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/data", nil)
+	// Retrieve nodes with query parameters for inc data, approved, pending, rejected
+	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/nodes", nil)
+	// Retrieve or update the status of a node's application
+	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/node/{nodeAddress:0[xX][0-9a-fA-F]{40}}/status", nil)
 
 	// Market Sub-Routes
 	marketRouter := apiRouter.PathPrefix("/market").Subrouter()
