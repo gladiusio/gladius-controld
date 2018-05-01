@@ -31,6 +31,12 @@ func main() {
 	walletRouter := apiRouter.PathPrefix("/keystore").Subrouter()
 	walletRouter.HandleFunc("/create", handlers.KeystoreCreationHandler).
 		Methods("POST")
+	walletRouter.HandleFunc("/wallets", handlers.KeystoreWalletsRetrievalHandler).
+		Methods("GET")
+	walletRouter.HandleFunc("/wallet/{index:[0-9]*}", handlers.KeystoreWalletRetrievalHandler).
+		Methods("GET")
+	walletRouter.HandleFunc("/wallet/{index:[0-9]*}/open", handlers.KeystoreWalletOpenHandler).
+		Methods("POST")
 
 	// Status Sub-Routes
 	statusRouter := apiRouter.PathPrefix("/status").Subrouter()

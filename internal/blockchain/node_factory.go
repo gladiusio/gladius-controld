@@ -10,7 +10,6 @@ import (
 // ConnectNodeFactory - Establish Connection to deployed NodeFactory contract
 func ConnectNodeFactory() (*generated.NodeFactory, error) {
 	conn := ConnectClient()
-
 	nodeFactory, err := generated.NewNodeFactory(common.HexToAddress("0x85f0129d0b40b0ed15d97b657872b55cf91ae7de"), conn)
 
 	if err != nil {
@@ -21,14 +20,19 @@ func ConnectNodeFactory() (*generated.NodeFactory, error) {
 }
 
 // NodeForAccount - returns node address for wallet
-func NodeForAccount(ownerAddress string) (*common.Address, error) {
+func NodeOwnedByUser() (*common.Address, error) {
+	address := GetDefaultAccountAddress()
+	return NodeForAccount(address)
+}
+
+func NodeForAccount(ownerAddress common.Address) (*common.Address, error) {
 	factory, err := ConnectNodeFactory()
 
 	if err != nil {
 		return nil, err
 	}
 
-	address, err := factory.GetNodeAddress(&bind.CallOpts{From: common.HexToAddress(ownerAddress)})
+	address, err := factory.GetNodeAddress(&bind.CallOpts{From: ownerAddress})
 
 	if err != nil {
 		return nil, err
@@ -44,7 +48,7 @@ func CreateNode() (string, error) {
 		return "null", err
 	}
 
-	auth := GetAuth("password")
+	auth := GetDefaultAuth("password")
 
 	transaction, err := factory.CreateNode(auth)
 

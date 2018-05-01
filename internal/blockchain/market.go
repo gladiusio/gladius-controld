@@ -36,7 +36,7 @@ func MarketPools() ([]common.Address, error) {
 //MarketCreatePool - Create new pool
 func MarketCreatePool(publicKey string) (common.Hash, error) {
 	market := ConnectMarket()
-	auth := GetAuth("password")
+	auth := GetDefaultAuth("password")
 
 	transaction, err := market.CreatePool(auth, publicKey)
 	if err != nil {

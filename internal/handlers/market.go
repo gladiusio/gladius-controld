@@ -37,6 +37,6 @@ func MarketPoolsCreateHandler(w http.ResponseWriter, r *http.Request) {
 		ErrorHandler(w, r, "Could not build pool creation transaction", err, http.StatusNotFound)
 	}
 
-	jsonResponse := fmt.Sprintf("0x%x", transaction)
+	jsonResponse := fmt.Sprintf("{\"txHash\": \"0x%x\"}", transaction)
 	ResponseHandler(w, r, "null", string(jsonResponse))
 }
