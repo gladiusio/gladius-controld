@@ -27,15 +27,17 @@ func main() {
 	apiRouter := router.PathPrefix("/api").Subrouter()
 	apiRouter.HandleFunc("/", handlers.APIHandler)
 
-	// Wallet Management
+	// Key Management
 	walletRouter := apiRouter.PathPrefix("/keystore").Subrouter()
-	walletRouter.HandleFunc("/create", handlers.KeystoreCreationHandler).
+	walletRouter.HandleFunc("/wallet/create", handlers.KeystoreCreationHandler).
 		Methods("POST")
 	walletRouter.HandleFunc("/wallets", handlers.KeystoreWalletsRetrievalHandler).
 		Methods("GET")
 	walletRouter.HandleFunc("/wallet/{index:[0-9]*}", handlers.KeystoreWalletRetrievalHandler).
 		Methods("GET")
 	walletRouter.HandleFunc("/wallet/{index:[0-9]*}/open", handlers.KeystoreWalletOpenHandler).
+		Methods("POST")
+	walletRouter.HandleFunc("/pgp/create", handlers.KeystorePGPCreationHandler).
 		Methods("POST")
 
 	// Status Sub-Routes

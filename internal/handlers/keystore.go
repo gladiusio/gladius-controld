@@ -2,14 +2,22 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/nfeld9807/rest-api/internal/blockchain"
+	"github.com/nfeld9807/rest-api/internal/crypto"
 	"net/http"
 	"strconv"
 )
 
 type wallet_struct struct {
 	Passphrase string `json:"passphrase"`
+}
+
+type pgp_struct struct {
+	Name    string `json:"name"`
+	Comment string `json:"comment"`
+	Email   string `json:"email"`
 }
 
 func passphraseDecoder(w http.ResponseWriter, r *http.Request) wallet_struct {
@@ -76,5 +84,43 @@ func KeystoreWalletsRetrievalHandler(w http.ResponseWriter, r *http.Request) {
 
 	response += "]"
 
+	ResponseHandler(w, r, "null", response)
+}
+
+func KeystorePGPCreationHandler(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+	var pgpStruct pgp_struct
+	err := decoder.Decode(&pgpStruct)
+
+	if err != nil {
+		ErrorHandler(w, r, "Request invalid, body is missing either `name`, `comment`, and/or `email`", err, http.StatusBadRequest)
+	}
+
+	path, err := crypto.CreateKeyPair(pgpStruct.Name, pgpStruct.Comment, pgpStruct.Email)
+	if err != nil {
+		ErrorHandler(w, r, "PGP key pair could not be created", err, http.StatusInternalServerError)
+	}
+
+	//encMessage, err := crypto.EncryptMessage("Test Message")
+
+	//if err != nil {
+	//log.Fatal(err)
+	//}
+
+	//println(encMessage)
+
+	//decMessage, err := crypto.DecryptMessage(encMessage)
+
+	//if err != nil {
+	//log.Fatal(err)
+	//}
+
+	//println(decMessage)
+
+	//wallet := passphraseDecoder(w, r)
+
+	//account, err := blockchain.CreateAccount(wallet.Passphrase)
+	//response := blockchain.AccountResponseFormatter(&account)
+	response := fmt.Sprintf("{\"path\": \"%s\"}", path)
 	ResponseHandler(w, r, "null", response)
 }

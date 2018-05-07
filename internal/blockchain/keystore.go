@@ -52,8 +52,15 @@ func Wallets() []accounts.Wallet {
 
 func OpenWallet(accountIndex int, passphrase string) accounts.Wallet {
 	ks, _ := keystoreForPath("")
+	account := ks.Accounts()[accountIndex]
+	err := ks.Unlock(account, passphrase)
+
 	wallet := ks.Wallets()[accountIndex]
 	wallet.Open(passphrase)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	return wallet
 }

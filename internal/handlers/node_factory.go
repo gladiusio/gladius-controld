@@ -25,7 +25,7 @@ func NodeFactoryNodeAddressHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonResponse := fmt.Sprintf("0x%x", nodeAddress)
-	ResponseHandler(w, r, "null", string(jsonResponse))
+	ResponseHandler(w, r, "null", "\""+string(jsonResponse)+"\"")
 }
 
 func NodeFactoryCreateNodeHandler(w http.ResponseWriter, r *http.Request) {
