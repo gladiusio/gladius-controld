@@ -32,7 +32,8 @@ func MarketPoolsHandler(w http.ResponseWriter, r *http.Request) {
 
 // MarketPoolsCreateHandler - Create a new Pool
 func MarketPoolsCreateHandler(w http.ResponseWriter, r *http.Request) {
-	transaction, err := blockchain.MarketCreatePool("test")
+	auth := r.Header.Get("X-Authorization")
+	transaction, err := blockchain.MarketCreatePool(auth, "test")
 	if err != nil {
 		ErrorHandler(w, r, "Could not build pool creation transaction", err, http.StatusNotFound)
 	}

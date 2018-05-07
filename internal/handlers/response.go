@@ -19,7 +19,7 @@ func ResponseHandler(w http.ResponseWriter, r *http.Request, m string, res strin
 // Replaces any response
 func replaceTx(payload string) string {
 	re := regexp.MustCompile(`"txHash":\s"(0[xX][a-fA-F0-9]{64})"`)
-	s := re.ReplaceAllString(payload, "\"txHash\": { \"value\": $1, \"status\": \"http://localhost:3000/api/status/tx/$1\", \"etherscan\": { \"main\": \"https://etherscan.io/tx/$1\", \"ropsten\":\"https://ropsten.etherscan.io/tx/$1\"} }")
+	s := re.ReplaceAllString(payload, "\"txHash\": { \"value\": \"$1\", \"status\": \"http://localhost:3000/api/status/tx/$1\", \"etherscan\": { \"main\": \"https://etherscan.io/tx/$1\", \"ropsten\":\"https://ropsten.etherscan.io/tx/$1\"} }")
 
 	return s
 }

@@ -101,26 +101,6 @@ func KeystorePGPCreationHandler(w http.ResponseWriter, r *http.Request) {
 		ErrorHandler(w, r, "PGP key pair could not be created", err, http.StatusInternalServerError)
 	}
 
-	//encMessage, err := crypto.EncryptMessage("Test Message")
-
-	//if err != nil {
-	//log.Fatal(err)
-	//}
-
-	//println(encMessage)
-
-	//decMessage, err := crypto.DecryptMessage(encMessage)
-
-	//if err != nil {
-	//log.Fatal(err)
-	//}
-
-	//println(decMessage)
-
-	//wallet := passphraseDecoder(w, r)
-
-	//account, err := blockchain.CreateAccount(wallet.Passphrase)
-	//response := blockchain.AccountResponseFormatter(&account)
 	response := fmt.Sprintf("{\"path\": \"%s\"}", path)
 	ResponseHandler(w, r, "null", response)
 }

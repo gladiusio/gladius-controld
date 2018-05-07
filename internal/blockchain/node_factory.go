@@ -41,14 +41,14 @@ func NodeForAccount(ownerAddress common.Address) (*common.Address, error) {
 	return &address, nil
 }
 
-func CreateNode() (string, error) {
+func CreateNode(passphrase string) (string, error) {
 	factory, err := ConnectNodeFactory()
 
 	if err != nil {
 		return "null", err
 	}
 
-	auth := GetDefaultAuth("password")
+	auth := GetDefaultAuth(passphrase)
 
 	transaction, err := factory.CreateNode(auth)
 

@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	//"encoding/json"
-	//"fmt"
-	//"github.com/nfeld9807/rest-api/internal/blockchain"
+	"encoding/json"
+	"fmt"
+	"github.com/nfeld9807/rest-api/internal/blockchain"
 	"net/http"
 )
 
@@ -12,31 +12,24 @@ func NodeHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Main Node API\n"))
 }
 
-//// MarketPoolsHandler - Returns all Pools
-//func MarketPoolsHandler(w http.ResponseWriter, r *http.Request) {
-//pools, err := blockchain.MarketPools()
-//if err != nil {
-//ErrorHandler(w, r, "Could not retrieve pools", err, http.StatusNotFound)
-//}
+func NodeRetrieveDataHandler(w http.ResponseWriter, r *http.Request) {
+	nodeData, _ := blockchain.NodeRetrieveData()
+	jsonResponse := nodeData.String()
 
-//length := int(len(pools))
-//response := make([]string, length)
+	ResponseHandler(w, r, "null", jsonResponse)
+}
 
-//for i, pool := range pools {
-//response[i] = pool.String()
-//}
+func NodeSetDataHandler(w http.ResponseWriter, r *http.Request) {
+	auth := r.Header.Get("X-Authorization")
+	decoder := json.NewDecoder(r.Body)
+	var data blockchain.NodeData
+	err := decoder.Decode(&data)
 
-//jsonResponse, _ := json.Marshal(response)
-//ResponseHandler(w, r, "null", string(jsonResponse))
-//}
+	if err != nil {
+		ErrorHandler(w, r, "Passphrase `passphrase` not included or invalid in request", err, http.StatusBadRequest)
+	}
 
-//// MarketPoolsCreateHandler - Create a new Pool
-//func MarketPoolsCreateHandler(w http.ResponseWriter, r *http.Request) {
-//transaction, err := blockchain.MarketCreatePool("test")
-//if err != nil {
-//ErrorHandler(w, r, "Could not build pool creation transaction", err, http.StatusNotFound)
-//}
-
-//jsonResponse := fmt.Sprintf("0x%x", transaction)
-//ResponseHandler(w, r, "null", string(jsonResponse))
-//}
+	transaction, _ := blockchain.NodeSetData(auth, &data)
+	jsonResponse := fmt.Sprintf("{\"txHash\": \"0x%x\"}", transaction)
+	ResponseHandler(w, r, "null", string(jsonResponse))
+}

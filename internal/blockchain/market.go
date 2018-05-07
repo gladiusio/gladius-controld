@@ -34,16 +34,15 @@ func MarketPools() ([]common.Address, error) {
 }
 
 //MarketCreatePool - Create new pool
-func MarketCreatePool(publicKey string) (common.Hash, error) {
+func MarketCreatePool(passphrase, publicKey string) (string, error) {
 	market := ConnectMarket()
-	auth := GetDefaultAuth("password")
+	auth := GetDefaultAuth(passphrase)
 
 	transaction, err := market.CreatePool(auth, publicKey)
 	if err != nil {
 		log.Fatalf("Failed to request token transfer: %v", err)
 	}
 
-	fmt.Printf("Transfer pending: 0x%x\n", transaction.Hash())
-
-	return transaction.Hash(), nil
+	txHash := fmt.Sprintf("0x%x", transaction.Hash())
+	return txHash, nil
 }

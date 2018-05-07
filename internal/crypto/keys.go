@@ -122,7 +122,7 @@ func EncryptMessage(message, publicKey string) (string, error) {
 	return encStr, nil
 }
 
-func DecryptMessage(message string) (string, error) {
+func DecryptData(message string) (string, error) {
 	var pathTemp string = os.Getenv("HOME") + "/.config/gladius/keys/"
 	keyringFileBuffer, _ := os.Open(pathTemp + "private.asc")
 
