@@ -77,7 +77,7 @@ func KeystoreWalletsRetrievalHandler(w http.ResponseWriter, r *http.Request) {
 
 	for index, wallet := range wallets {
 		response += blockchain.WalletResponseFormatter(wallet)
-		if index < len(wallets) {
+		if index < len(wallets)-1 {
 			response += ","
 		}
 	}

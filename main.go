@@ -74,7 +74,7 @@ func main() {
 	// Retrieve owned Pool if available
 	poolRouter.HandleFunc("/", nil)
 	// Pool object, data, public key, etc
-	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}", nil)
+	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}", handlers.PoolRetrievePublicKeyHandler) // TODO temp to display public key
 	// Pool data, both public and private data can be set here
 	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/data", nil)
 	// Retrieve nodes with query parameters for inc data, approved, pending, rejected
