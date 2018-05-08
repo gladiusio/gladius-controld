@@ -1,9 +1,9 @@
 package blockchain
 
 import (
-	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/nfeld9807/rest-api/internal/blockchain/generated"
 )
 
@@ -41,11 +41,11 @@ func NodeForAccount(ownerAddress common.Address) (*common.Address, error) {
 	return &address, nil
 }
 
-func CreateNode(passphrase string) (string, error) {
+func CreateNode(passphrase string) (*types.Transaction, error) {
 	factory, err := ConnectNodeFactory()
 
 	if err != nil {
-		return "null", err
+		return nil, err
 	}
 
 	auth := GetDefaultAuth(passphrase)
@@ -53,10 +53,8 @@ func CreateNode(passphrase string) (string, error) {
 	transaction, err := factory.CreateNode(auth)
 
 	if err != nil {
-		return "null", err
+		return nil, err
 	}
 
-	txHash := fmt.Sprintf("0x%x", transaction.Hash())
-
-	return txHash, nil
+	return transaction, nil
 }

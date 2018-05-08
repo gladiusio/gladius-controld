@@ -1,8 +1,8 @@
 package blockchain
 
 import (
-	"fmt"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/nfeld9807/rest-api/internal/blockchain/generated"
 	"log"
 )
@@ -34,7 +34,7 @@ func MarketPools() ([]common.Address, error) {
 }
 
 //MarketCreatePool - Create new pool
-func MarketCreatePool(passphrase, publicKey string) (string, error) {
+func MarketCreatePool(passphrase, publicKey string) (*types.Transaction, error) {
 	market := ConnectMarket()
 	auth := GetDefaultAuth(passphrase)
 
@@ -43,6 +43,5 @@ func MarketCreatePool(passphrase, publicKey string) (string, error) {
 		log.Fatalf("Failed to request token transfer: %v", err)
 	}
 
-	txHash := fmt.Sprintf("0x%x", transaction.Hash())
-	return txHash, nil
+	return transaction, nil
 }

@@ -2,9 +2,9 @@ package blockchain
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/nfeld9807/rest-api/internal/blockchain/generated"
 	"github.com/nfeld9807/rest-api/internal/crypto"
 	"log"
@@ -55,7 +55,7 @@ func NodeRetrieveData() (*NodeData, error) {
 	return &nodeData, nil
 }
 
-func NodeSetData(passphrase string, data *NodeData) (string, error) {
+func NodeSetData(passphrase string, data *NodeData) (*types.Transaction, error) {
 	nodeAddress, _ := NodeOwnedByUser()
 	node := ConnectNode(*nodeAddress)
 
@@ -64,11 +64,10 @@ func NodeSetData(passphrase string, data *NodeData) (string, error) {
 	transaction, err := node.SetData(GetDefaultAuth(passphrase), encData)
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	txHash := fmt.Sprintf("0x%x", transaction.Hash())
-	return txHash, nil
+	return transaction, nil
 }
 
 // Encryption

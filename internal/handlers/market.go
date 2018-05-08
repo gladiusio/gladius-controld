@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/nfeld9807/rest-api/internal/blockchain"
 	"net/http"
 )
@@ -38,6 +37,5 @@ func MarketPoolsCreateHandler(w http.ResponseWriter, r *http.Request) {
 		ErrorHandler(w, r, "Could not build pool creation transaction", err, http.StatusNotFound)
 	}
 
-	jsonResponse := fmt.Sprintf("{\"txHash\": \"0x%x\"}", transaction)
-	ResponseHandler(w, r, "null", string(jsonResponse))
+	TransactionHandler(w, r, "null", transaction)
 }

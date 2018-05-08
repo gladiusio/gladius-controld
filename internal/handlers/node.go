@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/nfeld9807/rest-api/internal/blockchain"
 	"net/http"
 )
@@ -30,6 +29,5 @@ func NodeSetDataHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	transaction, _ := blockchain.NodeSetData(auth, &data)
-	jsonResponse := fmt.Sprintf("{\"txHash\": \"0x%x\"}", transaction)
-	ResponseHandler(w, r, "null", string(jsonResponse))
+	TransactionHandler(w, r, "null", transaction)
 }

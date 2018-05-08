@@ -30,11 +30,11 @@ func NodeFactoryNodeAddressHandler(w http.ResponseWriter, r *http.Request) {
 
 func NodeFactoryCreateNodeHandler(w http.ResponseWriter, r *http.Request) {
 	auth := r.Header.Get("X-Authorization")
-	txHash, err := blockchain.CreateNode(auth)
+	transaction, err := blockchain.CreateNode(auth)
 
 	if err != nil {
 		ErrorHandler(w, r, "Could not create Node for account", err, http.StatusNotFound)
 	}
 
-	ResponseHandler(w, r, "null", "{ \"txHash\": \""+txHash+"\"}")
+	TransactionHandler(w, r, "null", transaction)
 }
