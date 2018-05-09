@@ -8,6 +8,7 @@ import (
 	"github.com/nfeld9807/rest-api/internal/blockchain/generated"
 	"github.com/nfeld9807/rest-api/internal/crypto"
 	"log"
+	"math/big"
 	"strings"
 )
 
@@ -70,16 +71,42 @@ func NodeSetData(passphrase string, data *NodeData) (*types.Transaction, error) 
 	return transaction, nil
 }
 
-// Encryption
+func NodeApplyToPool(passphrase, nodeAddress, poolAddress string) (*types.Transaction, error) {
+	node := ConnectNode(common.HexToAddress(nodeAddress))
 
-// Encrypt against key
+	data, err := NodeRetrieveData()
+	println(data.String())
+	if err != nil {
+		return nil, err
+	}
 
-// Decryption
+	poolPubKey, err := PoolRetrievePublicKey(poolAddress)
+	println(poolPubKey)
+	if err != nil {
+		return nil, err
+	}
 
-// GET / SET Data
+	encData, err := crypto.EncryptMessage(data.String(), poolPubKey)
+	if err != nil {
+		return nil, err
+	}
 
-// Data for pool
+	transaction, err := node.ApplyToPool(GetDefaultAuth(passphrase), common.HexToAddress(poolAddress), encData)
 
-// Apply to pool
+	if err != nil {
+		return nil, err
+	}
 
-// Status for pool
+	return transaction, nil
+}
+
+func NodeApplicationStatus(nodeAddress, poolAddress string) (*big.Int, error) {
+	node := ConnectNode(common.HexToAddress(nodeAddress))
+	statusCode, err := node.GetStatus(&bind.CallOpts{From: GetDefaultAccountAddress()}, common.HexToAddress(poolAddress))
+
+	if err != nil {
+		return nil, err
+	}
+
+	return statusCode, nil
+}
