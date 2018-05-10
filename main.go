@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	ghandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/nfeld9807/rest-api/internal/handlers"
 	"log"
@@ -91,7 +92,7 @@ func main() {
 		Methods("POST").
 		Name("market-pools-create")
 
-	log.Fatal(http.ListenAndServe(port, router))
+	log.Fatal(http.ListenAndServe(port, ghandlers.CORS()(router)))
 }
 
 func responseMiddleware(next http.Handler) http.Handler {
