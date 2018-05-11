@@ -51,7 +51,11 @@ func CreateNode(passphrase string) (*types.Transaction, error) {
 		return nil, err
 	}
 
-	auth := GetDefaultAuth(passphrase)
+	auth, err := GetDefaultAuth(passphrase)
+
+	if err != nil {
+		return nil, err
+	}
 
 	transaction, err := factory.CreateNode(auth)
 

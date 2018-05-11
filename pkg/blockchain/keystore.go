@@ -82,20 +82,23 @@ func GetAccountAddress(index int) common.Address {
 	return wallet.Accounts()[index].Address
 }
 
-func GetDefaultAuth(passphrase string) *bind.TransactOpts {
+func GetDefaultAuth(passphrase string) (*bind.TransactOpts, error) {
 	return GetAuth(passphrase, 0)
 }
 
 // GetAuth - Temporary auth retrieval
-func GetAuth(passphrase string, index int) *bind.TransactOpts {
+func GetAuth(passphrase string, index int) (*bind.TransactOpts, error) {
 	wallet := Wallets()[index]
 
-	key, _ := ioutil.ReadFile(wallet.URL().Path)
+	key, err := ioutil.ReadFile(wallet.URL().Path)
+	if err != nil {
+		return nil, err
+	}
 
 	auth, err := bind.NewTransactor(strings.NewReader(string(key)), passphrase)
 	if err != nil {
-		log.Fatalf("Failed to create authorized transactor: %v", err)
+		return nil, err
 	}
 
-	return auth
+	return auth, nil
 }

@@ -61,8 +61,16 @@ func NodeSetData(passphrase string, data *NodeData) (*types.Transaction, error) 
 	node := ConnectNode(*nodeAddress)
 
 	encData, err := crypto.EncryptData(data.String())
+	if err != nil {
+		return nil, err
+	}
 
-	transaction, err := node.SetData(GetDefaultAuth(passphrase), encData)
+	auth, err := GetDefaultAuth(passphrase)
+	if err != nil {
+		return nil, err
+	}
+
+	transaction, err := node.SetData(auth, encData)
 
 	if err != nil {
 		return nil, err
@@ -91,7 +99,12 @@ func NodeApplyToPool(passphrase, nodeAddress, poolAddress string) (*types.Transa
 		return nil, err
 	}
 
-	transaction, err := node.ApplyToPool(GetDefaultAuth(passphrase), common.HexToAddress(poolAddress), encData)
+	auth, err := GetDefaultAuth(passphrase)
+	if err != nil {
+		return nil, err
+	}
+
+	transaction, err := node.ApplyToPool(auth, common.HexToAddress(poolAddress), encData)
 
 	if err != nil {
 		return nil, err

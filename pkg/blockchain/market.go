@@ -39,11 +39,14 @@ func MarketPools() ([]common.Address, error) {
 //MarketCreatePool - Create new pool
 func MarketCreatePool(passphrase, publicKey string) (*types.Transaction, error) {
 	market := ConnectMarket()
-	auth := GetDefaultAuth(passphrase)
+	auth, err := GetDefaultAuth(passphrase)
+	if err != nil {
+		return nil, err
+	}
 
 	transaction, err := market.CreatePool(auth, publicKey)
 	if err != nil {
-		log.Fatalf("Failed to request token transfer: %v", err)
+		return nil, err
 	}
 
 	return transaction, nil
