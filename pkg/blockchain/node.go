@@ -2,14 +2,15 @@ package blockchain
 
 import (
 	"encoding/json"
+	"log"
+	"math/big"
+	"strings"
+
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain/generated"
 	"github.com/gladiusio/gladius-controld/pkg/crypto"
-	"log"
-	"math/big"
-	"strings"
 )
 
 // ConnectNode - Connect and grab node

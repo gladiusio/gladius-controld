@@ -3,7 +3,6 @@ package handlers
 import (
 	"errors"
 	"fmt"
-	//"github.com/ethereum/go-ethereum/common"
 	"net/http"
 	"regexp"
 

@@ -5,8 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
-	// "github.com/gladiusio/gladius-utils/config"
-	// "github.com/gladiusio/gladius-utils/init/manager"
+
 	"github.com/gladiusio/gladius-controld/pkg/routing/handlers"
 	ghandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
