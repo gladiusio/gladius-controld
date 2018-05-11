@@ -2,9 +2,11 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/ethereum/go-ethereum/core/types"
+	//"github.com/ethereum/go-ethereum/common"
 	"net/http"
 	"regexp"
+
+	"github.com/ethereum/go-ethereum/core/types"
 )
 
 // ResponseHandler - Default Response Handler
@@ -21,6 +23,7 @@ func TransactionHandler(w http.ResponseWriter, r *http.Request, m string, transa
 	transactionJSON, err := transaction.MarshalJSON()
 	if err != nil {
 		ErrorHandler(w, r, "Could not parse transaction JSON", err, http.StatusInternalServerError)
+		return
 	}
 
 	txHash := transaction.Hash().String()

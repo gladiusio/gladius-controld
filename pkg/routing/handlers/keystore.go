@@ -21,26 +21,31 @@ type pgp_struct struct {
 	Email   string `json:"email"`
 }
 
-func passphraseDecoder(w http.ResponseWriter, r *http.Request) wallet_struct {
+func passphraseDecoder(w http.ResponseWriter, r *http.Request) (wallet_struct, error) {
 	decoder := json.NewDecoder(r.Body)
 	var wallet wallet_struct
 	err := decoder.Decode(&wallet)
 
 	if err != nil {
-		ErrorHandler(w, r, "Passphrase `passphrase` not included or invalid in request", err, http.StatusBadRequest)
+		return wallet_struct{}, err
 	}
 
 	defer r.Body.Close()
 
-	return wallet
+	return wallet, nil
 }
 
 func KeystoreCreationHandler(w http.ResponseWriter, r *http.Request) {
-	wallet := passphraseDecoder(w, r)
+	wallet, err := passphraseDecoder(w, r)
+	if err != nil {
+		ErrorHandler(w, r, "Could not find `passphrase` in request", err, http.StatusInternalServerError)
+		return
+	}
 
 	account, err := blockchain.CreateAccount(wallet.Passphrase)
 	if err != nil {
 		ErrorHandler(w, r, "Wallet could not be created", err, http.StatusInternalServerError)
+		return
 	}
 
 	response := blockchain.AccountResponseFormatter(&account)
@@ -60,7 +65,11 @@ func KeystoreWalletRetrievalHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func KeystoreWalletOpenHandler(w http.ResponseWriter, r *http.Request) {
-	walletStruct := passphraseDecoder(w, r)
+	walletStruct, err := passphraseDecoder(w, r)
+	if err != nil {
+		ErrorHandler(w, r, "Could not find `passphrase` in request", err, http.StatusInternalServerError)
+		return
+	}
 	vars := mux.Vars(r)
 	indexString := vars["index"]
 	index, _ := strconv.Atoi(indexString)
@@ -95,11 +104,13 @@ func KeystorePGPCreationHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		ErrorHandler(w, r, "Request invalid, body is missing either `name`, `comment`, and/or `email`", err, http.StatusBadRequest)
+		return
 	}
 
 	path, err := crypto.CreateKeyPair(pgpStruct.Name, pgpStruct.Comment, pgpStruct.Email)
 	if err != nil {
 		ErrorHandler(w, r, "PGP key pair could not be created", err, http.StatusInternalServerError)
+		return
 	}
 
 	response := fmt.Sprintf("{\"path\": \"%s\"}", path)

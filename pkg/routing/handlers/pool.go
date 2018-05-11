@@ -2,9 +2,10 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/gorilla/mux"
-	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"net/http"
+
+	"github.com/gladiusio/gladius-controld/pkg/blockchain"
+	"github.com/gorilla/mux"
 )
 
 // PoolHandler - Main Node API route handler
@@ -25,24 +26,3 @@ func PoolRetrievePublicKeyHandler(w http.ResponseWriter, r *http.Request) {
 	response := fmt.Sprintf("{\"publicKey\": \"%s\"}", publicKey)
 	ResponseHandler(w, r, "null", response)
 }
-
-//func NodeRetrieveDataHandler(w http.ResponseWriter, r *http.Request) {
-//nodeData, _ := blockchain.NodeRetrieveData()
-//jsonResponse := nodeData.String()
-
-//ResponseHandler(w, r, "null", jsonResponse)
-//}
-
-//func NodeSetDataHandler(w http.ResponseWriter, r *http.Request) {
-//auth := r.Header.Get("X-Authorization")
-//decoder := json.NewDecoder(r.Body)
-//var data blockchain.NodeData
-//err := decoder.Decode(&data)
-
-//if err != nil {
-//ErrorHandler(w, r, "Passphrase `passphrase` not included or invalid in request", err, http.StatusBadRequest)
-//}
-
-//transaction, _ := blockchain.NodeSetData(auth, &data)
-//TransactionHandler(w, r, "null", transaction)
-//}

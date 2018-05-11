@@ -2,9 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/gorilla/mux"
-	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"net/http"
+
+	"github.com/gladiusio/gladius-controld/pkg/blockchain"
+	"github.com/gorilla/mux"
 )
 
 // NodeHandler - Main Node API route handler
@@ -43,6 +44,7 @@ func NodeApplyToPoolHandler(w http.ResponseWriter, r *http.Request) {
 	transaction, err := blockchain.NodeApplyToPool(auth, nodeAddress, poolAddress)
 	if err != nil {
 		ErrorHandler(w, r, "Could not apply to pool", err, http.StatusBadRequest)
+		return
 	}
 
 	println(transaction)
@@ -59,6 +61,7 @@ func NodeApplicationStatusHandler(w http.ResponseWriter, r *http.Request) {
 	status, err := blockchain.NodeApplicationStatus(nodeAddress, poolAddress)
 	if err != nil {
 		ErrorHandler(w, r, "Could not find status for pool application", err, http.StatusBadRequest)
+		return
 	}
 
 	var response string = "{ \"code\": " + status.String() + ", \"status\": "

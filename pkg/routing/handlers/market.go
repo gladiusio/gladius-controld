@@ -2,8 +2,9 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"net/http"
+
+	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 )
 
 // MarketHandler - Main Market API route handler
@@ -16,6 +17,7 @@ func MarketPoolsHandler(w http.ResponseWriter, r *http.Request) {
 	pools, err := blockchain.MarketPools()
 	if err != nil {
 		ErrorHandler(w, r, "Could not retrieve pools", err, http.StatusNotFound)
+		return
 	}
 
 	length := int(len(pools))
@@ -35,6 +37,7 @@ func MarketPoolsCreateHandler(w http.ResponseWriter, r *http.Request) {
 	transaction, err := blockchain.MarketCreatePool(auth, "test")
 	if err != nil {
 		ErrorHandler(w, r, "Could not build pool creation transaction", err, http.StatusNotFound)
+		return
 	}
 
 	TransactionHandler(w, r, "null", transaction)

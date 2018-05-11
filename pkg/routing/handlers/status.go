@@ -2,10 +2,11 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/gorilla/mux"
-	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"net/http"
+
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/gladiusio/gladius-controld/pkg/blockchain"
+	"github.com/gorilla/mux"
 )
 
 // StatusHandler Main Status API route handler
