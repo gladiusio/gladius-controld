@@ -29,6 +29,7 @@ func Start() {
 	// Base API Sub-Routes
 	apiRouter := router.PathPrefix("/api").Subrouter()
 	apiRouter.HandleFunc("/", handlers.APIHandler)
+	apiRouter.NotFoundHandler = http.HandlerFunc(handlers.NotFoundHandler)
 
 	// Key Management
 	walletRouter := apiRouter.PathPrefix("/keystore").Subrouter()

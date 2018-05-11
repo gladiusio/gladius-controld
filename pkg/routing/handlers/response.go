@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	//"github.com/ethereum/go-ethereum/common"
 	"net/http"
@@ -31,6 +32,12 @@ func TransactionHandler(w http.ResponseWriter, r *http.Request, m string, transa
 	response := fmt.Sprintf("{ \"txPayload\": %s, \"txHash\": \"%s\" }", string(transactionJSON), txHash)
 
 	ResponseHandler(w, r, m, response)
+}
+
+func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
+	err := errors.New(r.URL.String() + " not found in available routes")
+	ErrorHandler(w, r, "Invalid request, check parameters and try again", err, http.StatusNotFound)
+	return
 }
 
 // ErrorHandler - Default Error Handler
