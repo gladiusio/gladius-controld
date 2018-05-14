@@ -11,11 +11,16 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func Start() {
-	var DEBUG = true
-	var port = ":3001"
+const (
+	STATIC_DIR   = "/static/"
+	PORT         = "3001"
+	CONTENT_PORT = "3002"
+	DEBUG        = true
+)
 
-	fmt.Println("Starting server at http://localhost" + port)
+func Start() {
+	fmt.Println("Starting API at http://localhost:" + PORT)
+	fmt.Println("Starting UI  at http://localhost:" + CONTENT_PORT)
 
 	// Main Router
 	router := mux.NewRouter()
@@ -23,11 +28,18 @@ func Start() {
 		router.Use(loggingMiddleware)
 	}
 
-	router.Use(responseMiddleware)
+	// Content
+	go func() {
+		contentRouter := mux.NewRouter()
+		contentRouter.PathPrefix("/").Handler(http.FileServer(http.Dir("static/node_profile/")))
+		contentRouter.Handle("/", nil)
+		http.ListenAndServe(":"+CONTENT_PORT, contentRouter)
+	}()
 
 	// Base API Sub-Routes
 	apiRouter := router.PathPrefix("/api").Subrouter()
-	apiRouter.HandleFunc("/", handlers.APIHandler)
+	apiRouter.Use(responseMiddleware)
+	apiRouter.HandleFunc("/manager", handlers.APIHandler)
 	apiRouter.NotFoundHandler = http.HandlerFunc(handlers.NotFoundHandler)
 
 	// Key Management
@@ -94,7 +106,7 @@ func Start() {
 		Methods("POST").
 		Name("market-pools-create")
 
-	log.Fatal(http.ListenAndServe(port, ghandlers.CORS()(router)))
+	log.Fatal(http.ListenAndServe(":"+PORT, ghandlers.CORS()(router)))
 }
 
 func responseMiddleware(next http.Handler) http.Handler {
