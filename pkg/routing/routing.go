@@ -12,29 +12,19 @@ import (
 )
 
 const (
-	STATIC_DIR   = "/static/"
-	PORT         = "3001"
-	CONTENT_PORT = "3002"
-	DEBUG        = true
+	STATIC_DIR = "/static/"
+	PORT       = "3001"
+	DEBUG      = true
 )
 
 func Start() {
 	fmt.Println("Starting API at http://localhost:" + PORT)
-	fmt.Println("Starting UI  at http://localhost:" + CONTENT_PORT)
 
 	// Main Router
 	router := mux.NewRouter()
 	if DEBUG {
 		router.Use(loggingMiddleware)
 	}
-
-	// Content
-	go func() {
-		contentRouter := mux.NewRouter()
-		contentRouter.PathPrefix("/").Handler(http.FileServer(http.Dir("static/node_profile/")))
-		contentRouter.Handle("/", nil)
-		http.ListenAndServe(":"+CONTENT_PORT, contentRouter)
-	}()
 
 	// Base API Sub-Routes
 	apiRouter := router.PathPrefix("/api").Subrouter()
