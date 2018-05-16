@@ -56,8 +56,8 @@
     "config",
     "init/manager"
   ]
-  revision = "a8964a4a23da9aa519ca9e1f7f295b91656fc33c"
-  version = "0.2.1"
+  revision = "f27af7099d3b3814c53187fc5a071c0393596b49"
+  version = "0.2.2"
 
 [[projects]]
   name = "github.com/go-stack/stack"
@@ -291,6 +291,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "01021ceea4ceea0d4faac0bc9fb71bd44ea486ef835e59d7b97099389482c033"
+  inputs-digest = "3b76b1a17fc2865ead84aedfb865688a661de1cbfde7cb65f74509b03a8513cb"
   solver-name = "gps-cdcl"
   solver-version = 1
