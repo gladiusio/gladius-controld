@@ -27,17 +27,14 @@ func AccountResponseFormatter(account *accounts.Account) string {
 	address := account.Address
 	accountAddress := fmt.Sprintf("0x%x", address)
 
-	accountPath := account.URL.Path
-
-	return "{ \"address\": \"" + accountAddress + "\", \"path\": \"" + accountPath + "\"}"
+	return "{ \"address\": \"" + accountAddress + "\"}"
 }
 
 func WalletResponseFormatter(wallet accounts.Wallet) string {
-	walletPath := wallet.URL().Path
 	walletStatus, _ := wallet.Status()
 	walletAddress := wallet.Accounts()[0].Address
 
-	return "{ \"status\": \"" + walletStatus + "\", \"path\": \"" + walletPath + "\", \"address\": \"" + walletAddress.String() + "\"}"
+	return "{ \"status\": \"" + walletStatus + "\", \"address\": \"" + walletAddress.String() + "\"}"
 }
 
 func CreateAccount(passphrase string) (accounts.Account, error) {
