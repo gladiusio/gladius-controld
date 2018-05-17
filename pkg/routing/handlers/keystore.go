@@ -108,11 +108,13 @@ func KeystorePGPCreationHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	path, err := crypto.CreateKeyPair(pgpStruct.Name, pgpStruct.Comment, pgpStruct.Email)
+	println(path)
+
 	if err != nil {
 		ErrorHandler(w, r, "PGP key pair could not be created", err, http.StatusInternalServerError)
 		return
 	}
 
-	response := fmt.Sprintf("{\"path\": \"%s\"}", path)
+	response := fmt.Sprintf("{\"created\": true}")
 	ResponseHandler(w, r, "null", response)
 }
