@@ -5,7 +5,7 @@
   branch = "master"
   name = "github.com/aristanetworks/goarista"
   packages = ["monotime"]
-  revision = "70dca2f27708bcf7323c078bad4af7e71eb0fc24"
+  revision = "20a90e2204c23c01498125aae033e582dbe4e326"
 
 [[projects]]
   branch = "master"
@@ -56,8 +56,8 @@
     "config",
     "init/manager"
   ]
-  revision = "c180681cae880c0374426b40d2ef7cbf312fabbb"
-  version = "0.2.3"
+  revision = "486e8052c24340c8b461ef7e407eaaf6b496d708"
+  version = "0.2.5"
 
 [[projects]]
   name = "github.com/go-stack/stack"
@@ -204,7 +204,7 @@
     "leveldb/table",
     "leveldb/util"
   ]
-  revision = "9637fa0b2f0db13c99d899b91007edb7df4610b7"
+  revision = "e6d6b529196422703d54ff5c40e79809ec2020b3"
 
 [[projects]]
   branch = "master"
@@ -262,7 +262,7 @@
     "imports",
     "internal/fastwalk"
   ]
-  revision = "48418e5732e1b1e2a10207c8007a5f959e422f20"
+  revision = "28aef64757f4d432485ab970b094e1af8b301e84"
 
 [[projects]]
   name = "gopkg.in/fatih/set.v0"
