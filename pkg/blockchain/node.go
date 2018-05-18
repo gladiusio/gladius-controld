@@ -27,6 +27,21 @@ func ConnectNode(nodeAddress common.Address) *generated.Node {
 	return node
 }
 
+type Node struct {
+	Address string   `json:"address"`
+	Status  int      `json:"status"`
+	Data    NodeData `json:"data"`
+}
+
+func (d *Node) String() string {
+	json, err := json.Marshal(d)
+	if err != nil {
+		return "{}"
+	}
+
+	return string(json)
+}
+
 type NodeData struct {
 	Name   string `json:"name"`
 	Email  string `json:"email"`
@@ -41,6 +56,10 @@ func (d *NodeData) String() string {
 	}
 
 	return string(json)
+}
+
+func Node(nodeAddress string) (*Node, error) {
+	node := ConnectNode(*nodeAddress)
 }
 
 func NodeRetrieveData() (*NodeData, error) {

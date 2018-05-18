@@ -5,6 +5,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain/generated"
 )
 
@@ -29,3 +30,11 @@ func PoolRetrievePublicKey(poolAddress string) (string, error) {
 
 	return publicKey, nil
 }
+
+func PoolRetrievePublicData(poolAddress string) (string, error) {}
+
+func PoolSetPublicData(poolAddress, data string) (*types.Transaction, error) {}
+
+func Nodes(poolAddress string) (*[]generated.Node, error) {}
+
+func NodesByStatus(poolAddress string, status int) (*[]generated.Node, error) {}
