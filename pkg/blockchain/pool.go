@@ -1,7 +1,9 @@
 package blockchain
 
 import (
+	"encoding/json"
 	"log"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -31,10 +33,62 @@ func PoolRetrievePublicKey(poolAddress string) (string, error) {
 	return publicKey, nil
 }
 
-func PoolRetrievePublicData(poolAddress string) (string, error) {}
+type PoolPublicData struct {
+	Name         string `json:"name"`
+	Location     string `json:"location"`
+	Rating       string `json:"rating"`
+	NodeCount    string `json:"nodeCount"`
+	MaxBandwidth string `json:"maxBandwidth"`
+}
 
-func PoolSetPublicData(poolAddress, data string) (*types.Transaction, error) {}
+func (d *PoolPublicData) String() string {
+	json, err := json.Marshal(d)
+	if err != nil {
+		return "{}"
+	}
 
-func Nodes(poolAddress string) (*[]generated.Node, error) {}
+	return string(json)
+}
 
-func NodesByStatus(poolAddress string, status int) (*[]generated.Node, error) {}
+func PoolRetrievePublicData(poolAddress string) (*PoolPublicData, error) {
+	pool := ConnectPool(common.HexToAddress(poolAddress))
+	publicDataResponse, err := pool.PublicData(&bind.CallOpts{From: GetDefaultAccountAddress()})
+	if err != nil {
+		return nil, err
+	}
+
+	dataReader := strings.NewReader(publicDataResponse)
+	decoder := json.NewDecoder(dataReader)
+	var poolPublicData PoolPublicData
+	decoder.Decode(&poolPublicData)
+	return &poolPublicData, nil
+}
+
+func PoolSetPublicData(passphrase, poolAddress, data string) (*types.Transaction, error) {
+	pool := ConnectPool(common.HexToAddress(poolAddress))
+
+	auth, err := GetDefaultAuth(passphrase)
+	if err != nil {
+		return nil, err
+	}
+
+	transaction, err := pool.SetPublicData(auth, data)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return transaction, nil
+}
+
+func Nodes(poolAddress string) (*[]common.Address, error) {
+	pool := ConnectPool(common.HexToAddress(poolAddress))
+	nodeAddressList, err := pool.GetNodeList(&bind.CallOpts{From: GetDefaultAccountAddress()})
+	if err != nil {
+		return nil, err
+	}
+	return &nodeAddressList, nil
+}
+
+//
+// func NodesByStatus(poolAddress string, status int) (*[]generated.Node, error) {}

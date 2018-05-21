@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"math/big"
+	"strconv"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -27,13 +28,13 @@ func ConnectNode(nodeAddress common.Address) *generated.Node {
 	return node
 }
 
-type Node struct {
+type NodeApplication struct {
 	Address string   `json:"address"`
 	Status  int      `json:"status"`
 	Data    NodeData `json:"data"`
 }
 
-func (d *Node) String() string {
+func (d *NodeApplication) String() string {
 	json, err := json.Marshal(d)
 	if err != nil {
 		return "{}"
@@ -58,21 +59,71 @@ func (d *NodeData) String() string {
 	return string(json)
 }
 
-func Node(nodeAddress string) (*Node, error) {
-	node := ConnectNode(*nodeAddress)
+func NodeRetrieveApplication(nodeAddress, poolAddress *common.Address) (*NodeApplication, error) {
+	nodeData, err := NodeRetrievePoolData(nodeAddress, poolAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	nodeStatus, err := NodeApplicationStatus(nodeAddress.String(), poolAddress.String())
+	if err != nil {
+		return nil, err
+	}
+
+	statusInt, err := strconv.Atoi(nodeStatus.String())
+	if err != nil {
+		return nil, err
+	}
+
+	nodeStruct := &NodeApplication{
+		Address: nodeAddress.String(),
+		Status:  statusInt,
+		Data:    *nodeData,
+	}
+
+	return nodeStruct, nil
 }
 
 func NodeRetrieveData() (*NodeData, error) {
 	nodeAddress, _ := NodeOwnedByUser()
 	node := ConnectNode(*nodeAddress)
 
-	encData, _ := node.Data(&bind.CallOpts{From: GetDefaultAccountAddress()})
-	data, _ := crypto.DecryptData(encData)
+	encData, err := node.Data(&bind.CallOpts{From: GetDefaultAccountAddress()})
+	if err != nil {
+		return nil, err
+	}
+
+	data, err := crypto.DecryptData(encData)
+	if err != nil {
+		return nil, err
+	}
 
 	dataReader := strings.NewReader(data)
 	decoder := json.NewDecoder(dataReader)
 	var nodeData NodeData
 	decoder.Decode(&nodeData)
+	return &nodeData, nil
+}
+
+func NodeRetrievePoolData(nodeAddress, poolAddress *common.Address) (*NodeData, error) {
+	node := ConnectNode(*nodeAddress)
+
+	encPoolData, err := node.GetPoolData(&bind.CallOpts{From: GetDefaultAccountAddress()}, *poolAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	poolApplication, err := crypto.DecryptData(encPoolData)
+	if err != nil {
+		return nil, err
+	}
+
+	dataReader := strings.NewReader(poolApplication)
+	decoder := json.NewDecoder(dataReader)
+
+	var nodeData NodeData
+	decoder.Decode(&nodeData)
+
 	return &nodeData, nil
 }
 
@@ -103,13 +154,13 @@ func NodeApplyToPool(passphrase, nodeAddress, poolAddress string) (*types.Transa
 	node := ConnectNode(common.HexToAddress(nodeAddress))
 
 	data, err := NodeRetrieveData()
-	println(data.String())
+
 	if err != nil {
 		return nil, err
 	}
 
 	poolPubKey, err := PoolRetrievePublicKey(poolAddress)
-	println(poolPubKey)
+
 	if err != nil {
 		return nil, err
 	}
@@ -134,9 +185,9 @@ func NodeApplyToPool(passphrase, nodeAddress, poolAddress string) (*types.Transa
 }
 
 func NodeApplicationStatus(nodeAddress, poolAddress string) (*big.Int, error) {
-	node := ConnectNode(common.HexToAddress(nodeAddress))
-	statusCode, err := node.GetStatus(&bind.CallOpts{From: GetDefaultAccountAddress()}, common.HexToAddress(poolAddress))
-
+	parsedNodeAddress := common.HexToAddress(nodeAddress)
+	node := ConnectNode(parsedNodeAddress)
+	statusCode, err := node.GetStatus(&bind.CallOpts{From: common.HexToAddress(poolAddress)}, common.HexToAddress(poolAddress))
 	if err != nil {
 		return nil, err
 	}
