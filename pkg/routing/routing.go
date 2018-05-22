@@ -36,10 +36,8 @@ func Start() {
 	walletRouter := apiRouter.PathPrefix("/keystore").Subrouter()
 	walletRouter.HandleFunc("/wallet/create", handlers.KeystoreCreationHandler).
 		Methods("POST")
-	walletRouter.HandleFunc("/wallets", handlers.KeystoreWalletsRetrievalHandler).
-		Methods("GET")
-	walletRouter.HandleFunc("/wallet/{index:[0-9]*}", handlers.KeystoreWalletRetrievalHandler).
-		Methods("GET")
+	walletRouter.HandleFunc("/wallets", handlers.KeystoreWalletsRetrievalHandler)
+	walletRouter.HandleFunc("/wallet/{index:[0-9]*}", handlers.KeystoreWalletRetrievalHandler)
 	walletRouter.HandleFunc("/wallet/{index:[0-9]*}/open", handlers.KeystoreWalletOpenHandler).
 		Methods("POST")
 	walletRouter.HandleFunc("/pgp/create", handlers.KeystorePGPCreationHandler).
@@ -57,16 +55,14 @@ func Start() {
 	// Node Sub-Routes
 	nodeRouter := apiRouter.PathPrefix("/node").Subrouter()
 	// Retrieve owned Node if available
-	nodeRouter.HandleFunc("/", handlers.NodeFactoryNodeAddressHandler).
-		Methods("GET")
+	nodeRouter.HandleFunc("/", handlers.NodeFactoryNodeAddressHandler)
 	// Node for address
 	nodeRouter.HandleFunc("/{nodeAddress:0[xX][0-9a-fA-F]{40}}", nil)
 	// Node Creation
 	nodeRouter.HandleFunc("/create", handlers.NodeFactoryCreateNodeHandler).
 		Methods("POST")
 	// Node Data
-	nodeRouter.HandleFunc("/{nodeAddress:0[xX][0-9a-fA-F]{40}}/data", handlers.NodeRetrieveDataHandler).
-		Methods("GET")
+	nodeRouter.HandleFunc("/{nodeAddress:0[xX][0-9a-fA-F]{40}}/data", handlers.NodeRetrieveDataHandler)
 	nodeRouter.HandleFunc("/{nodeAddress:0[xX][0-9a-fA-F]{40}}/data", handlers.NodeSetDataHandler).
 		Methods("POST")
 	// Node application to Pool
@@ -81,20 +77,21 @@ func Start() {
 	// Pool object, data, public key, etc
 	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}", handlers.PoolRetrievePublicKeyHandler) // TODO temp to display public key
 	// Pool data, both public and private data can be set here
-	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/data", nil)
+	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/data", handlers.PoolPublicDataHandler).
+		Methods("GET", "POST")
 	// Retrieve nodes with query parameters for inc data, approved, pending, rejected
-	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/nodes", nil)
+	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/nodes/{status:.*}", handlers.PoolRetrieveNodesHandler)
+	// Retrieve node application
+	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/node/{nodeAddress:0[xX][0-9a-fA-F]{40}}/application", handlers.PoolRetrieveNodeApplicationHandler)
 	// Retrieve or update the status of a node's application
-	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/node/{nodeAddress:0[xX][0-9a-fA-F]{40}}/status", nil)
+	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/node/{nodeAddress:0[xX][0-9a-fA-F]{40}}/{status}", handlers.PoolUpdateNodeStatusHandler).
+		Methods("PUT")
 
 	// Market Sub-Routes
 	marketRouter := apiRouter.PathPrefix("/market").Subrouter()
-	marketRouter.HandleFunc("/pools", handlers.MarketPoolsHandler).
-		Methods("GET").
-		Name("market-pools")
+	marketRouter.HandleFunc("/pools", handlers.MarketPoolsHandler)
 	marketRouter.HandleFunc("/pools/create", handlers.MarketPoolsCreateHandler).
-		Methods("POST").
-		Name("market-pools-create")
+		Methods("POST")
 
 	log.Fatal(http.ListenAndServe(":"+PORT, ghandlers.CORS()(router)))
 }
