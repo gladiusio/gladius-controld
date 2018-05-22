@@ -77,14 +77,15 @@ func Start() {
 	// Pool object, data, public key, etc
 	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}", handlers.PoolRetrievePublicKeyHandler) // TODO temp to display public key
 	// Pool data, both public and private data can be set here
-	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/data", handlers.PoolSetPublicDataHandler).
-		Methods("POST")
+	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/data", handlers.PoolPublicDataHandler).
+		Methods("GET", "POST")
 	// Retrieve nodes with query parameters for inc data, approved, pending, rejected
-	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/nodes", handlers.PoolRetrieveNodes)
+	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/nodes", handlers.PoolRetrieveNodesHandler)
 	// Retrieve node application
-	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/node/{nodeAddress:0[xX][0-9a-fA-F]{40}}/application", handlers.PoolRetrieveNodeApplication)
+	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/node/{nodeAddress:0[xX][0-9a-fA-F]{40}}/application", handlers.PoolRetrieveNodeApplicationHandler)
 	// Retrieve or update the status of a node's application
-	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/node/{nodeAddress:0[xX][0-9a-fA-F]{40}}/status", nil)
+	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/node/{nodeAddress:0[xX][0-9a-fA-F]{40}}/{status}", handlers.PoolUpdateNodeStatusHandler).
+		Methods("PUT")
 
 	// Market Sub-Routes
 	marketRouter := apiRouter.PathPrefix("/market").Subrouter()
