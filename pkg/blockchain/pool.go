@@ -91,6 +91,29 @@ func PoolNodes(poolAddress string) (*[]common.Address, error) {
 	return &nodeAddressList, nil
 }
 
+func PoolNodesWithData(poolAddress common.Address, nodeAddresses *[]common.Address, status int) (*string, error) {
+	var filter bool = status >= 0
+
+	response := "["
+
+	for _, nodeAddress := range *nodeAddresses {
+		nodeApplication, err := NodeRetrieveApplication(&nodeAddress, &poolAddress)
+		if err != nil {
+			return nil, err
+		}
+
+		if filter && nodeApplication.Status == status {
+			response += nodeApplication.String() + ","
+		} else if !filter {
+			response += nodeApplication.String() + ","
+		}
+	}
+	strings.TrimRight(response, ",")
+	response += "]"
+
+	return &response, nil
+}
+
 func PoolUpdateNodeStatus(passphrase, poolAddress, nodeAddress string, status int) (*types.Transaction, error) {
 	pool := ConnectPool(common.HexToAddress(poolAddress))
 	var err error

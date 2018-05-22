@@ -2,6 +2,7 @@ package blockchain
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -24,4 +25,22 @@ func TxReceipt(txHash common.Hash) (*types.Receipt, error) {
 	defer cancel()
 
 	return conn.TransactionReceipt(ctx, txHash)
+}
+
+func ApplicationStatusFromString(status string) (int, error) {
+	switch status {
+	case "unavailable":
+		// Unavailable
+		return 0, nil
+	case "approved", "approve":
+		// Approved
+		return 1, nil
+	case "rejected", "reject":
+		// Rejected
+		return 2, nil
+	case "pending":
+		// Pending
+		return 3, nil
+	}
+	return -1, errors.New("Status Not Found for: " + status)
 }

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
@@ -65,20 +64,20 @@ func PoolRetrieveNodesHandler(w http.ResponseWriter, r *http.Request) {
 
 	poolAddress := common.HexToAddress(vars["poolAddress"])
 	nodeAddresses, _ := blockchain.PoolNodes(poolAddress.String())
-
-	response := "["
-
-	for _, nodeAddress := range *nodeAddresses {
-		nodeApplication, err := blockchain.NodeRetrieveApplication(&nodeAddress, &poolAddress)
-		if err != nil {
-			ErrorHandler(w, r, "Could not retrieve application", err, http.StatusUnprocessableEntity)
-			return
-		}
-		response += nodeApplication.String() + ","
+	status := vars["status"]
+	statusInt, err := blockchain.ApplicationStatusFromString(status)
+	if err != nil {
+		ErrorHandler(w, r, "Could not retrieve applications", err, http.StatusUnprocessableEntity)
+		return
 	}
-	strings.TrimRight(response, ",")
-	response += "]"
-	ResponseHandler(w, r, "null", response)
+
+	response, err := blockchain.PoolNodesWithData(poolAddress, nodeAddresses, statusInt)
+	if err != nil {
+		ErrorHandler(w, r, "Could not retrieve applications", err, http.StatusUnprocessableEntity)
+		return
+	}
+
+	ResponseHandler(w, r, "null", *response)
 }
 
 func PoolRetrieveNodeApplicationHandler(w http.ResponseWriter, r *http.Request) {
