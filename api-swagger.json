@@ -1,0 +1,508 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Gladius Control Daemon",
+    "description": "This document was generated from the branch master.\n\nIf you are a contributor to this project, you may access it here: https://paw.cloud/account/teams/2670/projects/24958",
+    "version": "v0.0.0",
+    "contact": {
+      "name": "codes4coffee",
+      "url": "https://paw.cloud/account/teams/2670"
+    }
+  },
+  "host": "localhost:3001",
+  "schemes": [
+    "http"
+  ],
+  "basePath": "/api",
+  "paths": {
+    "/keystore/pgp/create": {
+      "post": {
+        "summary": "Create PGP Pair",
+        "description": "Creates a new PGP Key pair and stores the keys in `~/.config/gladius/keys` on Unix based systems and `C:\\Users\\USER\\.gladius\\keys` on Windows.",
+        "operationId": "c52cc793-1089-4f19-8705-312c4adae07b",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"name\":\"Nate\",\"comments\":\"Anything goes here\",\"email\":\"someone@email.com\"}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/keystore/pgp/view/public": {
+      "get": {
+        "summary": "PGP Public Key",
+        "description": "Retrieves the generated Public Keys from `/keystore/pgp/create`.",
+        "operationId": "5373c3e2-7936-406c-90f7-46319539bb10",
+        "parameters": [
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/keystore/wallet/create": {
+      "post": {
+        "summary": "Create Wallet",
+        "description": "Creates a new Ethereum wallet encrypted against the provided passphrase. Wallet will be stored in `~/.config/gladius/wallet` on Unix based systems and `C:\\Users\\USER\\.gladius\\wallet` on Windows.\n\n\n",
+        "operationId": "2771f78f-94f4-4d74-a300-b8cfb86da69e",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"passphrase\":\"***** Hidden credentials *****\"}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/keystore/wallets": {
+      "get": {
+        "summary": "Accounts",
+        "description": "Retrieves the list of generated accounts from `/keystre/wallet/create` as an array of wallet JSON objects.",
+        "operationId": "3152acdf-efa1-41ff-9deb-5c01ee379d8a",
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/keystore/wallet/0": {
+      "get": {
+        "summary": "Retrieve",
+        "description": "Retrieves the JSON wallet object at the given index. Use the index of the wallet returned from `/keystore/wallets`.",
+        "operationId": "6981b638-e00f-42f2-bafb-191e8476b2cb",
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/keystore/wallet/0/open": {
+      "post": {
+        "summary": "Open",
+        "description": "Opens a given wallet at the provided index.",
+        "operationId": "c3355d66-6fee-46fc-b280-dfe2417193b4",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"passphrase\":\"***** Hidden credentials *****\"}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/status/tx/0x462d31221a14d9196ca906cc5396ccee045cb2bc7d82bec4edd22ed3f4d05571": {
+      "get": {
+        "summary": "txHash",
+        "description": "Retrieves the status of a given transaction hash. This info is similar to what is provided by etherscan.io. Links to the web are also provided to give to the user as feedback.",
+        "operationId": "98e181db-3748-4626-ac11-de268f4828bf",
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/node/": {
+      "get": {
+        "summary": "Base",
+        "description": "Retrieve the node that is registered to the given wallet, as of now `/keystore/wallet/0`. An optional URL parameter can be provided to retrieve the node address of a wallet address.",
+        "operationId": "d8b455ff-c6f2-49ee-8807-dd34be123622",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "0x1f136d7B6308870ed334378f381C9F56d04C3ABa",
+            "name": "account",
+            "required": false,
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/node/create": {
+      "post": {
+        "summary": "Create",
+        "description": "Creates and registers a node with the default wallet.\n\n**`X-Authorization` is required to charge the wallet for creating a node.**",
+        "operationId": "630a0b94-6da3-4e2d-9272-95838c60c18f",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "***** Hidden credentials *****",
+            "name": "X-Authorization",
+            "required": false,
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/node/0xb79bf04170f8bb16e7bbf7431cb1fcaa42a6d686/data": {
+      "post": {
+        "summary": "Data",
+        "description": "Adds data to the node registered for the given wallet. The data payload *is* flexible but we are expecting the **Body Parameters** below. The data payload is encrypted automatically by using the generated PGP Keys. If these keys change, calling this again will replace that data with data encrypted by the new keys.\n\n**`X-Authorization` is required to charge the wallet for submitting data.**",
+        "operationId": "4da349d0-735e-4fbf-a502-488ca25c2e9e",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "***** Hidden credentials *****",
+            "name": "X-Authorization",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"name\":\"Node Demo 2\",\"email\":\"example2@gladius.io\",\"ip\":\"2.2.2.2\",\"status\":\"active\"}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      },
+      "get": {
+        "summary": "Data",
+        "description": "",
+        "operationId": "e57c1323-4c5e-4e14-857a-3dbb0f7626a1",
+        "consumes": [
+          "text/plain"
+        ],
+        "parameters": [
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "Retrieves the data POST'd in `/node/{{nodeAddress}}/data` and automatically decrypts the data using the private key that was previously generated."
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/node/0xb79bf04170f8bb16e7bbf7431cb1fcaa42a6d686/apply/0xDAcd582c3Ba1A90567Da0fC3f1dBB638D9438e06": {
+      "post": {
+        "summary": "Application",
+        "description": "This endpoint retrieves submitted node data, decrypts it, re-encrypts it against the provided pool's public key, and submits an encrypted application for the pool. Only the pool owner can see this application and cannot be modified only overwritten with a new application.\n\n**`X-Authorization` is required to charge the wallet for submitting an application.**",
+        "operationId": "afaa089e-3e8d-45ba-baf9-feb5f83850f9",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "***** Hidden credentials *****",
+            "name": "X-Authorization",
+            "required": false,
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/node/0xb79bf04170f8bb16e7bbf7431cb1fcaa42a6d686/application/0xDAcd582c3Ba1A90567Da0fC3f1dBB638D9438e06": {
+      "get": {
+        "summary": "Application Status",
+        "description": "Retrieves the current status of a submitted pool application. This endpoint also provides the available statuses as well as copy to use for displaying messages to the user.",
+        "operationId": "59fd621d-de18-4dc5-9560-2cb37fe152e1",
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/pool/0xDAcd582c3Ba1A90567Da0fC3f1dBB638D9438e06": {
+      "get": {
+        "summary": "Base",
+        "description": "Returns the public key of a given pool. You can find a list of available pools at `/market/pools`.",
+        "operationId": "4c41390e-7f8f-4d68-98a7-0b48e3bba8e3",
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/pool/0xDAcd582c3Ba1A90567Da0fC3f1dBB638D9438e06/node/0xb79bf04170f8bb16e7bbf7431cb1fcaa42a6d686/application": {
+      "get": {
+        "summary": "Retrieve Application",
+        "description": "Retrieve the application for a given node address. The data is automatically decrypted with the private key in the keys directory.",
+        "operationId": "c8e6cb0a-552a-4e1b-add2-76ed4ee5e1bd",
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/pool/0xDAcd582c3Ba1A90567Da0fC3f1dBB638D9438e06/nodes/approved": {
+      "get": {
+        "summary": "Nodes",
+        "description": "Returns the nodes based on the provided filter. Below are the available filters:\n\nReturns all nodes, regardless of status\n\n- `/pool/0xDAcd582c3Ba1A90567Da0fC3f1dBB638D9438e06/nodes/`\n\nReturns approved nodes\n\n- `/pool/0xDAcd582c3Ba1A90567Da0fC3f1dBB638D9438e06/nodes/approved`\n\nReturns rejected nodes\n\n- `/pool/0xDAcd582c3Ba1A90567Da0fC3f1dBB638D9438e06/nodes/rejected`\n",
+        "operationId": "27714e47-d74b-44af-bfb2-10ee30f28239",
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/pool/0xDAcd582c3Ba1A90567Da0fC3f1dBB638D9438e06/data": {
+      "post": {
+        "summary": "Set Public Data",
+        "description": "Sets the public data payload for a pool.\n\n**`X-Authorization` is required to charge the wallet for submitting this data.**",
+        "operationId": "224a3c04-395f-48eb-bc30-5791df318a16",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "***** Hidden credentials *****",
+            "name": "X-Authorization",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"name\":\"Gladius Pool A\",\"location\":\"NYC - United States\",\"rating\":\"4.5\",\"nodeCount\":\"20\",\"maxBandwidth\":\"10\"}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      },
+      "get": {
+        "summary": "Public Data",
+        "description": "Retrieves the public data set on a given pool from `/pool/{{poolAddress}}/data`",
+        "operationId": "01f6d513-d47a-456f-8a33-eb838e2551e0",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "***** Hidden credentials *****",
+            "name": "X-Authorization",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"name\":\"Gladius Pool A\",\"location\":\"NYC - United States\",\"rating\":\"4.5\",\"nodeCount\":\"20\",\"maxBandwidth\":\"10\"}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/pool/0xDAcd582c3Ba1A90567Da0fC3f1dBB638D9438e06/node/0x6d05Cb0c3fD05641b491cc41CA104C794D777315/approve": {
+      "put": {
+        "summary": "Approve Node",
+        "description": "Approves the given node and adds it to the list of approved nodes for a pool.\n\n**`X-Authorization` is required to charge the wallet for approving a node.**",
+        "operationId": "ec4730bf-0cf7-4c6e-8265-86a15ff2399a",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "***** Hidden credentials *****",
+            "name": "X-Authorization",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"name\":\"Gladius Pool A\",\"location\":\"NYC - United States\",\"rating\":\"4.5\",\"nodeCount\":\"20\",\"maxBandwidth\":\"10\"}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/pool/0xDAcd582c3Ba1A90567Da0fC3f1dBB638D9438e06/node/0xf3E45F89f8190987f2673402098054FD0b01d1a0/reject": {
+      "put": {
+        "summary": "Reject Node",
+        "description": "Rejects the given node and adds it to the list of rejected nodes for a pool.\n\n**`X-Authorization` is required to charge the wallet for rejecting a node.**",
+        "operationId": "15bd5074-f01d-4111-859a-7804d389cd94",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "***** Hidden credentials *****",
+            "name": "X-Authorization",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"name\":\"Gladius Pool A\",\"location\":\"NYC - United States\",\"rating\":\"4.5\",\"nodeCount\":\"20\",\"maxBandwidth\":\"10\"}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/market/pools/create": {
+      "post": {
+        "summary": "Create Pool",
+        "description": "Creates a new pool with the provided public key. This key cannot be modified and a new pool would have to be created.\n\n**`X-Authorization` is required to charge the wallet for creating a pool**",
+        "operationId": "67581f8b-e4f8-4bfa-aeea-c72a08c21362",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "***** Hidden credentials *****",
+            "name": "X-Authorization",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"publicKey\":\"-----BEGIN PGP PUBLIC KEY BLOCK-----\\n\\nxsBNBFrwkiABCACoumNcaLCv96cwReXKMCe5OwZ6rWC1hx6pz4g61EGWfwCCTOjo\\nmenC9x6z44nzB4Uo6O4UTsYhKotDK316Wel9gjSnMiGE1IKLmvPGXpoOGdqez8rD\\npbD/WSHmKXjXLCgmCT92xf2SImcKZKMA1fFJNOcW/Ut8OLRuGFBV7MSo/btEEVSh\\nK7Loaj1U/h1p7arHxCycNPz3fk3jct4ia7G+wcczkoN5d3bn5eT7szbBP0fT8Y/Z\\n2mzwlNFANROr5lSEeCVSuwM9Uz3Eilvxiu98oEjRMKo0+7jf4oHWvLO+Ti2IFMyd\\nfMbZnKXkLVx6bxG1rL2KfYQZ7JNTsmECl1TfABEBAAHNGE5hdGUgPHNvbWVvbmVA\\nZW1haWwuY29tPsLAdAQTAQgAKAUCWvCSIAkQDIG2yReqggMCGwMCGQEGCwkIBwMC\\nBhUIAgkKCwMWAgEAAOpdCAB+vtkq7OUhduVIjjYiZZ+85KFoprDeoTW6mftIpdE+\\n5jYGS9acEf7kSqZmGEukVE7pp+rSeu97fonWsuyyiNslYErNXa6cGcG/CxBF3XeJ\\nicYbauSC40MIxT9XjkxOQt7awaj8legJIOgrdQSmS9a/AP6VJIQXrtfxWpEqaZB5\\ndjnOEXOrsBPQugUJWIx4zGAHFYlABxmufLsHZMakkeDK5C9h5rLEq8gyeQj2XbUm\\n+C5qO1yoDvomwFsmnOSnDKCpyvBi0tdeq7oWoe3q+iFrYkyQf/NISWgvYC1QVrRM\\ndCPvTxABILhzXBS6Xxxa2y/HeevU4RvjD6kpMuqTNCX7zsBNBFrwkiABCADcr/a/\\nc5uf+x3jSRTHMr5wq2dLsnr82z3cAFcfIsrnMeFVkF76Ls9R9f/s5Txc89Ui01P3\\nHMaaBK5oaF5gW3ptB3UHEvX0XpSHBzwZK1SP4hoKux7Avclh4i+ghudtNegm+cBO\\nmvdyo3HCxwwHJMIxRk5bl9EYbVhcTznKR7kcAPA2x4dqzEzALwplN5sZL0nnjBfn\\nYU4bBskK1lBST36Fi4/ip4BP/RFoI5oNxDz90/5fhpdRarQpFuQkzwlOqUf9lLzg\\n0qTRsyna1Yu6QKGAOdMAQCF9QPW4v2RpkoiCOCqy6L8ElKlU8S1MChG+7f5qjNuN\\n1jwsvB3KLE+1hkVtABEBAAHCwF8EGAEIABMFAlrwkiAJEAyBtskXqoIDAhsMAADb\\nQQgApWUqV9ldCf+XY2FLLs9AacDv7UZGs4RVm9lXb/FMjPMgzl3BsixJnGyLLxOp\\nPOB389J6HcP7QlxlxTGGWE6gCNFYG3zxhOEMPLL8pX0l/BAKRt4zHIcN9x3nfvsd\\nprWQ8ttV2uvDx2MIrofcH8SGaOmBQDxI5zXPs/Cy7u//mS7rL8d5WELfY1v0mR0K\\nAjNsp61ZYVmQoOqGp5yYFQlTT/5j3bEUYbafiiA2ogH8i9yZDA0dWLhk3bo9yPxr\\nFBgfEhcOaz0CNLbTASiAol+ITW1TefWnyegeiqa/WDaiCeiUKd65C2kTteqS2dt7\\nXATPIgXDfEj8hWhoojTxZN5YCg==\\n=iRwI\\n-----END PGP PUBLIC KEY BLOCK-----\\n\"}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/market/pools": {
+      "get": {
+        "summary": "Pools",
+        "description": "Returns a list of available pool addresses.",
+        "operationId": "627953dd-9dcd-4553-9f39-77b4c959e42a",
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        },
+        "parameters": []
+      }
+    }
+  },
+  "tags": []
+}

@@ -1,0 +1,350 @@
+{
+  "info": {
+    "name": "Gladius Control Daemon",
+    "schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+    "description": "This document was generated from the branch master.\n\nIf you are a contributor to this project, you may access it here: https://paw.cloud/account/teams/2670/projects/24958",
+    "version": "v0.0.0"
+  },
+  "item": [
+    {
+      "name": "Keystore",
+      "item": [
+        {
+          "name": "Create PGP Pair",
+          "description": "Creates a new PGP Key pair and stores the keys in `~/.config/gladius/keys` on Unix based systems and `C:\\Users\\USER\\.gladius\\keys` on Windows.",
+          "request": {
+            "url": "http://localhost:3001/api/keystore/pgp/create",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json; charset=utf-8"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"string\",\n  \"default\": \"{\\\"name\\\":\\\"Nate\\\",\\\"comments\\\":\\\"Anything goes here\\\",\\\"email\\\":\\\"someone@email.com\\\"}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "PGP Public Key",
+          "description": "Retrieves the generated Public Keys from `/keystore/pgp/create`.",
+          "request": {
+            "url": "http://localhost:3001/api/keystore/pgp/view/public",
+            "method": "GET",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"string\",\n  \"default\": \"\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Create Wallet",
+          "description": "Creates a new Ethereum wallet encrypted against the provided passphrase. Wallet will be stored in `~/.config/gladius/wallet` on Unix based systems and `C:\\Users\\USER\\.gladius\\wallet` on Windows.\n\n\n",
+          "request": {
+            "url": "http://localhost:3001/api/keystore/wallet/create",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json; charset=utf-8"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"string\",\n  \"default\": \"{\\\"passphrase\\\":\\\"***** Hidden credentials *****\\\"}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Accounts",
+          "description": "Retrieves the list of generated accounts from `/keystre/wallet/create` as an array of wallet JSON objects.",
+          "request": {
+            "url": "http://localhost:3001/api/keystore/wallets",
+            "method": "GET"
+          }
+        },
+        {
+          "name": "Retrieve",
+          "description": "Retrieves the JSON wallet object at the given index. Use the index of the wallet returned from `/keystore/wallets`.",
+          "request": {
+            "url": "http://localhost:3001/api/keystore/wallet/0",
+            "method": "GET"
+          }
+        },
+        {
+          "name": "Open",
+          "description": "Opens a given wallet at the provided index.",
+          "request": {
+            "url": "http://localhost:3001/api/keystore/wallet/0/open",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json; charset=utf-8"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"string\",\n  \"default\": \"{\\\"passphrase\\\":\\\"***** Hidden credentials *****\\\"}\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Status",
+      "item": [
+        {
+          "name": "txHash",
+          "description": "Retrieves the status of a given transaction hash. This info is similar to what is provided by etherscan.io. Links to the web are also provided to give to the user as feedback.",
+          "request": {
+            "url": "http://localhost:3001/api/status/tx/0x462d31221a14d9196ca906cc5396ccee045cb2bc7d82bec4edd22ed3f4d05571",
+            "method": "GET"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Node",
+      "item": [
+        {
+          "name": "Base",
+          "description": "Retrieve the node that is registered to the given wallet, as of now `/keystore/wallet/0`. An optional URL parameter can be provided to retrieve the node address of a wallet address.",
+          "request": {
+            "url": "http://localhost:3001/api/node/?account=0x1f136d7B6308870ed334378f381C9F56d04C3ABa",
+            "method": "GET"
+          }
+        },
+        {
+          "name": "Create",
+          "description": "Creates and registers a node with the default wallet.\n\n**`X-Authorization` is required to charge the wallet for creating a node.**",
+          "request": {
+            "url": "http://localhost:3001/api/node/create",
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Authorization",
+                "value": "***** Hidden credentials *****"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Data",
+          "description": "Adds data to the node registered for the given wallet. The data payload *is* flexible but we are expecting the **Body Parameters** below. The data payload is encrypted automatically by using the generated PGP Keys. If these keys change, calling this again will replace that data with data encrypted by the new keys.\n\n**`X-Authorization` is required to charge the wallet for submitting data.**",
+          "request": {
+            "url": "http://localhost:3001/api/node/0xb79bf04170f8bb16e7bbf7431cb1fcaa42a6d686/data",
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Authorization",
+                "value": "***** Hidden credentials *****"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json; charset=utf-8"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"string\",\n  \"default\": \"{\\\"name\\\":\\\"Node Demo 2\\\",\\\"email\\\":\\\"example2@gladius.io\\\",\\\"ip\\\":\\\"2.2.2.2\\\",\\\"status\\\":\\\"active\\\"}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Data",
+          "request": {
+            "url": "http://localhost:3001/api/node/0xb79bf04170f8bb16e7bbf7431cb1fcaa42a6d686/data",
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/plain; charset=utf-8"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"string\",\n  \"default\": \"Retrieves the data POST'd in `/node/{{nodeAddress}}/data` and automatically decrypts the data using the private key that was previously generated.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Application",
+          "description": "This endpoint retrieves submitted node data, decrypts it, re-encrypts it against the provided pool's public key, and submits an encrypted application for the pool. Only the pool owner can see this application and cannot be modified only overwritten with a new application.\n\n**`X-Authorization` is required to charge the wallet for submitting an application.**",
+          "request": {
+            "url": "http://localhost:3001/api/node/0xb79bf04170f8bb16e7bbf7431cb1fcaa42a6d686/apply/0xDAcd582c3Ba1A90567Da0fC3f1dBB638D9438e06",
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Authorization",
+                "value": "***** Hidden credentials *****"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Application Status",
+          "description": "Retrieves the current status of a submitted pool application. This endpoint also provides the available statuses as well as copy to use for displaying messages to the user.",
+          "request": {
+            "url": "http://localhost:3001/api/node/0xb79bf04170f8bb16e7bbf7431cb1fcaa42a6d686/application/0xDAcd582c3Ba1A90567Da0fC3f1dBB638D9438e06",
+            "method": "GET"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pool",
+      "item": [
+        {
+          "name": "Base",
+          "description": "Returns the public key of a given pool. You can find a list of available pools at `/market/pools`.",
+          "request": {
+            "url": "http://localhost:3001/api/pool/0xDAcd582c3Ba1A90567Da0fC3f1dBB638D9438e06",
+            "method": "GET"
+          }
+        },
+        {
+          "name": "Retrieve Application",
+          "description": "Retrieve the application for a given node address. The data is automatically decrypted with the private key in the keys directory.",
+          "request": {
+            "url": "http://localhost:3001/api/pool/0xDAcd582c3Ba1A90567Da0fC3f1dBB638D9438e06/node/0xb79bf04170f8bb16e7bbf7431cb1fcaa42a6d686/application",
+            "method": "GET"
+          }
+        },
+        {
+          "name": "Nodes",
+          "description": "Returns the nodes based on the provided filter. Below are the available filters:\n\nReturns all nodes, regardless of status\n\n- `/pool/0xDAcd582c3Ba1A90567Da0fC3f1dBB638D9438e06/nodes/`\n\nReturns approved nodes\n\n- `/pool/0xDAcd582c3Ba1A90567Da0fC3f1dBB638D9438e06/nodes/approved`\n\nReturns rejected nodes\n\n- `/pool/0xDAcd582c3Ba1A90567Da0fC3f1dBB638D9438e06/nodes/rejected`\n",
+          "request": {
+            "url": "http://localhost:3001/api/pool/0xDAcd582c3Ba1A90567Da0fC3f1dBB638D9438e06/nodes/approved",
+            "method": "GET"
+          }
+        },
+        {
+          "name": "Set Public Data",
+          "description": "Sets the public data payload for a pool.\n\n**`X-Authorization` is required to charge the wallet for submitting this data.**",
+          "request": {
+            "url": "http://localhost:3001/api/pool/0xDAcd582c3Ba1A90567Da0fC3f1dBB638D9438e06/data",
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Authorization",
+                "value": "***** Hidden credentials *****"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json; charset=utf-8"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"string\",\n  \"default\": \"{\\\"name\\\":\\\"Gladius Pool A\\\",\\\"location\\\":\\\"NYC - United States\\\",\\\"rating\\\":\\\"4.5\\\",\\\"nodeCount\\\":\\\"20\\\",\\\"maxBandwidth\\\":\\\"10\\\"}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Public Data",
+          "description": "Retrieves the public data set on a given pool from `/pool/{{poolAddress}}/data`",
+          "request": {
+            "url": "http://localhost:3001/api/pool/0xDAcd582c3Ba1A90567Da0fC3f1dBB638D9438e06/data",
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Authorization",
+                "value": "***** Hidden credentials *****"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json; charset=utf-8"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"string\",\n  \"default\": \"{\\\"name\\\":\\\"Gladius Pool A\\\",\\\"location\\\":\\\"NYC - United States\\\",\\\"rating\\\":\\\"4.5\\\",\\\"nodeCount\\\":\\\"20\\\",\\\"maxBandwidth\\\":\\\"10\\\"}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Approve Node",
+          "description": "Approves the given node and adds it to the list of approved nodes for a pool.\n\n**`X-Authorization` is required to charge the wallet for approving a node.**",
+          "request": {
+            "url": "http://localhost:3001/api/pool/0xDAcd582c3Ba1A90567Da0fC3f1dBB638D9438e06/node/0x6d05Cb0c3fD05641b491cc41CA104C794D777315/approve",
+            "method": "PUT",
+            "header": [
+              {
+                "key": "X-Authorization",
+                "value": "***** Hidden credentials *****"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json; charset=utf-8"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"string\",\n  \"default\": \"{\\\"name\\\":\\\"Gladius Pool A\\\",\\\"location\\\":\\\"NYC - United States\\\",\\\"rating\\\":\\\"4.5\\\",\\\"nodeCount\\\":\\\"20\\\",\\\"maxBandwidth\\\":\\\"10\\\"}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Reject Node",
+          "description": "Rejects the given node and adds it to the list of rejected nodes for a pool.\n\n**`X-Authorization` is required to charge the wallet for rejecting a node.**",
+          "request": {
+            "url": "http://localhost:3001/api/pool/0xDAcd582c3Ba1A90567Da0fC3f1dBB638D9438e06/node/0xf3E45F89f8190987f2673402098054FD0b01d1a0/reject",
+            "method": "PUT",
+            "header": [
+              {
+                "key": "X-Authorization",
+                "value": "***** Hidden credentials *****"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json; charset=utf-8"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"string\",\n  \"default\": \"{\\\"name\\\":\\\"Gladius Pool A\\\",\\\"location\\\":\\\"NYC - United States\\\",\\\"rating\\\":\\\"4.5\\\",\\\"nodeCount\\\":\\\"20\\\",\\\"maxBandwidth\\\":\\\"10\\\"}\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Market",
+      "item": [
+        {
+          "name": "Create Pool",
+          "description": "Creates a new pool with the provided public key. This key cannot be modified and a new pool would have to be created.\n\n**`X-Authorization` is required to charge the wallet for creating a pool**",
+          "request": {
+            "url": "http://localhost:3001/api/market/pools/create",
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Authorization",
+                "value": "***** Hidden credentials *****"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json; charset=utf-8"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"string\",\n  \"default\": \"{\\\"publicKey\\\":\\\"-----BEGIN PGP PUBLIC KEY BLOCK-----\\\\n\\\\nxsBNBFrwkiABCACoumNcaLCv96cwReXKMCe5OwZ6rWC1hx6pz4g61EGWfwCCTOjo\\\\nmenC9x6z44nzB4Uo6O4UTsYhKotDK316Wel9gjSnMiGE1IKLmvPGXpoOGdqez8rD\\\\npbD/WSHmKXjXLCgmCT92xf2SImcKZKMA1fFJNOcW/Ut8OLRuGFBV7MSo/btEEVSh\\\\nK7Loaj1U/h1p7arHxCycNPz3fk3jct4ia7G+wcczkoN5d3bn5eT7szbBP0fT8Y/Z\\\\n2mzwlNFANROr5lSEeCVSuwM9Uz3Eilvxiu98oEjRMKo0+7jf4oHWvLO+Ti2IFMyd\\\\nfMbZnKXkLVx6bxG1rL2KfYQZ7JNTsmECl1TfABEBAAHNGE5hdGUgPHNvbWVvbmVA\\\\nZW1haWwuY29tPsLAdAQTAQgAKAUCWvCSIAkQDIG2yReqggMCGwMCGQEGCwkIBwMC\\\\nBhUIAgkKCwMWAgEAAOpdCAB+vtkq7OUhduVIjjYiZZ+85KFoprDeoTW6mftIpdE+\\\\n5jYGS9acEf7kSqZmGEukVE7pp+rSeu97fonWsuyyiNslYErNXa6cGcG/CxBF3XeJ\\\\nicYbauSC40MIxT9XjkxOQt7awaj8legJIOgrdQSmS9a/AP6VJIQXrtfxWpEqaZB5\\\\ndjnOEXOrsBPQugUJWIx4zGAHFYlABxmufLsHZMakkeDK5C9h5rLEq8gyeQj2XbUm\\\\n+C5qO1yoDvomwFsmnOSnDKCpyvBi0tdeq7oWoe3q+iFrYkyQf/NISWgvYC1QVrRM\\\\ndCPvTxABILhzXBS6Xxxa2y/HeevU4RvjD6kpMuqTNCX7zsBNBFrwkiABCADcr/a/\\\\nc5uf+x3jSRTHMr5wq2dLsnr82z3cAFcfIsrnMeFVkF76Ls9R9f/s5Txc89Ui01P3\\\\nHMaaBK5oaF5gW3ptB3UHEvX0XpSHBzwZK1SP4hoKux7Avclh4i+ghudtNegm+cBO\\\\nmvdyo3HCxwwHJMIxRk5bl9EYbVhcTznKR7kcAPA2x4dqzEzALwplN5sZL0nnjBfn\\\\nYU4bBskK1lBST36Fi4/ip4BP/RFoI5oNxDz90/5fhpdRarQpFuQkzwlOqUf9lLzg\\\\n0qTRsyna1Yu6QKGAOdMAQCF9QPW4v2RpkoiCOCqy6L8ElKlU8S1MChG+7f5qjNuN\\\\n1jwsvB3KLE+1hkVtABEBAAHCwF8EGAEIABMFAlrwkiAJEAyBtskXqoIDAhsMAADb\\\\nQQgApWUqV9ldCf+XY2FLLs9AacDv7UZGs4RVm9lXb/FMjPMgzl3BsixJnGyLLxOp\\\\nPOB389J6HcP7QlxlxTGGWE6gCNFYG3zxhOEMPLL8pX0l/BAKRt4zHIcN9x3nfvsd\\\\nprWQ8ttV2uvDx2MIrofcH8SGaOmBQDxI5zXPs/Cy7u//mS7rL8d5WELfY1v0mR0K\\\\nAjNsp61ZYVmQoOqGp5yYFQlTT/5j3bEUYbafiiA2ogH8i9yZDA0dWLhk3bo9yPxr\\\\nFBgfEhcOaz0CNLbTASiAol+ITW1TefWnyegeiqa/WDaiCeiUKd65C2kTteqS2dt7\\\\nXATPIgXDfEj8hWhoojTxZN5YCg==\\\\n=iRwI\\\\n-----END PGP PUBLIC KEY BLOCK-----\\\\n\\\"}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Pools",
+          "description": "Returns a list of available pool addresses.",
+          "request": {
+            "url": "http://localhost:3001/api/market/pools",
+            "method": "GET"
+          }
+        }
+      ]
+    }
+  ]
+}
