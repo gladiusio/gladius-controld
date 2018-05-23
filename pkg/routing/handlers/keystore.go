@@ -97,6 +97,15 @@ func KeystoreWalletsRetrievalHandler(w http.ResponseWriter, r *http.Request) {
 	ResponseHandler(w, r, "null", response)
 }
 
+func KeystorePGPPublicKeyRetrievalHandler(w http.ResponseWriter, r *http.Request) {
+	publicKey, err := blockchain.GetPGPPublicKey()
+	if err != nil {
+		ErrorHandler(w, r, "Public key not found or cannot be read", err, http.StatusNotFound)
+		return
+	}
+	ResponseHandler(w, r, "null", "{\"publicKey\": \""+publicKey+"\"}")
+}
+
 func KeystorePGPCreationHandler(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var pgpStruct pgp_struct

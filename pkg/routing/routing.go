@@ -40,6 +40,7 @@ func Start() {
 	walletRouter.HandleFunc("/wallet/{index:[0-9]*}", handlers.KeystoreWalletRetrievalHandler)
 	walletRouter.HandleFunc("/wallet/{index:[0-9]*}/open", handlers.KeystoreWalletOpenHandler).
 		Methods("POST")
+	walletRouter.HandleFunc("/pgp/view/public", handlers.KeystorePGPPublicKeyRetrievalHandler)
 	walletRouter.HandleFunc("/pgp/create", handlers.KeystorePGPCreationHandler).
 		Methods("POST")
 

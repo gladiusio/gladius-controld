@@ -69,6 +69,18 @@ func CloseWallet(accountIndex int) {
 	wallet.Close()
 }
 
+func GetPGPPublicKey() (string, error) {
+	var pathTemp string = viper.GetString("DirKeys")
+	keyringFileBuffer, err := ioutil.ReadFile(pathTemp + "/public.asc")
+	if err != nil {
+		return "", err
+	}
+
+	publicKey := string(keyringFileBuffer)
+
+	return publicKey, nil
+}
+
 func GetDefaultAccountAddress() common.Address {
 	return GetAccountAddress(0)
 }
