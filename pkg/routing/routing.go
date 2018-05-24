@@ -63,7 +63,8 @@ func Start() {
 	nodeRouter.HandleFunc("/create", handlers.NodeFactoryCreateNodeHandler).
 		Methods("POST")
 	// Node Data
-	nodeRouter.HandleFunc("/{nodeAddress:0[xX][0-9a-fA-F]{40}}/data", handlers.NodeRetrieveDataHandler)
+	nodeRouter.HandleFunc("/{nodeAddress:0[xX][0-9a-fA-F]{40}}/data", handlers.NodeRetrieveDataHandler).
+		Methods("GET")
 	nodeRouter.HandleFunc("/{nodeAddress:0[xX][0-9a-fA-F]{40}}/data", handlers.NodeSetDataHandler).
 		Methods("POST")
 	// Node application to Pool
