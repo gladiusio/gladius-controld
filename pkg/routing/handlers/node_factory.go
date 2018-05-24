@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -23,6 +24,11 @@ func NodeFactoryNodeAddressHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		ErrorHandler(w, r, "Could not retrieve Node for account", err, http.StatusNotFound)
+		return
+	}
+
+	if nodeAddress.String() == "0x0000000000000000000000000000000000000000" {
+		ErrorHandler(w, r, "Account does not have an associated node", errors.New("account has not created a node"), http.StatusNotFound)
 		return
 	}
 
