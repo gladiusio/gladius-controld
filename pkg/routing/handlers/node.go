@@ -34,7 +34,11 @@ func NodeSetDataHandler(w http.ResponseWriter, r *http.Request) {
 		ErrorHandler(w, r, "Passphrase `passphrase` not included or invalid in request", err, http.StatusBadRequest)
 	}
 
-	transaction, _ := blockchain.NodeSetData(auth, &data)
+	transaction, err := blockchain.NodeSetData(auth, &data)
+	if err != nil {
+		ErrorHandler(w, r, "Node data could not be set", err, http.StatusBadRequest)
+		return
+	}
 	TransactionHandler(w, r, "null", transaction)
 }
 

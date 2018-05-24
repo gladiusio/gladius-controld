@@ -85,7 +85,10 @@ func CreateKeyPair(name, comment, email string) (string, error) {
 
 func EncryptData(data string) (string, error) {
 	var pathTemp string = viper.GetString("DirKeys")
-	keyringFileBuffer, _ := ioutil.ReadFile(pathTemp + "/public.asc")
+	keyringFileBuffer, err := ioutil.ReadFile(pathTemp + "/public.asc")
+	if err != nil {
+		return "", err
+	}
 
 	publicKey := string(keyringFileBuffer)
 
@@ -126,7 +129,10 @@ func EncryptMessage(message, publicKey string) (string, error) {
 
 func DecryptData(message string) (string, error) {
 	var pathTemp string = viper.GetString("DirKeys")
-	keyringFileBuffer, _ := os.Open(pathTemp + "/private.asc")
+	keyringFileBuffer, err := os.Open(pathTemp + "/private.asc")
+	if err != nil {
+		return "", err
+	}
 
 	defer keyringFileBuffer.Close()
 
