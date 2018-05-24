@@ -3,7 +3,6 @@ package blockchain
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts"
@@ -48,7 +47,7 @@ func Wallets() []accounts.Wallet {
 	return ks.Wallets()
 }
 
-func OpenWallet(accountIndex int, passphrase string) accounts.Wallet {
+func OpenWallet(accountIndex int, passphrase string) (*accounts.Wallet, error) {
 	ks, _ := keystoreForPath("")
 	account := ks.Accounts()[accountIndex]
 	err := ks.Unlock(account, passphrase)
@@ -57,10 +56,10 @@ func OpenWallet(accountIndex int, passphrase string) accounts.Wallet {
 	wallet.Open(passphrase)
 
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	return wallet
+	return &wallet, nil
 }
 
 func CloseWallet(accountIndex int) {

@@ -74,9 +74,13 @@ func KeystoreWalletOpenHandler(w http.ResponseWriter, r *http.Request) {
 	indexString := vars["index"]
 	index, _ := strconv.Atoi(indexString)
 
-	wallet := blockchain.OpenWallet(index, walletStruct.Passphrase)
+	wallet, err := blockchain.OpenWallet(index, walletStruct.Passphrase)
+	if err != nil {
+		ErrorHandler(w, r, "Wallet could not be opened, passphrase could be incorrect", err, http.StatusBadRequest)
+		return
+	}
 
-	response := blockchain.WalletResponseFormatter(wallet)
+	response := blockchain.WalletResponseFormatter(*wallet)
 	ResponseHandler(w, r, "null", response)
 }
 
