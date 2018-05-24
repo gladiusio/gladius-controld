@@ -14,7 +14,11 @@ func NodeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func NodeRetrieveDataHandler(w http.ResponseWriter, r *http.Request) {
-	nodeData, _ := blockchain.NodeRetrieveData()
+	nodeData, err := blockchain.NodeRetrieveData()
+	if err != nil {
+		ErrorHandler(w, r, "Node data could not be retrieved or data is not set", err, http.StatusNotFound)
+	}
+
 	jsonResponse := nodeData.String()
 
 	ResponseHandler(w, r, "null", jsonResponse)
