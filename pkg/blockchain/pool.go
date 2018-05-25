@@ -108,7 +108,7 @@ func PoolNodesWithData(poolAddress common.Address, nodeAddresses *[]common.Addre
 			response += nodeApplication.String() + ","
 		}
 	}
-	strings.TrimRight(response, ",")
+	response = strings.TrimRight(response, ",")
 	response += "]"
 
 	return &response, nil
