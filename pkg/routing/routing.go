@@ -14,7 +14,7 @@ import (
 const (
 	STATIC_DIR = "/static/"
 	PORT       = "3001"
-	DEBUG      = true
+	DEBUG      = false
 )
 
 func Start() {
