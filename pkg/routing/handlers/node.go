@@ -14,7 +14,11 @@ func NodeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func NodeRetrieveDataHandler(w http.ResponseWriter, r *http.Request) {
-	nodeData, _ := blockchain.NodeRetrieveData()
+	nodeData, err := blockchain.NodeRetrieveData()
+	if err != nil {
+		ErrorHandler(w, r, "Node data could not be retrieved or data is not set", err, http.StatusNotFound)
+	}
+
 	jsonResponse := nodeData.String()
 
 	ResponseHandler(w, r, "null", jsonResponse)
@@ -30,7 +34,11 @@ func NodeSetDataHandler(w http.ResponseWriter, r *http.Request) {
 		ErrorHandler(w, r, "Passphrase `passphrase` not included or invalid in request", err, http.StatusBadRequest)
 	}
 
-	transaction, _ := blockchain.NodeSetData(auth, &data)
+	transaction, err := blockchain.NodeSetData(auth, &data)
+	if err != nil {
+		ErrorHandler(w, r, "Node data could not be set", err, http.StatusBadRequest)
+		return
+	}
 	TransactionHandler(w, r, "null", transaction)
 }
 
