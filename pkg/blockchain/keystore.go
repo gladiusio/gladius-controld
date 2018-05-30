@@ -12,62 +12,69 @@ import (
 	"github.com/spf13/viper"
 )
 
-func keystoreForPath(path string) (*keystore.KeyStore, error) {
+// GladiusAccountManager is a type that allows the user to create a keystore file,
+// create an in it, and preform actions on the first account stored.
+type GladiusAccountManager struct {
+	keystore *keystore.KeyStore
+}
+
+func NewGladiusAccountManager() *GladiusAccountManager {
 	var pathTemp string = viper.GetString("DirWallet")
 	ks := keystore.NewKeyStore(
 		pathTemp,
 		keystore.LightScryptN,
 		keystore.LightScryptP)
 
-	return ks, nil
+	return &GladiusAccountManager{keystore: ks}
 }
 
-func AccountResponseFormatter(account *accounts.Account) string {
-	address := account.Address
+func (ga GladiusAccountManager) Keystore() *keystore.KeyStore {
+	return ga.keystore
+}
+
+func (ga GladiusAccountManager) UnlockAccount(passphrase string) {
+	ga.Keystore().Unlock(ga.GetAccount(), passphrase)
+}
+
+func (ga GladiusAccountManager) AccountResponseFormatter() string {
+	address := ga.GetAccountAddress()
 	accountAddress := fmt.Sprintf("0x%x", address)
 
 	return "{ \"address\": \"" + accountAddress + "\"}"
 }
 
-func WalletResponseFormatter(wallet accounts.Wallet) string {
-	walletStatus, _ := wallet.Status()
-	walletAddress := wallet.Accounts()[0].Address
-
-	return "{ \"status\": \"" + walletStatus + "\", \"address\": \"" + walletAddress.String() + "\"}"
-}
-
-func CreateAccount(passphrase string) (accounts.Account, error) {
-	ks, _ := keystoreForPath("")
+func (ga GladiusAccountManager) CreateAccount(passphrase string) (accounts.Account, error) {
+	ks := ga.Keystore()
 	return ks.NewAccount(passphrase)
 }
 
-func Wallets() []accounts.Wallet {
-	ks, _ := keystoreForPath("")
-
-	return ks.Wallets()
+func (ga GladiusAccountManager) GetAccountAddress() common.Address {
+	return ga.GetAccount().Address
 }
 
-func OpenWallet(accountIndex int, passphrase string) (*accounts.Wallet, error) {
-	ks, _ := keystoreForPath("")
-	account := ks.Accounts()[accountIndex]
-	err := ks.Unlock(account, passphrase)
+func (ga GladiusAccountManager) GetAccount() accounts.Account {
+	keystore := ga.Keystore()
 
-	wallet := ks.Wallets()[accountIndex]
-	wallet.Open(passphrase)
+	return keystore.Accounts()[0]
+}
 
+func (ga GladiusAccountManager) GetAuth(passphrase string) (*bind.TransactOpts, error) {
+	// Create a JSON blob with the same passphrase used to decrypt it
+	key, err := ga.Keystore().Export(ga.GetAccount(), passphrase, passphrase)
 	if err != nil {
 		return nil, err
 	}
 
-	return &wallet, nil
+	// Create a transactor from the key file
+	auth, err := bind.NewTransactor(strings.NewReader(string(key)), passphrase)
+	if err != nil {
+		return nil, err
+	}
+
+	return auth, nil
 }
 
-func CloseWallet(accountIndex int) {
-	ks, _ := keystoreForPath("")
-	wallet := ks.Wallets()[accountIndex]
-	wallet.Close()
-}
-
+// TODO: Move somewhere more logical...
 func GetPGPPublicKey() (string, error) {
 	var pathTemp string = viper.GetString("DirKeys")
 	keyringFileBuffer, err := ioutil.ReadFile(pathTemp + "/public.asc")
@@ -78,35 +85,4 @@ func GetPGPPublicKey() (string, error) {
 	publicKey := string(keyringFileBuffer)
 
 	return publicKey, nil
-}
-
-func GetDefaultAccountAddress() common.Address {
-	return GetAccountAddress(0)
-}
-
-func GetAccountAddress(index int) common.Address {
-	ks, _ := keystoreForPath("")
-	wallet := ks.Wallets()[index]
-	return wallet.Accounts()[index].Address
-}
-
-func GetDefaultAuth(passphrase string) (*bind.TransactOpts, error) {
-	return GetAuth(passphrase, 0)
-}
-
-// GetAuth - Temporary auth retrieval
-func GetAuth(passphrase string, index int) (*bind.TransactOpts, error) {
-	wallet := Wallets()[index]
-
-	key, err := ioutil.ReadFile(wallet.URL().Path)
-	if err != nil {
-		return nil, err
-	}
-
-	auth, err := bind.NewTransactor(strings.NewReader(string(key)), passphrase)
-	if err != nil {
-		return nil, err
-	}
-
-	return auth, nil
 }

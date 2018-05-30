@@ -39,7 +39,8 @@ func MarketPools() ([]common.Address, error) {
 //MarketCreatePool - Create new pool
 func MarketCreatePool(passphrase, publicKey string) (*types.Transaction, error) {
 	market := ConnectMarket()
-	auth, err := GetDefaultAuth(passphrase)
+	ga := NewGladiusAccountManager()
+	auth, err := ga.GetAuth(passphrase)
 	if err != nil {
 		return nil, err
 	}

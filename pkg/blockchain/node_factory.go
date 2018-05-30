@@ -24,7 +24,8 @@ func ConnectNodeFactory() (*generated.NodeFactory, error) {
 
 // NodeForAccount - returns node address for wallet
 func NodeOwnedByUser() (*common.Address, error) {
-	address := GetDefaultAccountAddress()
+	ga := NewGladiusAccountManager()
+	address := ga.GetAccountAddress()
 	return NodeForAccount(address)
 }
 
@@ -50,8 +51,8 @@ func CreateNode(passphrase string) (*types.Transaction, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	auth, err := GetDefaultAuth(passphrase)
+	ga := NewGladiusAccountManager()
+	auth, err := ga.GetAuth(passphrase)
 
 	if err != nil {
 		return nil, err

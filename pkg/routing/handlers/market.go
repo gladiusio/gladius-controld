@@ -32,7 +32,7 @@ func MarketPoolsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 type poolData struct {
-	publicKey string `json:"publicKey"`
+	PublicKey string `json:"publicKey"`
 }
 
 // MarketPoolsCreateHandler - Create a new Pool
@@ -42,7 +42,7 @@ func MarketPoolsCreateHandler(w http.ResponseWriter, r *http.Request) {
 	var data poolData
 	err := decoder.Decode(&data)
 
-	transaction, err := blockchain.MarketCreatePool(auth, data.publicKey)
+	transaction, err := blockchain.MarketCreatePool(auth, data.PublicKey)
 	if err != nil {
 		ErrorHandler(w, r, "Could not build pool creation transaction", err, http.StatusNotFound)
 		return
