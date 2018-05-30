@@ -36,7 +36,7 @@ func Start() {
 	walletRouter := apiRouter.PathPrefix("/keystore").Subrouter()
 	walletRouter.HandleFunc("/account/create", handlers.KeystoreAccountCreationHandler).
 		Methods("POST")
-	walletRouter.HandleFunc("/acount", handlers.KeystoreAccountRetrievalHandler)
+	walletRouter.HandleFunc("/account", handlers.KeystoreAccountRetrievalHandler)
 	walletRouter.HandleFunc("/account/open", handlers.KeystoreAccountUnlockHandler).
 		Methods("POST")
 	walletRouter.HandleFunc("/pgp/view/public", handlers.KeystorePGPPublicKeyRetrievalHandler)
