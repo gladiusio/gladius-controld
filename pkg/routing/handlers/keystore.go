@@ -13,7 +13,7 @@ type accountBody struct {
 	Passphrase string `json:"passphrase"`
 }
 
-type pgp_struct struct {
+type pgpStruct struct {
 	Name    string `json:"name"`
 	Comment string `json:"comment"`
 	Email   string `json:"email"`
@@ -21,8 +21,8 @@ type pgp_struct struct {
 
 func passphraseDecoder(w http.ResponseWriter, r *http.Request) (*accountBody, error) {
 	decoder := json.NewDecoder(r.Body)
-	var accountBody accountBody
-	err := decoder.Decode(&accountBody)
+	var ab accountBody
+	err := decoder.Decode(&ab)
 
 	if err != nil {
 		return nil, err
@@ -30,7 +30,7 @@ func passphraseDecoder(w http.ResponseWriter, r *http.Request) (*accountBody, er
 
 	defer r.Body.Close()
 
-	return &accountBody, nil
+	return &ab, nil
 }
 
 func KeystoreAccountCreationHandler(w http.ResponseWriter, r *http.Request) {
@@ -89,15 +89,15 @@ func KeystorePGPPublicKeyRetrievalHandler(w http.ResponseWriter, r *http.Request
 
 func KeystorePGPCreationHandler(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
-	var pgpStruct pgp_struct
-	err := decoder.Decode(&pgpStruct)
+	var ps pgpStruct
+	err := decoder.Decode(&ps)
 
 	if err != nil {
 		ErrorHandler(w, r, "Request invalid, body is missing either `name`, `comment`, and/or `email`", err, http.StatusBadRequest)
 		return
 	}
 
-	path, err := crypto.CreateKeyPair(pgpStruct.Name, pgpStruct.Comment, pgpStruct.Email)
+	path, err := crypto.CreateKeyPair(ps.Name, ps.Comment, ps.Email)
 	println(path)
 
 	if err != nil {
