@@ -41,9 +41,9 @@ func KeystoreAccountCreationHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	ga := blockchain.NewGladiusAccountManager()
 
-	ga.CreateAccount(wallet.Passphrase)
-	if err != nil {
-		ErrorHandler(w, r, "Wallet could not be created", err, http.StatusInternalServerError)
+	_, err2 := ga.CreateAccount(wallet.Passphrase)
+	if err2 != nil {
+		ErrorHandler(w, r, "Account could not be created", err2, http.StatusInternalServerError)
 		return
 	}
 

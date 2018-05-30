@@ -1,6 +1,7 @@
 package blockchain
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"strings"
@@ -45,7 +46,11 @@ func (ga GladiusAccountManager) AccountResponseFormatter() string {
 
 func (ga GladiusAccountManager) CreateAccount(passphrase string) (accounts.Account, error) {
 	ks := ga.Keystore()
-	return ks.NewAccount(passphrase)
+	if len(ga.Keystore().Accounts()) < 1 {
+		return ks.NewAccount(passphrase)
+	}
+	return accounts.Account{}, errors.New("gladius account already exists")
+
 }
 
 func (ga GladiusAccountManager) GetAccountAddress() common.Address {
