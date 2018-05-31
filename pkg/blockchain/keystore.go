@@ -33,8 +33,8 @@ func (ga GladiusAccountManager) Keystore() *keystore.KeyStore {
 	return ga.keystore
 }
 
-func (ga GladiusAccountManager) UnlockAccount(passphrase string) {
-	ga.Keystore().Unlock(ga.GetAccount(), passphrase)
+func (ga GladiusAccountManager) UnlockAccount(passphrase string) error {
+	return ga.Keystore().Unlock(ga.GetAccount(), passphrase)
 }
 
 func (ga GladiusAccountManager) AccountResponseFormatter() string {

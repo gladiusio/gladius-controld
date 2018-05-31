@@ -68,7 +68,7 @@ func KeystoreAccountUnlockHandler(w http.ResponseWriter, r *http.Request) {
 
 	ga := blockchain.NewGladiusAccountManager()
 
-	ga.UnlockAccount(accountBody.Passphrase)
+	err = ga.UnlockAccount(accountBody.Passphrase)
 	if err != nil {
 		ErrorHandler(w, r, "Wallet could not be opened, passphrase could be incorrect", err, http.StatusBadRequest)
 		return
