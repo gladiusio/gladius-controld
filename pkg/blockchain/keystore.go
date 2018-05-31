@@ -19,6 +19,7 @@ type GladiusAccountManager struct {
 	keystore *keystore.KeyStore
 }
 
+// NewGladiusAccountManager creates a new gladius account manager
 func NewGladiusAccountManager() *GladiusAccountManager {
 	var pathTemp string = viper.GetString("DirWallet")
 	ks := keystore.NewKeyStore(
@@ -29,14 +30,17 @@ func NewGladiusAccountManager() *GladiusAccountManager {
 	return &GladiusAccountManager{keystore: ks}
 }
 
+// Keystore gets the keystore associated with the account manager
 func (ga GladiusAccountManager) Keystore() *keystore.KeyStore {
 	return ga.keystore
 }
 
+//UnlockAccount Unlocks the account
 func (ga GladiusAccountManager) UnlockAccount(passphrase string) error {
 	return ga.Keystore().Unlock(ga.GetAccount(), passphrase)
 }
 
+// AccountResponseFormatter creates a JSON formatted account
 func (ga GladiusAccountManager) AccountResponseFormatter() string {
 	address := ga.GetAccountAddress()
 	accountAddress := fmt.Sprintf("0x%x", address)
@@ -44,6 +48,7 @@ func (ga GladiusAccountManager) AccountResponseFormatter() string {
 	return "{ \"address\": \"" + accountAddress + "\"}"
 }
 
+// CreateAccount will create an account if there isn't one already
 func (ga GladiusAccountManager) CreateAccount(passphrase string) (accounts.Account, error) {
 	ks := ga.Keystore()
 	if len(ga.Keystore().Accounts()) < 1 {
@@ -53,16 +58,19 @@ func (ga GladiusAccountManager) CreateAccount(passphrase string) (accounts.Accou
 
 }
 
+// GetAccountAddress gets the account address
 func (ga GladiusAccountManager) GetAccountAddress() common.Address {
 	return ga.GetAccount().Address
 }
 
+// GetAccount gets the actual account type
 func (ga GladiusAccountManager) GetAccount() accounts.Account {
 	keystore := ga.Keystore()
 
 	return keystore.Accounts()[0]
 }
 
+// GetAuth gets the authenticator for the go bindings of our smart contracts
 func (ga GladiusAccountManager) GetAuth(passphrase string) (*bind.TransactOpts, error) {
 	// Create a JSON blob with the same passphrase used to decrypt it
 	key, err := ga.Keystore().Export(ga.GetAccount(), passphrase, passphrase)
