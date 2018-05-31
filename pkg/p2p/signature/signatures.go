@@ -84,7 +84,7 @@ func VerifySignedMessage(sm *SignedMessage) (bool, error) {
 
 	fmt.Println(len(sm.Signature))
 	// Check if the signature is valid
-	signatureValid := crypto.VerifySignature(crypto.CompressPubkey(pub), sm.Hash, sm.Signature)
+	signatureValid := crypto.VerifySignature(crypto.CompressPubkey(pub), sm.Hash, sm.Signature[:64])
 
 	// Check if the address matches
 	addressMatches := crypto.PubkeyToAddress(*pub).String() == sm.Address
