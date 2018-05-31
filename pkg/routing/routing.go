@@ -32,6 +32,13 @@ func Start() {
 	apiRouter.HandleFunc("/manager", handlers.APIHandler)
 	apiRouter.NotFoundHandler = http.HandlerFunc(handlers.NotFoundHandler)
 
+	// P2P Network Routes
+	p2pRouter := apiRouter.PathPrefix("/p2p").Subrouter()
+	p2pRouter.HandleFunc("/state/push", handlers.PeerToPeerStateUpdateHandler).
+		Methods("POST")
+	p2pRouter.HandleFunc("/state/verify", handlers.VerifySignedMessageHandler).
+		Methods("POST")
+
 	// Key Management
 	walletRouter := apiRouter.PathPrefix("/keystore").Subrouter()
 	walletRouter.HandleFunc("/account/create", handlers.KeystoreAccountCreationHandler).
