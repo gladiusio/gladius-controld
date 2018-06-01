@@ -5,7 +5,6 @@ import (
 	b64 "encoding/base64"
 	"encoding/json"
 	"errors"
-	"fmt"
 
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
@@ -34,7 +33,6 @@ func ParseSignedMessage(message, hash, signature, address string) (*SignedMessag
 	if err != nil {
 		return nil, errors.New("error decoding signature")
 	}
-	fmt.Println("Decoded signature: ", dSignature)
 	return &SignedMessage{Message: dMessage, Hash: dHash, Signature: dSignature, Address: address}, nil
 }
 
@@ -51,7 +49,6 @@ func CreateSignedMessage(message *message.Message, passphrase string) (string, e
 
 	hash := crypto.Keccak256(messageBytes)
 	signature, err := ga.Keystore().SignHash(ga.GetAccount(), hash)
-	fmt.Println("Signed signature: ", signature)
 
 	if err != nil {
 		return "", errors.New("Error signing message")
@@ -82,13 +79,12 @@ func VerifySignedMessage(sm *SignedMessage) (bool, error) {
 		return false, errors.New("Error signing message")
 	}
 
-	fmt.Println(len(sm.Signature))
 	// Check if the signature is valid
 	signatureValid := crypto.VerifySignature(crypto.CompressPubkey(pub), sm.Hash, sm.Signature[:64])
 
 	// Check if the address matches
 	addressMatches := crypto.PubkeyToAddress(*pub).String() == sm.Address
-	fmt.Println(addressInPool, hashMatches, signatureValid, addressMatches)
+
 	if addressInPool && addressMatches && hashMatches && signatureValid {
 		return true, nil
 	}
