@@ -19,6 +19,84 @@ This document provides documentation for the Gladius Control Daemon to build int
 Throughout the document, you will see {{ETH_ADDRESS}}. This is a placeholder for either a node address or pool address in almost all cases.
 
 ## Requests
+### **POST** - /api/p2p/state/sign
+
+#### Description
+Takes a message and returns a verifiable signature from the account at `/api/account/`
+
+#### CURL
+
+```sh
+curl -X POST "http://localhost:3001/api/p2p/state/sign" \
+    -H "Content-Type: application/json; charset=utf-8" \
+    --data-raw "$body"
+```
+
+#### Header Parameters
+
+- **Content-Type** should respect the following schema:
+
+```
+{
+  "type": "string",
+  "enum": [
+    "application/json; charset=utf-8"
+  ],
+  "default": "application/json; charset=utf-8"
+}
+```
+
+#### Body Parameters
+
+- **body** should respect the following schema:
+
+```json
+{
+  "state": "Message to sign goes here",
+  "passphrase": "WoahASecurePassphrase"
+}
+```
+
+## Requests
+### **POST** - /api/p2p/state/verify
+
+#### Description
+Verifies a signature from `/api/p2p/state/sign`
+
+#### CURL
+
+```sh
+curl -X POST "http://localhost:3001/api/p2p/state/verify" \
+    -H "Content-Type: application/json; charset=utf-8" \
+    --data-raw "$body"
+```
+
+#### Header Parameters
+
+- **Content-Type** should respect the following schema:
+
+```
+{
+  "type": "string",
+  "enum": [
+    "application/json; charset=utf-8"
+  ],
+  "default": "application/json; charset=utf-8"
+}
+```
+
+#### Body Parameters
+
+- **body** should respect the following schema:
+
+```json
+{
+  "message": "base64encodedmessage",
+  "hash": "base64encodedhash",
+  "signature": "base64encodedsignature",
+  "address": "0x4A97ACA4C808EE8a7C36175e31d46795d91F6CdD"
+}
+```
 
 ### **POST** - /api/keystore/pgp/create
 
