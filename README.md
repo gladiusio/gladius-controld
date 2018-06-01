@@ -61,7 +61,8 @@ curl -X POST "http://localhost:3001/api/p2p/state/sign" \
 ### **POST** - /api/p2p/state/verify
 
 #### Description
-Verifies a signature from `/api/p2p/state/sign`
+Verifies a signature from `/api/p2p/state/sign` and checks to see if that
+address is authorized for the pool.
 
 #### CURL
 
