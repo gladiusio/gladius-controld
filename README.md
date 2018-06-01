@@ -14,7 +14,7 @@ from the project root. You can change the target to be whatever system you want.
 
 ## API Documentation
 
-This document provides documentation for the Gladius Control Daemon to build interfaces on top of the Gladius Blockchain Network with familiar REST API calls. If something needs more detail or explanation, please file an issue.
+This document provides documentation for the Gladius Control Daemon to build interfaces on top of the Gladius Network with familiar REST API calls. If something needs more detail or explanation, please file an issue.
 
 Throughout the document, you will see {{ETH_ADDRESS}}. This is a placeholder for either a node address or pool address in almost all cases.
 
