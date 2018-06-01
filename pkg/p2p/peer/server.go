@@ -1,4 +1,4 @@
-package server
+package peer
 
 import "sync"
 
