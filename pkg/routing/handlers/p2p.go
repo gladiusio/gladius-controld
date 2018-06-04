@@ -85,3 +85,35 @@ func VerifySignedMessageHandler(w http.ResponseWriter, r *http.Request) {
 
 	ResponseHandler(w, r, "null", strconv.FormatBool(verified))
 }
+
+// DiscoveryHandler takes in a the given peer and asks it for the current
+// network state. This allows the node to get information on other nodes,
+// where to find content, etc.
+func DiscoveryHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
+// StartUpHandler is a wrapper for updating state and handles hearbeat setup.
+// It also pushes any changes to IP addresses, current content on disk, etc.
+func StartUpHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
+// UpdateStateHandler updates state with signed update and pushes state to a set
+// of random peers. They then propigate it to their peers until the network has
+// a consistent state
+func UpdateStateHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
+// GetFullStateHandler gets the current state the node has access to.
+func GetFullStateHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
+// GetContentLocationHandler will compare the content list provided with the
+// current state and return a list of links to download content from a peer that
+// has the it
+func GetContentLocationHandler(w http.ResponseWriter, r *http.Request) {
+
+}
