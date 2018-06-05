@@ -34,9 +34,9 @@ func Start() {
 
 	// P2P Network Routes
 	p2pRouter := apiRouter.PathPrefix("/p2p").Subrouter()
-	p2pRouter.HandleFunc("/state/sign", handlers.PeerToPeerStateUpdateHandler).
+	p2pRouter.HandleFunc("/message/sign", handlers.PeerToPeerStateUpdateHandler).
 		Methods("POST")
-	p2pRouter.HandleFunc("/state/verify", handlers.VerifySignedMessageHandler).
+	p2pRouter.HandleFunc("/message/verify", handlers.VerifySignedMessageHandler).
 		Methods("POST")
 
 	// Key Management

@@ -19,7 +19,7 @@ This document provides documentation for the Gladius Control Daemon to build int
 Throughout the document, you will see {{ETH_ADDRESS}}. This is a placeholder for either a node address or pool address in almost all cases.
 
 ## Requests
-### **POST** - /api/p2p/state/sign
+### **POST** - /api/p2p/message/sign
 
 #### Description
 Takes a message and returns a verifiable signature from the account at `/api/account/`
@@ -27,7 +27,7 @@ Takes a message and returns a verifiable signature from the account at `/api/acc
 #### CURL
 
 ```sh
-curl -X POST "http://localhost:3001/api/p2p/state/sign" \
+curl -X POST "http://localhost:3001/api/p2p/message/sign" \
     -H "Content-Type: application/json; charset=utf-8" \
     --data-raw "$body"
 ```
@@ -52,16 +52,16 @@ curl -X POST "http://localhost:3001/api/p2p/state/sign" \
 
 ```json
 {
-  "state": "Message to sign goes here",
+  "message": "Message to sign goes here",
   "passphrase": "WoahASecurePassphrase"
 }
 ```
 
 ## Requests
-### **POST** - /api/p2p/state/verify
+### **POST** - /api/p2p/message/verify
 
 #### Description
-Verifies a signature from `/api/p2p/state/sign` and checks to see if that
+Verifies a signature from `/api/p2p/message/sign` and checks to see if that
 address is authorized for the pool.
 
 #### CURL
