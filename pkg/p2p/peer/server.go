@@ -2,18 +2,18 @@ package peer
 
 import "sync"
 
-// Server is a type that manages the Gladius p2p interface
-type Server struct {
+// server is a type that manages the Gladius p2p "server"
+type server struct {
 	running bool
 	mux     sync.Mutex
 }
 
 // Start starts the p2p server
-func (s *Server) Start() {
+func (s *server) Start() {
 
 }
 
 // Stop stops the p2p server
-func (s *Server) Stop() {
+func (s *server) Stop() {
 
 }

@@ -10,15 +10,15 @@ import (
 )
 
 type messageBody struct {
-	Message    string `json:"message"`
-	Passphrase string `json:"passphrase"`
+	Message    interface{} `json:"message"`
+	Passphrase string      `json:"passphrase"`
 }
 
 type signatureBody struct {
-	Message   string `json:"message"`
-	Hash      string `json:"hash"`
-	Signature string `json:"signature"`
-	Address   string `json:"address"`
+	Message   interface{} `json:"message"`
+	Hash      string      `json:"hash"`
+	Signature string      `json:"signature"`
+	Address   string      `json:"address"`
 }
 
 func stateBodyDecoder(w http.ResponseWriter, r *http.Request) (*messageBody, error) {
@@ -99,7 +99,7 @@ func DiscoveryHandler(w http.ResponseWriter, r *http.Request) {
 
 // StartUpHandler is a wrapper for updating the network state at startup.
 // It handles hearbeat setup, changes to public IP address, current content on
-// disk, etc.
+// disk, getting state from a previous known node, etc.
 func StartUpHandler(w http.ResponseWriter, r *http.Request) {
 
 }
