@@ -14,11 +14,90 @@ from the project root. You can change the target to be whatever system you want.
 
 ## API Documentation
 
-This document provides documentation for the Gladius Control Daemon to build interfaces on top of the Gladius Blockchain Network with familiar REST API calls. If something needs more detail or explanation, please file an issue.
+This document provides documentation for the Gladius Control Daemon to build interfaces on top of the Gladius Network with familiar REST API calls. If something needs more detail or explanation, please file an issue.
 
 Throughout the document, you will see {{ETH_ADDRESS}}. This is a placeholder for either a node address or pool address in almost all cases.
 
 ## Requests
+### **POST** - /api/p2p/message/sign
+
+#### Description
+Takes a message and returns a verifiable signature from the account at `/api/account/`
+
+#### CURL
+
+```sh
+curl -X POST "http://localhost:3001/api/p2p/message/sign" \
+    -H "Content-Type: application/json; charset=utf-8" \
+    --data-raw "$body"
+```
+
+#### Header Parameters
+
+- **Content-Type** should respect the following schema:
+
+```
+{
+  "type": "string",
+  "enum": [
+    "application/json; charset=utf-8"
+  ],
+  "default": "application/json; charset=utf-8"
+}
+```
+
+#### Body Parameters
+
+- **body** should respect the following schema:
+
+```json
+{
+  "message": "Message to sign goes here",
+  "passphrase": "WoahASecurePassphrase"
+}
+```
+
+## Requests
+### **POST** - /api/p2p/message/verify
+
+#### Description
+Verifies a signature from `/api/p2p/message/sign` and checks to see if that
+address is authorized for the pool.
+
+#### CURL
+
+```sh
+curl -X POST "http://localhost:3001/api/p2p/state/verify" \
+    -H "Content-Type: application/json; charset=utf-8" \
+    --data-raw "$body"
+```
+
+#### Header Parameters
+
+- **Content-Type** should respect the following schema:
+
+```
+{
+  "type": "string",
+  "enum": [
+    "application/json; charset=utf-8"
+  ],
+  "default": "application/json; charset=utf-8"
+}
+```
+
+#### Body Parameters
+
+- **body** should respect the following schema:
+
+```json
+{
+  "message": "base64encodedmessage",
+  "hash": "base64encodedhash",
+  "signature": "base64encodedsignature",
+  "address": "0x4A97ACA4C808EE8a7C36175e31d46795d91F6CdD"
+}
+```
 
 ### **POST** - /api/keystore/pgp/create
 
@@ -84,10 +163,10 @@ curl -X GET "http://localhost:3001/api/keystore/pgp/view/public" \
 }
 ```
 
-### **POST** - /api/keystore/wallet/create
+### **POST** - /api/keystore/account/create
 
 #### Description
-Creates a new Ethereum wallet encrypted against the provided passphrase. Wallet will be stored in `~/.config/gladius/wallet` on Unix based systems and `C:\Users\USER\.gladius\wallet` on Windows.
+Creates a new Ethereum account encrypted against the provided passphrase. The account will be stored in `~/.config/gladius/wallet` on Unix based systems and `C:\Users\USER\.gladius\wallet` on Windows.
 
 
 
@@ -95,7 +174,7 @@ Creates a new Ethereum wallet encrypted against the provided passphrase. Wallet 
 #### CURL
 
 ```sh
-curl -X POST "http://localhost:3001/api/keystore/wallet/create" \
+curl -X POST "http://localhost:3001/api/keystore/account/create" \
     -H "Content-Type: application/json; charset=utf-8" \
     --data-raw "$body"
 ```
@@ -125,37 +204,26 @@ curl -X POST "http://localhost:3001/api/keystore/wallet/create" \
 }
 ```
 
-### **GET** - /api/keystore/wallets
+### **GET** - /api/keystore/account
 
 #### Description
-Retrieves the list of generated accounts from `/keystre/wallet/create` as an array of wallet JSON objects.
+Retrieves the list of generated accounts from `/keystore/account/create` as a JSON object.
 
 #### CURL
 
 ```sh
-curl -X GET "http://localhost:3001/api/keystore/wallets"
+curl -X GET "http://localhost:3001/api/keystore/account"
 ```
 
-### **GET** - /api/keystore/wallet/0
+### **POST** - /api/keystore/account/open
 
 #### Description
-Retrieves the JSON wallet object at the given index. Use the index of the wallet returned from `/keystore/wallets`.
+Unlocks the Gladius account.
 
 #### CURL
 
 ```sh
-curl -X GET "http://localhost:3001/api/keystore/wallet/0"
-```
-
-### **POST** - /api/keystore/wallet/0/open
-
-#### Description
-Opens a given wallet at the provided index.
-
-#### CURL
-
-```sh
-curl -X POST "http://localhost:3001/api/keystore/wallet/0/open" \
+curl -X POST "http://localhost:3001/api/keystore/account/open" \
     -H "Content-Type: application/json; charset=utf-8" \
     --data-raw "$body"
 ```
@@ -199,7 +267,7 @@ curl -X GET "http://localhost:3001/api/status/tx/{{TX_HASH}}"
 ### **GET** - /api/node/
 
 #### Description
-Retrieve the node that is registered to the given wallet, as of now `/keystore/wallet/0`. An optional URL parameter can be provided to retrieve the node address of a wallet address.
+Retrieve the node that is registered to the given wallet, as of now `/keystore/account`. An optional URL parameter can be provided to retrieve the node address of a wallet address.
 
 #### CURL
 

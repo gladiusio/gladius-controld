@@ -32,13 +32,19 @@ func Start() {
 	apiRouter.HandleFunc("/manager", handlers.APIHandler)
 	apiRouter.NotFoundHandler = http.HandlerFunc(handlers.NotFoundHandler)
 
+	// P2P Network Routes
+	p2pRouter := apiRouter.PathPrefix("/p2p").Subrouter()
+	p2pRouter.HandleFunc("/message/sign", handlers.PeerToPeerStateUpdateHandler).
+		Methods("POST")
+	p2pRouter.HandleFunc("/message/verify", handlers.VerifySignedMessageHandler).
+		Methods("POST")
+
 	// Key Management
 	walletRouter := apiRouter.PathPrefix("/keystore").Subrouter()
-	walletRouter.HandleFunc("/wallet/create", handlers.KeystoreCreationHandler).
+	walletRouter.HandleFunc("/account/create", handlers.KeystoreAccountCreationHandler).
 		Methods("POST")
-	walletRouter.HandleFunc("/wallets", handlers.KeystoreWalletsRetrievalHandler)
-	walletRouter.HandleFunc("/wallet/{index:[0-9]*}", handlers.KeystoreWalletRetrievalHandler)
-	walletRouter.HandleFunc("/wallet/{index:[0-9]*}/open", handlers.KeystoreWalletOpenHandler).
+	walletRouter.HandleFunc("/account", handlers.KeystoreAccountRetrievalHandler)
+	walletRouter.HandleFunc("/account/open", handlers.KeystoreAccountUnlockHandler).
 		Methods("POST")
 	walletRouter.HandleFunc("/pgp/view/public", handlers.KeystorePGPPublicKeyRetrievalHandler)
 	walletRouter.HandleFunc("/pgp/create", handlers.KeystorePGPCreationHandler).
