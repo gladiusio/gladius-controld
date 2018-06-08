@@ -84,8 +84,7 @@ func NodeRetrieveApplication(nodeAddress, poolAddress *common.Address) (*NodeApp
 	return nodeStruct, nil
 }
 
-func NodeRetrieveData() (*NodeData, error) {
-	nodeAddress, _ := NodeOwnedByUser()
+func NodeRetrieveDataForAddress(nodeAddress *common.Address) (*NodeData, error) {
 	node := ConnectNode(*nodeAddress)
 
 	encData, err := node.Data(&bind.CallOpts{From: GetDefaultAccountAddress()})
@@ -103,6 +102,15 @@ func NodeRetrieveData() (*NodeData, error) {
 	var nodeData NodeData
 	decoder.Decode(&nodeData)
 	return &nodeData, nil
+}
+
+func NodeRetrieveData() (*NodeData, error) {
+	nodeAddress, err := NodeOwnedByUser()
+	if err != nil {
+		return nil, err
+	}
+	
+	return NodeRetrieveDataForAddress(nodeAddress)
 }
 
 func NodeRetrievePoolData(nodeAddress, poolAddress *common.Address) (*NodeData, error) {
