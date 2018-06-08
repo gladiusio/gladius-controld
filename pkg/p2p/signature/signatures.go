@@ -5,26 +5,33 @@ import (
 	b64 "encoding/base64"
 	"encoding/json"
 	"errors"
+	"regexp"
 
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/message"
+	"github.com/tdewolff/minify"
+	mjson "github.com/tdewolff/minify/json"
 )
 
 // SignedMessage is a type representing a signed message
 type SignedMessage struct {
-	Message   []byte `json:"message"`
-	Hash      []byte `json:"hash"`
-	Signature []byte `json:"signature"`
-	Address   string `json:"address"`
+	Message   *json.RawMessage `json:"message"`
+	Hash      []byte           `json:"hash"`
+	Signature []byte           `json:"signature"`
+	Address   string           `json:"address"`
 }
 
-// ParseSignedMessage returns a signed message to be passed into the VerifySignedMessgae method
+// ParseSignedMessage returns a signed message to be passed into the VerifySignedMessage method
 func ParseSignedMessage(message, hash, signature, address string) (*SignedMessage, error) {
-	dMessage, err := b64.StdEncoding.DecodeString(message)
+	m := minify.New()
+	m.AddFuncRegexp(regexp.MustCompile("[/+]json$"), mjson.Minify)
+	messageMin, err := m.String("text/json", message)
 	if err != nil {
-		return nil, errors.New("error decoding message")
+		panic(err)
 	}
+
+	h := json.RawMessage(messageMin)
 	dHash, err := b64.StdEncoding.DecodeString(hash)
 	if err != nil {
 		return nil, errors.New("error decoding hash")
@@ -33,7 +40,7 @@ func ParseSignedMessage(message, hash, signature, address string) (*SignedMessag
 	if err != nil {
 		return nil, errors.New("error decoding signature")
 	}
-	return &SignedMessage{Message: dMessage, Hash: dHash, Signature: dSignature, Address: address}, nil
+	return &SignedMessage{Message: &h, Hash: dHash, Signature: dSignature, Address: address}, nil
 }
 
 // CreateSignedMessage creates a signed state from the message where
@@ -47,6 +54,13 @@ func CreateSignedMessage(message *message.Message, passphrase string) (string, e
 	// Create a serailized JSON string
 	messageBytes := message.Serialize()
 
+	m := minify.New()
+	m.AddFuncRegexp(regexp.MustCompile("[/+]json$"), mjson.Minify)
+	messageBytes, err = m.Bytes("text/json", messageBytes)
+	if err != nil {
+		panic(err)
+	}
+
 	hash := crypto.Keccak256(messageBytes)
 	signature, err := ga.Keystore().SignHash(ga.GetAccount(), hash)
 
@@ -54,8 +68,10 @@ func CreateSignedMessage(message *message.Message, passphrase string) (string, e
 		return "", errors.New("Error signing message")
 	}
 
+	h := json.RawMessage(messageBytes)
+
 	// Create the signed message
-	signed := &SignedMessage{Message: messageBytes, Hash: hash, Signature: signature, Address: ga.GetAccountAddress().String()}
+	signed := &SignedMessage{Message: &h, Hash: hash, Signature: signature, Address: ga.GetAccountAddress().String()}
 
 	// Encode the struct as a json
 	bytes, err := json.Marshal(signed)
@@ -72,7 +88,8 @@ func VerifySignedMessage(sm *SignedMessage) (bool, error) {
 	// TODO: Check real address against pool
 	addressInPool := true
 	// Check if hash matches the message
-	hashMatches := bytes.Equal(sm.Hash, crypto.Keccak256(sm.Message))
+	m, _ := sm.Message.MarshalJSON()
+	hashMatches := bytes.Equal(sm.Hash, crypto.Keccak256(m))
 
 	pub, err := crypto.SigToPub(sm.Hash, sm.Signature)
 	if err != nil {

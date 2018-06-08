@@ -1,5 +1,8 @@
 package peer
 
-type Peer struct{
-  
+type Peer struct {
+}
+
+func New() *Peer {
+	return &Peer{}
 }

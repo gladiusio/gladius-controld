@@ -8,13 +8,14 @@ import (
 // Message is a type that stores timestamp and content and can return the json
 // serialized version
 type Message struct {
-	Content   string `json:"content"`
-	Timestamp int64  `json:"timestamp"`
+	Content   *json.RawMessage `json:"content"`
+	Timestamp int64            `json:"timestamp"`
 }
 
 // New creates a new Message type with fields for timestamp and a json message
-func New(jsonMessage string) *Message {
-	return &Message{Content: jsonMessage, Timestamp: time.Now().Unix()}
+func New(jsonMessage []byte) *Message {
+	h := json.RawMessage(jsonMessage)
+	return &Message{Content: &h, Timestamp: time.Now().Unix()}
 }
 
 // Serialize returns a serialized JSON string that includes the current timestamp
