@@ -39,6 +39,6 @@ type SignedField struct {
 
 // ParseNetworkState takes the network state json string in and returns a state
 // type if it is valid.
-func ParseNetworkState(stateString []byte) {
-
+func ParseNetworkState(stateString []byte) (*State, error) {
+	return &State{}, nil
 }
