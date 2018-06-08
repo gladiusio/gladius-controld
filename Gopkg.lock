@@ -14,6 +14,12 @@
   revision = "1432d294a5b055c297457c25434efbf13384cc46"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/buger/jsonparser"
+  packages = ["."]
+  revision = "2cac668e8456b4284edb0715e17e2af02d3ec993"
+
+[[projects]]
   name = "github.com/ethereum/go-ethereum"
   packages = [
     ".",
@@ -207,6 +213,26 @@
   revision = "e6d6b529196422703d54ff5c40e79809ec2020b3"
 
 [[projects]]
+  name = "github.com/tdewolff/minify"
+  packages = [
+    ".",
+    "json"
+  ]
+  revision = "8d72a4127ae33b755e95bffede9b92e396267ce2"
+  version = "v2.3.5"
+
+[[projects]]
+  name = "github.com/tdewolff/parse"
+  packages = [
+    ".",
+    "buffer",
+    "json",
+    "strconv"
+  ]
+  revision = "639f6272aec6b52094db77b9ec488214b0b4b1a1"
+  version = "v2.3.2"
+
+[[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = [
@@ -291,6 +317,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "2f2355093e6ddaedcfa8a19c365d65a2e09c608d17cd8e9e988610db1124bc49"
+  inputs-digest = "4106961918c7f166d2348e3cc0f97774a2e5afba3ba2ce17ed9c8e8c91fea0cf"
   solver-name = "gps-cdcl"
   solver-version = 1

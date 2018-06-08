@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/gladiusio/gladius-controld/pkg/p2p/peer"
 	"github.com/gladiusio/gladius-controld/pkg/routing/handlers"
 	ghandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -32,11 +33,22 @@ func Start() {
 	apiRouter.HandleFunc("/manager", handlers.APIHandler)
 	apiRouter.NotFoundHandler = http.HandlerFunc(handlers.NotFoundHandler)
 
-	// P2P Network Routes
+	// P2P setup
+	peer := peer.New()
 	p2pRouter := apiRouter.PathPrefix("/p2p").Subrouter()
-	p2pRouter.HandleFunc("/message/sign", handlers.PeerToPeerStateUpdateHandler).
+
+	// P2P Message Routes
+	p2pRouter.HandleFunc("/message/sign", handlers.CreateSignedMessageHandler).
 		Methods("POST")
 	p2pRouter.HandleFunc("/message/verify", handlers.VerifySignedMessageHandler).
+		Methods("POST")
+
+	// P2P State Routes
+	p2pRouter.HandleFunc("/state/push_message", handlers.PushStateMessageHandler(peer)).
+		Methods("POST")
+	p2pRouter.HandleFunc("/state/", handlers.GetFullStateHandler(peer)).
+		Methods("GET")
+	p2pRouter.HandleFunc("/state/", handlers.PushStateMessageHandler(peer)).
 		Methods("POST")
 
 	// Key Management
