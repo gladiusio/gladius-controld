@@ -48,7 +48,7 @@ func Start() {
 		Methods("POST")
 	p2pRouter.HandleFunc("/state/", handlers.GetFullStateHandler(peer)).
 		Methods("GET")
-	p2pRouter.HandleFunc("/state/", handlers.PushStateMessageHandler(peer)).
+	p2pRouter.HandleFunc("/state/content_needed", handlers.GetContentHandler(peer)).
 		Methods("POST")
 
 	// Key Management

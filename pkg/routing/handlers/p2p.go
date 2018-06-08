@@ -123,6 +123,8 @@ func GetFullStateHandler(*peer.Peer) func(w http.ResponseWriter, r *http.Request
 // GetContentHandler will compare the content list provided with the
 // current state and return a list of links to download content from a peer that
 // has the same set
-func GetContentHandler(w http.ResponseWriter, r *http.Request) {
-
+func GetContentHandler(*peer.Peer) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// TODO: Return content difference
+	}
 }
