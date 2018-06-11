@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -12,43 +13,50 @@ import (
 	"github.com/gladiusio/gladius-controld/pkg/p2p/signature"
 )
 
-// Helper to get fields from the json body and verify the signature
-func verifyBody(w http.ResponseWriter, r *http.Request) bool {
+// Helper to create signed message from body
+func getSignedMessageFromBody(w http.ResponseWriter, r *http.Request) *signature.SignedMessage {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		ErrorHandler(w, r, "Error decoding body", err, http.StatusBadRequest)
-		return false
+		return nil
 	}
 
 	messageBytes, _, _, err := jsonparser.Get(body, "message")
 	if err != nil {
 		ErrorHandler(w, r, "Could not find `message` in body", err, http.StatusBadRequest)
-		return false
+		return nil
 	}
 
 	hash, err := jsonparser.GetString(body, "hash")
 	if err != nil {
 		ErrorHandler(w, r, "Could not find `hash` in body", err, http.StatusBadRequest)
-		return false
+		return nil
 	}
 
 	signatureString, err := jsonparser.GetString(body, "signature")
 	if err != nil {
 		ErrorHandler(w, r, "Could not find `signature` in body", err, http.StatusBadRequest)
-		return false
+		return nil
 	}
 
 	address, err := jsonparser.GetString(body, "address")
 	if err != nil {
 		ErrorHandler(w, r, "Could not find `address` in body", err, http.StatusBadRequest)
-		return false
+		return nil
 	}
 
 	parsed, err := signature.ParseSignedMessage(string(messageBytes), hash, signatureString, address)
 	if err != nil {
 		ErrorHandler(w, r, "Couldn't parse body", err, http.StatusBadRequest)
-		return false
+		return nil
 	}
+
+	return parsed
+}
+
+// Helper to get fields from the json body and verify the signature
+func verifyBody(w http.ResponseWriter, r *http.Request) bool {
+	parsed := getSignedMessageFromBody(w, r)
 	verified, err := signature.VerifySignedMessage(parsed)
 	if err != nil {
 		ErrorHandler(w, r, "Error veryfing signature", err, http.StatusBadRequest)
@@ -56,6 +64,21 @@ func verifyBody(w http.ResponseWriter, r *http.Request) bool {
 	}
 
 	return verified
+}
+
+func getContentListFromBody(w http.ResponseWriter, r *http.Request) []string {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		ErrorHandler(w, r, "Error decoding body", err, http.StatusBadRequest)
+		return nil
+	}
+	s := make([]string, 5)
+	// Get all content file names passed in
+	jsonparser.ArrayEach(body, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		s = append(s, string(value))
+	}, "content")
+
+	return s
 }
 
 // VerifySignedMessageHandler verifies the incoming message with takes the form
@@ -101,12 +124,12 @@ func CreateSignedMessageHandler(w http.ResponseWriter, r *http.Request) {
 // PushStateMessageHandler updates state with signed update and pushes state to
 // a set of random peers. They then propigate it to their peers until the
 // network has a consistent state
-func PushStateMessageHandler(*peer.Peer) func(w http.ResponseWriter, r *http.Request) {
+func PushStateMessageHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		verified := verifyBody(w, r)
-
-		if verified {
-			// TODO: Push message to rest of network and update local state
+		if verifyBody(w, r) {
+			message := getSignedMessageFromBody(w, r)
+			p.UpdateAndPushState(message)
+			ResponseHandler(w, r, "null", "updated")
 		} else {
 			ErrorHandler(w, r, "Cannot verifiy signature", nil, http.StatusBadRequest)
 		}
@@ -114,17 +137,28 @@ func PushStateMessageHandler(*peer.Peer) func(w http.ResponseWriter, r *http.Req
 }
 
 // GetFullStateHandler gets the current state the node has access to.
-func GetFullStateHandler(*peer.Peer) func(w http.ResponseWriter, r *http.Request) {
+func GetFullStateHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// TODO: Return full state
+		json, err := p.GetState().GetJSON()
+		if err != nil {
+			ErrorHandler(w, r, "Error creating JSON state", nil, http.StatusInternalServerError)
+		}
+		ResponseHandler(w, r, "null", string(json))
 	}
 }
 
 // GetContentHandler will compare the content list provided with the
 // current state and return a list of links to download content from a peer that
-// has the same set
-func GetContentHandler(*peer.Peer) func(w http.ResponseWriter, r *http.Request) {
+// has the same set as the network state. It also includes a hash of that file
+// so the node can verify it before serving.
+func GetContentHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// TODO: Return content difference
+		list := getContentListFromBody(w, r)
+		needed := p.CompareContent(list)
+		neededJSON, err := json.Marshal(needed)
+		if err != nil {
+			ErrorHandler(w, r, "Error creating difference list", nil, http.StatusInternalServerError)
+		}
+		ResponseHandler(w, r, "null", string(neededJSON))
 	}
 }

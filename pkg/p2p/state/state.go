@@ -2,7 +2,10 @@ package state
 
 import (
 	"encoding/json"
+	"errors"
+	"log"
 
+	"github.com/buger/jsonparser"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/signature"
 )
 
@@ -15,6 +18,30 @@ type State struct {
 // GetJSON gets the JSON representation of the state including signatures
 func (s State) GetJSON() ([]byte, error) {
 	return json.Marshal(s)
+}
+
+// UpdateState updates the local state with the signed message information
+func (s *State) UpdateState(sm *signature.SignedMessage) {
+	jsonBytes, err := sm.Message.MarshalJSON()
+	if err != nil {
+		log.Fatal(errors.New("Malformed state JSON"))
+	}
+
+	messageBytes, _, _, err := jsonparser.Get(jsonBytes, "content")
+	if err != nil {
+		log.Println("Couldn't process state update")
+	}
+
+	var handler func([]byte, []byte, jsonparser.ValueType, int) error
+	handler = func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
+		switch string(key) {
+		case "node":
+		}
+		return nil
+	}
+	jsonparser.ObjectEach(messageBytes, handler)
+
+	jsonparser.Get(jsonBytes)
 }
 
 // PoolData is a type that stores information about the pool
