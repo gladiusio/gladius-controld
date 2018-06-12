@@ -48,6 +48,8 @@ func Start() {
 		Methods("POST")
 	p2pRouter.HandleFunc("/state/", handlers.GetFullStateHandler(peer)).
 		Methods("GET")
+	p2pRouter.HandleFunc("/state/signatures", handlers.GetSignatureListHandler(peer)).
+		Methods("GET")
 	p2pRouter.HandleFunc("/state/content_diff", handlers.GetContentHandler(peer)).
 		Methods("POST")
 

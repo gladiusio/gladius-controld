@@ -7,6 +7,7 @@ import (
 	"errors"
 	"regexp"
 
+	"github.com/buger/jsonparser"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/message"
@@ -43,6 +44,13 @@ func ParseSignedMessage(message, hash, signature, address string) (*SignedMessag
 	}
 
 	return &SignedMessage{Message: &h, Hash: dHash, Signature: dSignature, Address: address, verified: false}, nil
+}
+
+// GetTimestamp gets the verified timestamp from the message
+func (sm SignedMessage) GetTimestamp() int64 {
+	jsonBytes, _ := sm.Message.MarshalJSON()
+	timestamp, _ := jsonparser.GetInt(jsonBytes, "timestamp")
+	return timestamp
 }
 
 // IsVerified checks the internal status of the message and returns true if the

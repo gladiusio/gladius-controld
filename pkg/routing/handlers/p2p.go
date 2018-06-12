@@ -66,6 +66,7 @@ func verifyBody(w http.ResponseWriter, r *http.Request) (bool, *signature.Signed
 	return verified, parsed
 }
 
+// Gets a content list from an incoming comparison request
 func getContentListFromBody(w http.ResponseWriter, r *http.Request) []string {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -130,7 +131,7 @@ func PushStateMessageHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.R
 		v, sm := verifyBody(w, r)
 		if v {
 			p.UpdateAndPushState(sm)
-			text, _ := json.Marshal("Updated State")
+			text, _ := json.Marshal("Attempted to push message")
 			ResponseHandler(w, r, "null", string(text))
 		} else {
 			if sm != nil {
@@ -148,6 +149,15 @@ func GetFullStateHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Reque
 			ErrorHandler(w, r, "Error creating JSON state", nil, http.StatusInternalServerError)
 		}
 		ResponseHandler(w, r, "null", string(json))
+	}
+}
+
+// GetSignatureListHandler gets the list of signatures used to create the current
+// state
+func GetSignatureListHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		sigs, _ := json.Marshal(p.GetState().GetSignatureList())
+		ResponseHandler(w, r, "null", string(sigs))
 	}
 }
 
