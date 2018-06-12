@@ -130,7 +130,8 @@ func PushStateMessageHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.R
 		v, sm := verifyBody(w, r)
 		if v {
 			p.UpdateAndPushState(sm)
-			ResponseHandler(w, r, "null", "updated")
+			text, _ := json.Marshal("Updated State")
+			ResponseHandler(w, r, "null", string(text))
 		} else {
 			if sm != nil {
 				ErrorHandler(w, r, "Cannot verifiy signature", errors.New("cannot verifiy signature"), http.StatusBadRequest)
