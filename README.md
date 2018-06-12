@@ -12,6 +12,13 @@ Run `make dependencies`
 Then run `xgo --targets="windows/*,darwin/*,linux/*" --dest="./build/" ./cmd/gladius-controld`
 from the project root. You can change the target to be whatever system you want.
 
+Optionally, you can install and run linting tools:
+```sh
+go get gopkg.in/alecthomas/gometalinter.v2
+gometalinter.v2 --install
+make lint
+```
+
 ## API Documentation
 
 This document provides documentation for the Gladius Control Daemon to build interfaces on top of the Gladius Blockchain Network with familiar REST API calls. If something needs more detail or explanation, please file an issue.

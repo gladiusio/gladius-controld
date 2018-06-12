@@ -61,5 +61,8 @@ dependencies:
 test: $(NET_SRC)
 	$(GOTEST) $(NET_SRC)
 
+lint:
+	gometalinter.v2 ./...
+
 controld: test
 	$(GOBUILD) -o $(CTR_DEST) $(CTL_SRC)
