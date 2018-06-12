@@ -3,6 +3,7 @@ package state
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 
 	"github.com/buger/jsonparser"
@@ -22,26 +23,35 @@ func (s State) GetJSON() ([]byte, error) {
 
 // UpdateState updates the local state with the signed message information
 func (s *State) UpdateState(sm *signature.SignedMessage) {
-	jsonBytes, err := sm.Message.MarshalJSON()
-	if err != nil {
-		log.Fatal(errors.New("Malformed state JSON"))
-	}
-
-	messageBytes, _, _, err := jsonparser.Get(jsonBytes, "content")
-	if err != nil {
-		log.Println("Couldn't process state update")
-	}
-
-	var handler func([]byte, []byte, jsonparser.ValueType, int) error
-	handler = func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
-		switch string(key) {
-		case "node":
+	if sm.IsVerified() {
+		jsonBytes, err := sm.Message.MarshalJSON()
+		if err != nil {
+			log.Println(errors.New("Malformed state JSON"))
+			return
 		}
-		return nil
-	}
-	jsonparser.ObjectEach(messageBytes, handler)
 
-	jsonparser.Get(jsonBytes)
+		messageBytes, _, _, err := jsonparser.Get(jsonBytes, "content")
+		if err != nil {
+			log.Println("Couldn't process state update")
+			return
+		}
+
+		var handler func([]byte, []byte, jsonparser.ValueType, int) error
+		handler = func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
+			switch string(key) {
+			case "node":
+				nodeHandler(value)
+			}
+			return nil
+		}
+		jsonparser.ObjectEach(messageBytes, handler)
+
+		jsonparser.Get(jsonBytes)
+	}
+}
+
+func nodeHandler(nodeUpdate []byte) {
+	fmt.Println(string(nodeUpdate))
 }
 
 // PoolData is a type that stores information about the pool

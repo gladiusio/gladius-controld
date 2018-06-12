@@ -20,6 +20,7 @@ type SignedMessage struct {
 	Hash      []byte           `json:"hash"`
 	Signature []byte           `json:"signature"`
 	Address   string           `json:"address"`
+	verified  bool
 }
 
 // ParseSignedMessage returns a signed message to be passed into the VerifySignedMessage method
@@ -40,11 +41,41 @@ func ParseSignedMessage(message, hash, signature, address string) (*SignedMessag
 	if err != nil {
 		return nil, errors.New("error decoding signature")
 	}
-	return &SignedMessage{Message: &h, Hash: dHash, Signature: dSignature, Address: address}, nil
+
+	return &SignedMessage{Message: &h, Hash: dHash, Signature: dSignature, Address: address, verified: false}, nil
 }
 
-// CreateSignedMessage creates a signed state from the message where
-func CreateSignedMessage(message *message.Message, passphrase string) (string, error) {
+// IsVerified checks the internal status of the message and returns true if the
+// message is verified
+func (sm SignedMessage) IsVerified() bool {
+	// Check if address is part of pool
+	// TODO: Check real address against pool
+	addressInPool := true
+	// Check if hash matches the message
+	m, _ := sm.Message.MarshalJSON()
+	hashMatches := bytes.Equal(sm.Hash, crypto.Keccak256(m))
+
+	pub, err := crypto.SigToPub(sm.Hash, sm.Signature)
+	if err != nil {
+		return false
+	}
+
+	// Check if the signature is valid
+	signatureValid := crypto.VerifySignature(crypto.CompressPubkey(pub), sm.Hash, sm.Signature[:64])
+
+	// Check if the address matches
+	addressMatches := crypto.PubkeyToAddress(*pub).String() == sm.Address
+
+	if addressInPool && addressMatches && hashMatches && signatureValid {
+		return true
+	}
+
+	return false
+
+}
+
+// CreateSignedMessageString creates a signed state from the message where
+func CreateSignedMessageString(message *message.Message, passphrase string) (string, error) {
 	ga := blockchain.NewGladiusAccountManager()
 	err := ga.UnlockAccount(passphrase)
 	if err != nil {
@@ -80,31 +111,4 @@ func CreateSignedMessage(message *message.Message, passphrase string) (string, e
 	}
 
 	return string(bytes), err
-}
-
-// VerifySignedMessage Verifies that a signed message is valid
-func VerifySignedMessage(sm *SignedMessage) (bool, error) {
-	// Check if address is part of pool
-	// TODO: Check real address against pool
-	addressInPool := true
-	// Check if hash matches the message
-	m, _ := sm.Message.MarshalJSON()
-	hashMatches := bytes.Equal(sm.Hash, crypto.Keccak256(m))
-
-	pub, err := crypto.SigToPub(sm.Hash, sm.Signature)
-	if err != nil {
-		return false, errors.New("Error signing message")
-	}
-
-	// Check if the signature is valid
-	signatureValid := crypto.VerifySignature(crypto.CompressPubkey(pub), sm.Hash, sm.Signature[:64])
-
-	// Check if the address matches
-	addressMatches := crypto.PubkeyToAddress(*pub).String() == sm.Address
-
-	if addressInPool && addressMatches && hashMatches && signatureValid {
-		return true, nil
-	}
-
-	return false, nil
 }

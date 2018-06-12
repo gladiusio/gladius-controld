@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -55,15 +56,14 @@ func getSignedMessageFromBody(w http.ResponseWriter, r *http.Request) *signature
 }
 
 // Helper to get fields from the json body and verify the signature
-func verifyBody(w http.ResponseWriter, r *http.Request) bool {
+func verifyBody(w http.ResponseWriter, r *http.Request) (bool, *signature.SignedMessage) {
 	parsed := getSignedMessageFromBody(w, r)
-	verified, err := signature.VerifySignedMessage(parsed)
-	if err != nil {
-		ErrorHandler(w, r, "Error veryfing signature", err, http.StatusBadRequest)
-		return false
+	if parsed == nil {
+		return false, nil
 	}
+	verified := parsed.IsVerified()
 
-	return verified
+	return verified, parsed
 }
 
 func getContentListFromBody(w http.ResponseWriter, r *http.Request) []string {
@@ -85,7 +85,8 @@ func getContentListFromBody(w http.ResponseWriter, r *http.Request) []string {
 // of:
 // {"message": "b64string", "hash": "b64string", "signature": "b64string", "address": ""}
 func VerifySignedMessageHandler(w http.ResponseWriter, r *http.Request) {
-	ResponseHandler(w, r, "null", strconv.FormatBool(verifyBody(w, r)))
+	v, _ := verifyBody(w, r)
+	ResponseHandler(w, r, "null", strconv.FormatBool(v))
 }
 
 /*******************************************************************************
@@ -112,7 +113,7 @@ func CreateSignedMessageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	signed, err := signature.CreateSignedMessage(message.New(messageBytes), string(passphrase))
+	signed, err := signature.CreateSignedMessageString(message.New(messageBytes), string(passphrase))
 	if err != nil {
 		ErrorHandler(w, r, "Could not create sign message. Passphrase likely incorrect.", err, http.StatusBadRequest)
 		return
@@ -126,12 +127,14 @@ func CreateSignedMessageHandler(w http.ResponseWriter, r *http.Request) {
 // network has a consistent state
 func PushStateMessageHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if verifyBody(w, r) {
-			message := getSignedMessageFromBody(w, r)
-			p.UpdateAndPushState(message)
+		v, sm := verifyBody(w, r)
+		if v {
+			p.UpdateAndPushState(sm)
 			ResponseHandler(w, r, "null", "updated")
 		} else {
-			ErrorHandler(w, r, "Cannot verifiy signature", nil, http.StatusBadRequest)
+			if sm != nil {
+				ErrorHandler(w, r, "Cannot verifiy signature", errors.New("cannot verifiy signature"), http.StatusBadRequest)
+			}
 		}
 	}
 }
