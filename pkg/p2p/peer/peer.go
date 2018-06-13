@@ -30,7 +30,15 @@ func (p *Peer) Stop() {
 
 // UpdateAndPushState updates the local state and pushes it to several other peers
 func (p *Peer) UpdateAndPushState(sm *signature.SignedMessage) {
-	p.peerState.UpdateState(sm)
+	maxMessageAge := int64(10)
+	if sm.GetAgeInSeconds() < maxMessageAge {
+		p.peerState.UpdateState(sm)
+		// Push Message to peers every
+	}
+}
+
+func (p Peer) pushStateMessage(sm *signature.SignedMessage) {
+
 }
 
 // GetState returns the current local state

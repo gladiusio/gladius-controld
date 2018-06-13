@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"regexp"
+	"time"
 
 	"github.com/buger/jsonparser"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -51,6 +52,15 @@ func (sm SignedMessage) GetTimestamp() int64 {
 	jsonBytes, _ := sm.Message.MarshalJSON()
 	timestamp, _ := jsonparser.GetInt(jsonBytes, "timestamp")
 	return timestamp
+}
+
+func (sm SignedMessage) GetAgeInSeconds() int64 {
+	jsonBytes, _ := sm.Message.MarshalJSON()
+	timestamp, _ := jsonparser.GetInt(jsonBytes, "timestamp")
+
+	now := time.Now().Unix()
+
+	return now - timestamp
 }
 
 // IsVerified checks the internal status of the message and returns true if the
