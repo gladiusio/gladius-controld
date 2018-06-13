@@ -3,6 +3,7 @@ package blockchain
 import (
 	"log"
 
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain/generated"
@@ -22,6 +23,19 @@ func ConnectMarket() *generated.Market {
 	}
 
 	return market
+}
+
+func MarketPoolsOwnedByUser() ([]common.Address, error) {
+	market := ConnectMarket()
+
+	address := GetDefaultAccountAddress()
+
+	pools, err := market.GetOwnedPools(&bind.CallOpts{From: address}, address)
+	if err != nil {
+		return nil, err
+	}
+
+	return pools, nil
 }
 
 // MarketPools - List all available market pools
