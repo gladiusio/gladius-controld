@@ -26,6 +26,7 @@ func ConnectNodeFactory() (*generated.NodeFactory, error) {
 func NodeOwnedByUser() (*common.Address, error) {
 	ga := NewGladiusAccountManager()
 	address := ga.GetAccountAddress()
+
 	return NodeForAccount(address)
 }
 
