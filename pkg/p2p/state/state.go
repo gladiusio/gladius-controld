@@ -41,6 +41,11 @@ func (s *sigList) GetList() (values []*signature.SignedMessage) {
 	return values
 }
 
+// GetNodeFields gets the same field from all nodes
+func (s *State) GetNodeFields(key string) []interface{} {
+
+}
+
 // GetSignatureList returns a list of all of the signed messages used to make
 // the current state
 func (s *State) GetSignatureList() []*signature.SignedMessage {

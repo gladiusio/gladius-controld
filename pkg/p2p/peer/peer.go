@@ -38,7 +38,7 @@ func (p *Peer) UpdateAndPushState(sm *signature.SignedMessage) {
 }
 
 func (p Peer) pushStateMessage(sm *signature.SignedMessage) {
-
+	ipList := p.peerState.GetNodeFields("IPAddress")
 }
 
 // GetState returns the current local state
