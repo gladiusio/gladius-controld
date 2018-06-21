@@ -13,7 +13,7 @@ import (
 )
 
 func keystoreForPath(path string) (*keystore.KeyStore, error) {
-	var pathTemp string = viper.GetString("DirWallet")
+	var pathTemp = viper.GetString("DirWallet")
 	ks := keystore.NewKeyStore(
 		pathTemp,
 		keystore.LightScryptN,
@@ -69,7 +69,7 @@ func CloseWallet(accountIndex int) {
 }
 
 func GetPGPPublicKey() (string, error) {
-	var pathTemp string = viper.GetString("DirKeys")
+	var pathTemp = viper.GetString("DirKeys")
 	keyringFileBuffer, err := ioutil.ReadFile(pathTemp + "/public.asc")
 	if err != nil {
 		return "", err

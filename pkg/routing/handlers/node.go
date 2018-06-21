@@ -72,7 +72,7 @@ func NodeApplicationStatusHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var response string = "{ \"code\": " + status.String() + ", \"status\": "
+	var response = "{ \"code\": " + status.String() + ", \"status\": "
 
 	switch status.String() {
 	// Unavailable
