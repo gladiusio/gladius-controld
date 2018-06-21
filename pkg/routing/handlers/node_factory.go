@@ -17,8 +17,9 @@ func NodeFactoryHandler(w http.ResponseWriter, r *http.Request) {
 // NodeFactoryHandler - Main Node API route handler
 func NodeFactoryNodeAddressHandler(w http.ResponseWriter, r *http.Request) {
 	accountAddress := r.URL.Query().Get("account")
+	ga := blockchain.NewGladiusAccountManager()
 	if accountAddress == "" {
-		accountAddress = blockchain.GetDefaultAccountAddress().String()
+		accountAddress = ga.GetAccountAddress().String()
 	}
 	nodeAddress, err := blockchain.NodeForAccount(common.HexToAddress(accountAddress))
 
@@ -31,9 +32,15 @@ func NodeFactoryNodeAddressHandler(w http.ResponseWriter, r *http.Request) {
 		ErrorHandler(w, r, "Account does not have an associated node", errors.New("account has not created a node"), http.StatusNotFound)
 		return
 	}
+	
+	nodeData, err := blockchain.NodeRetrieveDataForAddress(nodeAddress)
+	var data = "null"
+	if err == nil {
+		data = nodeData.String()
+	}
 
-	jsonResponse := fmt.Sprintf("0x%x", nodeAddress)
-	ResponseHandler(w, r, "null", "\""+string(jsonResponse)+"\"")
+	jsonResponse := fmt.Sprintf("{\"address\": \"0x%x\",\"data\": %s}", nodeAddress, data)
+	ResponseHandler(w, r, "null", string(jsonResponse))
 }
 
 func NodeFactoryCreateNodeHandler(w http.ResponseWriter, r *http.Request) {

@@ -16,21 +16,40 @@ func MarketHandler(w http.ResponseWriter, r *http.Request) {
 
 // MarketPoolsHandler - Returns all Pools
 func MarketPoolsHandler(w http.ResponseWriter, r *http.Request) {
-	pools, err := blockchain.MarketPools()
+	poolsWithData, err := blockchain.MarketPoolsWithData()
 	if err != nil {
 		ErrorHandler(w, r, "Could not retrieve pools", err, http.StatusNotFound)
 		return
 	}
 
-	length := int(len(pools))
-	response := make([]string, length)
+	ResponseHandler(w, r, "null", poolsWithData)
+}
 
-	for i, pool := range pools {
-		response[i] = pool.String()
+type AddressArray []common.Address
+
+func (addressArray AddressArray) String() string {
+	response := "["
+
+	for _, address := range addressArray {
+		response += "\"" + address.String() + "\"" + ","
 	}
 
-	jsonResponse, _ := json.Marshal(response)
-	ResponseHandler(w, r, "null", string(jsonResponse))
+	response = strings.TrimRight(response, ",")
+	response += "]"
+
+	return response
+}
+
+func MarketPoolsOwnedHandler(w http.ResponseWriter, r *http.Request) {
+	pools, err := blockchain.MarketPoolsOwnedByUser()
+	if err != nil {
+		ErrorHandler(w, r, "Could not retrieve pools", err, http.StatusNotFound)
+		return
+	}
+
+	var poolsArray AddressArray = pools
+
+	ResponseHandler(w, r, "null", poolsArray.String())
 }
 
 type AddressArray []common.Address
@@ -61,7 +80,7 @@ func MarketPoolsOwnedHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 type poolData struct {
-	publicKey string `json:"publicKey"`
+	PublicKey string `json:"publicKey"`
 }
 
 // MarketPoolsCreateHandler - Create a new Pool
@@ -71,7 +90,7 @@ func MarketPoolsCreateHandler(w http.ResponseWriter, r *http.Request) {
 	var data poolData
 	err := decoder.Decode(&data)
 
-	transaction, err := blockchain.MarketCreatePool(auth, data.publicKey)
+	transaction, err := blockchain.MarketCreatePool(auth, data.PublicKey)
 	if err != nil {
 		ErrorHandler(w, r, "Could not build pool creation transaction", err, http.StatusNotFound)
 		return

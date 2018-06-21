@@ -26,7 +26,9 @@ func ConnectPool(poolAddress common.Address) *generated.Pool {
 
 func PoolRetrievePublicKey(poolAddress string) (string, error) {
 	pool := ConnectPool(common.HexToAddress(poolAddress))
-	publicKey, err := pool.PublicKey(&bind.CallOpts{From: GetDefaultAccountAddress()})
+	ga := NewGladiusAccountManager()
+
+	publicKey, err := pool.PublicKey(&bind.CallOpts{From: ga.GetAccountAddress()})
 	if err != nil {
 		return "null", nil
 	}
@@ -53,7 +55,9 @@ func (d *PoolPublicData) String() string {
 
 func PoolRetrievePublicData(poolAddress string) (*PoolPublicData, error) {
 	pool := ConnectPool(common.HexToAddress(poolAddress))
-	publicDataResponse, err := pool.PublicData(&bind.CallOpts{From: GetDefaultAccountAddress()})
+	ga := NewGladiusAccountManager()
+
+	publicDataResponse, err := pool.PublicData(&bind.CallOpts{From: ga.GetAccountAddress()})
 	if err != nil {
 		return nil, err
 	}
@@ -67,8 +71,9 @@ func PoolRetrievePublicData(poolAddress string) (*PoolPublicData, error) {
 
 func PoolSetPublicData(passphrase, poolAddress, data string) (*types.Transaction, error) {
 	pool := ConnectPool(common.HexToAddress(poolAddress))
+	ga := NewGladiusAccountManager()
 
-	auth, err := GetDefaultAuth(passphrase)
+	auth, err := ga.GetAuth(passphrase)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +89,9 @@ func PoolSetPublicData(passphrase, poolAddress, data string) (*types.Transaction
 
 func PoolNodes(poolAddress string) (*[]common.Address, error) {
 	pool := ConnectPool(common.HexToAddress(poolAddress))
-	nodeAddressList, err := pool.GetNodeList(&bind.CallOpts{From: GetDefaultAccountAddress()})
+	ga := NewGladiusAccountManager()
+
+	nodeAddressList, err := pool.GetNodeList(&bind.CallOpts{From: ga.GetAccountAddress()})
 	if err != nil {
 		return nil, err
 	}
@@ -117,8 +124,9 @@ func PoolNodesWithData(poolAddress common.Address, nodeAddresses *[]common.Addre
 func PoolUpdateNodeStatus(passphrase, poolAddress, nodeAddress string, status int) (*types.Transaction, error) {
 	pool := ConnectPool(common.HexToAddress(poolAddress))
 	var err error
+	ga := NewGladiusAccountManager()
 
-	auth, err := GetDefaultAuth(passphrase)
+	auth, err := ga.GetAuth(passphrase)
 	if err != nil {
 		return nil, err
 	}

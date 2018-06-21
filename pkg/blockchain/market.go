@@ -1,7 +1,9 @@
 package blockchain
 
 import (
+	"encoding/json"
 	"log"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -28,7 +30,8 @@ func ConnectMarket() *generated.Market {
 func MarketPoolsOwnedByUser() ([]common.Address, error) {
 	market := ConnectMarket()
 
-	address := GetDefaultAccountAddress()
+	ga := NewGladiusAccountManager()
+	address := ga.GetAccountAddress()
 
 	pools, err := market.GetOwnedPools(&bind.CallOpts{From: address}, address)
 	if err != nil {
@@ -50,10 +53,49 @@ func MarketPools() ([]common.Address, error) {
 	return pools, nil
 }
 
+type PoolResponse struct {
+	Address string         `json:"address"`
+	Data    PoolPublicData `json:"data"`
+}
+
+func (d *PoolResponse) String() string {
+	json, err := json.Marshal(d)
+	if err != nil {
+		return "{}"
+	}
+
+	return string(json)
+}
+
+func MarketPoolsWithData() (string, error) {
+	poolAddresses, err := MarketPools()
+	if err != nil {
+		return "[]", err
+	}
+
+	response := "["
+
+	for _, poolAddress := range poolAddresses {
+		poolData, err := PoolRetrievePublicData(poolAddress.String())
+		poolResponse := PoolResponse{poolAddress.String(), *poolData}
+		if err != nil {
+			return "[]", err
+		}
+
+		response += poolResponse.String() + ","
+	}
+
+	response = strings.TrimRight(response, ",")
+	response += "]"
+
+	return response, nil
+}
+
 //MarketCreatePool - Create new pool
 func MarketCreatePool(passphrase, publicKey string) (*types.Transaction, error) {
 	market := ConnectMarket()
-	auth, err := GetDefaultAuth(passphrase)
+	ga := NewGladiusAccountManager()
+	auth, err := ga.GetAuth(passphrase)
 	if err != nil {
 		return nil, err
 	}
