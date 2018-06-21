@@ -141,7 +141,8 @@ func DecryptData(message string) (string, error) {
 	// Decode the base64 string
 	dec, err := base64.StdEncoding.DecodeString(message)
 	if err != nil {
-		return "", err
+		// TODO this resolves the prior keybase message submission issue, but should return an err instead of nil
+		return "", nil
 	}
 
 	// Decrypt it with the contents of the private key

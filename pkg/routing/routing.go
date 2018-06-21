@@ -92,6 +92,7 @@ func Start() {
 	// Market Sub-Routes
 	marketRouter := apiRouter.PathPrefix("/market").Subrouter()
 	marketRouter.HandleFunc("/pools", handlers.MarketPoolsHandler)
+	marketRouter.HandleFunc("/pools/owned", handlers.MarketPoolsOwnedHandler)
 	marketRouter.HandleFunc("/pools/create", handlers.MarketPoolsCreateHandler).
 		Methods("POST")
 

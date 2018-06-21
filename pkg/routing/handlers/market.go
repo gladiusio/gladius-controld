@@ -3,7 +3,9 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 )
 
@@ -29,6 +31,33 @@ func MarketPoolsHandler(w http.ResponseWriter, r *http.Request) {
 
 	jsonResponse, _ := json.Marshal(response)
 	ResponseHandler(w, r, "null", string(jsonResponse))
+}
+
+type AddressArray []common.Address
+
+func (addressArray AddressArray) String() string {
+	response := "["
+
+	for _, address := range addressArray {
+		response += "\"" + address.String() + "\"" + ","
+	}
+
+	response = strings.TrimRight(response, ",")
+	response += "]"
+
+	return response
+}
+
+func MarketPoolsOwnedHandler(w http.ResponseWriter, r *http.Request) {
+	pools, err := blockchain.MarketPoolsOwnedByUser()
+	if err != nil {
+		ErrorHandler(w, r, "Could not retrieve pools", err, http.StatusNotFound)
+		return
+	}
+
+	var poolsArray AddressArray = pools
+
+	ResponseHandler(w, r, "null", poolsArray.String())
 }
 
 type poolData struct {
