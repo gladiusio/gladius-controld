@@ -3,16 +3,9 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
-
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
+	"github.com/gladiusio/gladius-controld/pkg/routing/response"
 )
-
-// MarketHandler - Main Market API route handler
-func MarketHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Main Market API\n"))
-}
 
 // MarketPoolsHandler - Returns all Pools
 func MarketPoolsHandler(w http.ResponseWriter, r *http.Request) {
@@ -25,21 +18,6 @@ func MarketPoolsHandler(w http.ResponseWriter, r *http.Request) {
 	ResponseHandler(w, r, "null", poolsWithData)
 }
 
-type AddressArray []common.Address
-
-func (addressArray AddressArray) String() string {
-	response := "["
-
-	for _, address := range addressArray {
-		response += "\"" + address.String() + "\"" + ","
-	}
-
-	response = strings.TrimRight(response, ",")
-	response += "]"
-
-	return response
-}
-
 func MarketPoolsOwnedHandler(w http.ResponseWriter, r *http.Request) {
 	pools, err := blockchain.MarketPoolsOwnedByUser()
 	if err != nil {
@@ -47,36 +25,14 @@ func MarketPoolsOwnedHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var poolsArray AddressArray = pools
-
-	ResponseHandler(w, r, "null", poolsArray.String())
-}
-
-type AddressArray []common.Address
-
-func (addressArray AddressArray) String() string {
-	response := "["
-
-	for _, address := range addressArray {
-		response += "\"" + address.String() + "\"" + ","
-	}
-
-	response = strings.TrimRight(response, ",")
-	response += "]"
-
-	return response
-}
-
-func MarketPoolsOwnedHandler(w http.ResponseWriter, r *http.Request) {
-	pools, err := blockchain.MarketPoolsOwnedByUser()
+	var poolsArray response.AddressHashes = pools
+	jsonPayload, err := json.Marshal(poolsArray)
 	if err != nil {
-		ErrorHandler(w, r, "Could not retrieve pools", err, http.StatusNotFound)
+		ErrorHandler(w, r, "Could not parse pools json", err, http.StatusNotFound)
 		return
 	}
 
-	var poolsArray AddressArray = pools
-
-	ResponseHandler(w, r, "null", poolsArray.String())
+	ResponseHandler(w, r, "null", string(jsonPayload))
 }
 
 type poolData struct {

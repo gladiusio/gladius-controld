@@ -3,9 +3,7 @@ package blockchain
 import (
 	"encoding/json"
 	"log"
-	"strings"
-
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+		"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain/generated"
@@ -73,7 +71,7 @@ func MarketPoolsWithData() (string, error) {
 		return "[]", err
 	}
 
-	response := "["
+	var pools []PoolResponse
 
 	for _, poolAddress := range poolAddresses {
 		poolData, err := PoolRetrievePublicData(poolAddress.String())
@@ -82,13 +80,15 @@ func MarketPoolsWithData() (string, error) {
 			return "[]", err
 		}
 
-		response += poolResponse.String() + ","
+		pools = append(pools, poolResponse)
 	}
 
-	response = strings.TrimRight(response, ",")
-	response += "]"
+	jsonPayload, err := json.Marshal(pools)
+	if err != nil {
+		return "", err
+	}
 
-	return response, nil
+	return string(jsonPayload), nil
 }
 
 //MarketCreatePool - Create new pool

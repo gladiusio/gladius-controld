@@ -7,6 +7,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
+	"encoding/json"
 )
 
 // NodeFactoryHandler - Main Node API route handler
@@ -34,12 +35,17 @@ func NodeFactoryNodeAddressHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	
 	nodeData, err := blockchain.NodeRetrieveDataForAddress(nodeAddress)
-	var data = "null"
+	var jsonPayload = "null"
 	if err == nil {
-		data = nodeData.String()
-	}
+		jsonPayload, err := json.Marshal(nodeData)
+		if err != nil {
+			ErrorHandler(w, r, "Node data could not be parsed to JSON", err, http.StatusNotFound)
+		}
 
-	jsonResponse := fmt.Sprintf("{\"address\": \"0x%x\",\"data\": %s}", nodeAddress, data)
+		ResponseHandler(w, r, "null", string(jsonPayload))
+	}
+	// TODO fix this
+	jsonResponse := fmt.Sprintf("{\"address\": \"0x%x\",\"data\": %s}", nodeAddress, jsonPayload)
 	ResponseHandler(w, r, "null", string(jsonResponse))
 }
 

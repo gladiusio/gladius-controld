@@ -21,12 +21,19 @@ func PoolPublicDataHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodGet {
 		poolData, err := blockchain.PoolRetrievePublicData(poolAddress)
+
 		if err != nil {
 			ErrorHandler(w, r, "Could not retrieve Pool's public data", err, http.StatusNotFound)
 			return
 		}
 
-		ResponseHandler(w, r, "null", poolData.String())
+		body, err := json.Marshal(poolData)
+		if err != nil {
+			ErrorHandler(w, r, "Could not parse Pool's public data as JSON", err, http.StatusNotFound)
+			return
+		}
+
+		ResponseHandler(w, r, "null", string(body))
 	}
 
 	if r.Method == http.MethodPost {
@@ -35,7 +42,12 @@ func PoolPublicDataHandler(w http.ResponseWriter, r *http.Request) {
 		var data blockchain.PoolPublicData
 		err := decoder.Decode(&data)
 
-		transaction, err := blockchain.PoolSetPublicData(auth, poolAddress, data.String())
+		jsonPayload, err := json.Marshal(data)
+		if err != nil {
+			ErrorHandler(w, r, "Could not decode request into JSON", err, http.StatusNotFound)
+		}
+
+		transaction, err := blockchain.PoolSetPublicData(auth, poolAddress, string(jsonPayload))
 		if err != nil {
 			ErrorHandler(w, r, "Could not set Pool's public data", err, http.StatusUnprocessableEntity)
 			return
@@ -77,7 +89,7 @@ func PoolRetrieveNodesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ResponseHandler(w, r, "null", *response)
+	ResponseHandler(w, r, "null", response)
 }
 
 func PoolRetrieveNodeApplicationHandler(w http.ResponseWriter, r *http.Request) {
@@ -91,7 +103,12 @@ func PoolRetrieveNodeApplicationHandler(w http.ResponseWriter, r *http.Request) 
 		ErrorHandler(w, r, "Could not retrieve application", err, http.StatusUnprocessableEntity)
 		return
 	}
-	ResponseHandler(w, r, "null", nodeApplication.String())
+
+	jsonPayload, err := json.Marshal(nodeApplication)
+	if err != nil {
+		ErrorHandler(w, r, "Could not parse application to JSON", err, http.StatusUnprocessableEntity)
+	}
+	ResponseHandler(w, r, "null", string(jsonPayload))
 }
 
 func PoolUpdateNodeStatusHandler(w http.ResponseWriter, r *http.Request) {

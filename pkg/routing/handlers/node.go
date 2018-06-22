@@ -8,20 +8,18 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// NodeHandler - Main Node API route handler
-func NodeHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Main Node API\n"))
-}
-
 func NodeRetrieveDataHandler(w http.ResponseWriter, r *http.Request) {
 	nodeData, err := blockchain.NodeRetrieveData()
 	if err != nil {
 		ErrorHandler(w, r, "Node data could not be retrieved or data is not set", err, http.StatusNotFound)
 	}
 
-	jsonResponse := nodeData.String()
+	jsonPayload, err := json.Marshal(nodeData)
+	if err != nil {
+		ErrorHandler(w, r, "Node data could not be parsed to JSON", err, http.StatusNotFound)
+	}
 
-	ResponseHandler(w, r, "null", jsonResponse)
+	ResponseHandler(w, r, "null", string(jsonPayload))
 }
 
 func NodeSetDataHandler(w http.ResponseWriter, r *http.Request) {
