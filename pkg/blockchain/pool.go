@@ -99,7 +99,7 @@ func PoolNodes(poolAddress string) (*[]common.Address, error) {
 }
 
 func PoolNodesWithData(poolAddress common.Address, nodeAddresses *[]common.Address, status int) (*string, error) {
-	var filter bool = status >= 0
+	var filter = status >= 0
 
 	response := "["
 
@@ -156,6 +156,3 @@ func PoolUpdateNodeStatus(passphrase, poolAddress, nodeAddress string, status in
 
 	return transaction, nil
 }
-
-//
-// func NodesByStatus(poolAddress string, status int) (*[]generated.Node, error) {}
