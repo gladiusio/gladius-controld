@@ -34,29 +34,11 @@ type NodeApplication struct {
 	Data    NodeData `json:"data"`
 }
 
-func (d *NodeApplication) String() string {
-	json, err := json.Marshal(d)
-	if err != nil {
-		return "{}"
-	}
-
-	return string(json)
-}
-
 type NodeData struct {
 	Name   string `json:"name"`
 	Email  string `json:"email"`
 	IP     string `json:"ip"`
 	Status string `json:"status"`
-}
-
-func (d *NodeData) String() string {
-	json, err := json.Marshal(d)
-	if err != nil {
-		return "{}"
-	}
-
-	return string(json)
 }
 
 func NodeRetrieveApplication(nodeAddress, poolAddress *common.Address) (*NodeApplication, error) {
@@ -141,7 +123,12 @@ func NodeSetData(passphrase string, data *NodeData) (*types.Transaction, error) 
 	nodeAddress, _ := NodeOwnedByUser()
 	node := ConnectNode(*nodeAddress)
 
-	encData, err := crypto.EncryptData(data.String())
+	dataPayload, err := json.Marshal(data)
+	if err != nil {
+		return nil, err
+	}
+
+	encData, err := crypto.EncryptData(string(dataPayload))
 	if err != nil {
 		return nil, err
 	}
@@ -171,13 +158,18 @@ func NodeApplyToPool(passphrase, nodeAddress, poolAddress string) (*types.Transa
 		return nil, err
 	}
 
+	dataPayload, err := json.Marshal(data)
+	if err != nil {
+		return nil, err
+	}
+
 	poolPubKey, err := PoolRetrievePublicKey(poolAddress)
 
 	if err != nil {
 		return nil, err
 	}
 
-	encData, err := crypto.EncryptMessage(data.String(), poolPubKey)
+	encData, err := crypto.EncryptMessage(string(dataPayload), poolPubKey)
 	if err != nil {
 		return nil, err
 	}

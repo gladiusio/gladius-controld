@@ -10,7 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain/generated"
-)
+	)
 
 // ConnectNode - Connect and grab node
 func ConnectPool(poolAddress common.Address) *generated.Pool {
@@ -42,15 +42,6 @@ type PoolPublicData struct {
 	Rating       string `json:"rating"`
 	NodeCount    string `json:"nodeCount"`
 	MaxBandwidth string `json:"maxBandwidth"`
-}
-
-func (d *PoolPublicData) String() string {
-	json, err := json.Marshal(d)
-	if err != nil {
-		return "{}"
-	}
-
-	return string(json)
 }
 
 func PoolRetrievePublicData(poolAddress string) (*PoolPublicData, error) {
@@ -98,27 +89,28 @@ func PoolNodes(poolAddress string) (*[]common.Address, error) {
 	return &nodeAddressList, nil
 }
 
-func PoolNodesWithData(poolAddress common.Address, nodeAddresses *[]common.Address, status int) (*string, error) {
-	var filter = status >= 0
+func PoolNodesWithData(poolAddress common.Address, nodeAddresses *[]common.Address, status int) (string, error) {
+	filter := status >= 0
 
-	response := "["
+	var applications []NodeData
 
 	for _, nodeAddress := range *nodeAddresses {
 		nodeApplication, err := NodeRetrieveApplication(&nodeAddress, &poolAddress)
 		if err != nil {
-			return nil, err
+			return "", err
 		}
 
 		if filter && nodeApplication.Status == status {
-			response += nodeApplication.String() + ","
-		} else if !filter {
-			response += nodeApplication.String() + ","
+			applications = append(applications, nodeApplication.Data)
 		}
 	}
-	response = strings.TrimRight(response, ",")
-	response += "]"
 
-	return &response, nil
+	jsonPayload, err := json.Marshal(applications)
+	if err != nil {
+		return "", err
+	}
+
+	return string(jsonPayload), nil
 }
 
 func PoolUpdateNodeStatus(passphrase, poolAddress, nodeAddress string, status int) (*types.Transaction, error) {
@@ -139,11 +131,9 @@ func PoolUpdateNodeStatus(passphrase, poolAddress, nodeAddress string, status in
 		err = errors.New("PoolUpdateNodeStatus - Node cannot change status to `Unavailable`")
 	case 1:
 		// Approved
-		println("aprrove")
 		transaction, err = pool.AcceptNode(auth, common.HexToAddress(nodeAddress))
 	case 2:
 		// Rejected
-		println("reject")
 		transaction, err = pool.RejectNode(auth, common.HexToAddress(nodeAddress))
 	case 3:
 		// Pending
