@@ -10,11 +10,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// PoolHandler - Main Node API route handler
-func PoolHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Main Node API\n"))
-}
-
 func PoolPublicDataHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	poolAddress := vars["poolAddress"]

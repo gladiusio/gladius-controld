@@ -21,7 +21,8 @@ type GladiusAccountManager struct {
 
 // NewGladiusAccountManager creates a new gladius account manager
 func NewGladiusAccountManager() *GladiusAccountManager {
-	var pathTemp string = viper.GetString("DirWallet")
+  var pathTemp = viper.GetString("DirWallet")
+
 	ks := keystore.NewKeyStore(
 		pathTemp,
 		keystore.LightScryptN,
@@ -89,7 +90,7 @@ func (ga GladiusAccountManager) GetAuth(passphrase string) (*bind.TransactOpts, 
 
 // TODO: Move somewhere more logical...
 func GetPGPPublicKey() (string, error) {
-	var pathTemp string = viper.GetString("DirKeys")
+	var pathTemp = viper.GetString("DirKeys")
 	keyringFileBuffer, err := ioutil.ReadFile(pathTemp + "/public.asc")
 	if err != nil {
 		return "", err
