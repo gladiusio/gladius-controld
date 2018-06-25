@@ -13,7 +13,7 @@ import (
 
 // New returns a new peer type
 func New() *Peer {
-	return &Peer{peerState: &state.State{}, running: false, maxMessageAge: 20, server: &server{}, client: &client{}}
+	return &Peer{peerState: &state.State{}, running: false, maxMessageAge: 1000, server: &server{}, client: &client{}}
 }
 
 // Peer is a type that represents a peer in the Gladius p2p network.
@@ -68,7 +68,6 @@ func (p Peer) pushStateMessage(sm *signature.SignedMessage) {
 						if err != nil {
 							fmt.Println("can't call method:", err)
 						}
-						fmt.Println("reply is: " + reply)
 					}
 				}
 			}
