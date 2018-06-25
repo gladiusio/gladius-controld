@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"net"
 	"net/rpc"
+	"strconv"
 	"time"
 
 	"github.com/gladiusio/gladius-controld/pkg/p2p/signature"
@@ -13,7 +14,9 @@ import (
 
 // New returns a new peer type
 func New() *Peer {
-	return &Peer{peerState: &state.State{}, running: false, maxMessageAge: 1000, server: &server{}, client: &client{}}
+	peer := &Peer{peerState: &state.State{}, running: false, maxMessageAge: 1000, client: &client{}}
+	peer.server = newServer(peer)
+	return peer
 }
 
 // Peer is a type that represents a peer in the Gladius p2p network.
@@ -37,7 +40,13 @@ func (p *Peer) Stop() {
 
 // UpdateAndPushState updates the local state and pushes it to several other peers
 func (p *Peer) UpdateAndPushState(sm *signature.SignedMessage) {
+	fmt.Println("Age: " + strconv.Itoa(int(sm.GetAgeInSeconds())))
+	fmt.Println("Max Age: " + strconv.Itoa(int(p.maxMessageAge)))
+
+	fmt.Println(sm.GetAgeInSeconds() < p.maxMessageAge)
+
 	if sm.GetAgeInSeconds() < p.maxMessageAge {
+		fmt.Println("Address: " + sm.Address)
 		p.peerState.UpdateState(sm)
 		// Send to peers
 		p.pushStateMessage(sm)
@@ -45,15 +54,17 @@ func (p *Peer) UpdateAndPushState(sm *signature.SignedMessage) {
 }
 
 func (p Peer) pushStateMessage(sm *signature.SignedMessage) {
-	ipList := p.peerState.GetNodeFields("IPAddress")
-	s := rand.NewSource(time.Now().Unix())
-	r := rand.New(s) // initialize local pseudorandom generator
 	go func() {
+		ipList := p.peerState.GetNodeFields("IPAddress")
+		s := rand.NewSource(time.Now().Unix())
+		r := rand.New(s) // initialize local pseudorandom generator
 		timestamp := sm.GetTimestamp()
 		for (time.Now().Unix() - timestamp) < p.maxMessageAge {
 			if len(ipList) > 0 {
-				ipInterface := ipList[r.Intn(len(ipList))]
-
+				index := r.Intn(len(ipList))
+				ipInterface := ipList[index]
+				// Delete it for this run
+				ipList = append(ipList[:index], ipList[index+1:]...)
 				if ipInterface != nil {
 					// Get the data from the signed field
 					ip := ipInterface.(state.SignedField).Data
@@ -68,8 +79,10 @@ func (p Peer) pushStateMessage(sm *signature.SignedMessage) {
 						if err != nil {
 							fmt.Println("can't call method:", err)
 						}
+						fmt.Println(reply)
+						conn.Close()
 					}
-					conn.Close()
+
 				}
 			}
 			time.Sleep(100 * time.Millisecond)
