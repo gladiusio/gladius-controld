@@ -54,6 +54,7 @@ func (p Peer) pushStateMessage(sm *signature.SignedMessage) {
 			ipInterface := ipList[r.Intn(len(ipList))]
 
 			if ipInterface != nil {
+				// Get the data from the signed field
 				ip := ipInterface.(state.SignedField).Data
 
 				conn, err := net.Dial("tcp", ip+":4351")
