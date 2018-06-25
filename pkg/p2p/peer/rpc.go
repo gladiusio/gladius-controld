@@ -2,7 +2,6 @@ package peer
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/buger/jsonparser"
@@ -18,7 +17,6 @@ type RPCLogging struct {
 }
 
 func (s *RPCState) Update(arg *signature.SignedMessage, reply *string) error {
-	fmt.Println("test")
 	if arg.IsInPoolAndVerified() {
 		s.p.UpdateAndPushState(arg)
 		*reply = "State Updated"

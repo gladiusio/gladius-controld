@@ -5,7 +5,6 @@ import (
 	"math/rand"
 	"net"
 	"net/rpc"
-	"strconv"
 	"time"
 
 	"github.com/gladiusio/gladius-controld/pkg/p2p/signature"
@@ -40,13 +39,7 @@ func (p *Peer) Stop() {
 
 // UpdateAndPushState updates the local state and pushes it to several other peers
 func (p *Peer) UpdateAndPushState(sm *signature.SignedMessage) {
-	fmt.Println("Age: " + strconv.Itoa(int(sm.GetAgeInSeconds())))
-	fmt.Println("Max Age: " + strconv.Itoa(int(p.maxMessageAge)))
-
-	fmt.Println(sm.GetAgeInSeconds() < p.maxMessageAge)
-
 	if sm.GetAgeInSeconds() < p.maxMessageAge {
-		fmt.Println("Address: " + sm.Address)
 		p.peerState.UpdateState(sm)
 		// Send to peers
 		p.pushStateMessage(sm)
@@ -79,7 +72,6 @@ func (p Peer) pushStateMessage(sm *signature.SignedMessage) {
 						if err != nil {
 							fmt.Println("can't call method:", err)
 						}
-						fmt.Println(reply)
 						conn.Close()
 					}
 
