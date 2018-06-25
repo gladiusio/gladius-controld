@@ -66,9 +66,6 @@ func (sm SignedMessage) GetAgeInSeconds() int64 {
 // IsVerified checks the internal status of the message and returns true if the
 // message is verified
 func (sm SignedMessage) IsVerified() bool {
-	// Check if address is part of pool
-	// TODO: Check real address against pool
-	addressInPool := true
 	// Check if hash matches the message
 	m, _ := sm.Message.MarshalJSON()
 	hashMatches := bytes.Equal(sm.Hash, crypto.Keccak256(m))
@@ -84,12 +81,19 @@ func (sm SignedMessage) IsVerified() bool {
 	// Check if the address matches
 	addressMatches := crypto.PubkeyToAddress(*pub).String() == sm.Address
 
-	if addressInPool && addressMatches && hashMatches && signatureValid {
+	if addressMatches && hashMatches && signatureValid {
 		return true
 	}
 
 	return false
 
+}
+
+func (sm SignedMessage) IsInPoolAndVerified() bool {
+	// Check if address is part of pool
+	// TODO: Check real address against pool
+	addressInPool := true
+	return addressInPool && sm.IsVerified()
 }
 
 // CreateSignedMessageString creates a signed state from the message where

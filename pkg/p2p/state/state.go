@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
+	"reflect"
 	"sync"
 
 	"github.com/buger/jsonparser"
@@ -43,7 +44,12 @@ func (s *sigList) GetList() (values []*signature.SignedMessage) {
 
 // GetNodeFields gets the same field from all nodes
 func (s *State) GetNodeFields(key string) []interface{} {
-
+	toReturn := make([]interface{}, len(s.NodeDataMap))
+	for _, value := range s.NodeDataMap {
+		v := reflect.ValueOf(*value)
+		toReturn = append(toReturn, v.FieldByName(key).Interface())
+	}
+	return toReturn
 }
 
 // GetSignatureList returns a list of all of the signed messages used to make
@@ -74,7 +80,7 @@ func (s *State) GetSignatureList() []*signature.SignedMessage {
 
 // UpdateState updates the local state with the signed message information
 func (s *State) UpdateState(sm *signature.SignedMessage) {
-	if sm.IsVerified() {
+	if sm.IsInPoolAndVerified() {
 		jsonBytes, err := sm.Message.MarshalJSON()
 		if err != nil {
 			log.Println(errors.New("Malformed state JSON"))

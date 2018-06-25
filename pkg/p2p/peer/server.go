@@ -19,7 +19,7 @@ func (s *server) Start() {
 	rpcState := new(RPCState)
 	rpcServer.RegisterName("State", rpcState)
 	// Listen for incoming tcp packets on specified port.
-	l, e := net.Listen("tcp", ":1234")
+	l, e := net.Listen("tcp", ":4351")
 	if e != nil {
 		log.Fatal("listen error:", e)
 	}

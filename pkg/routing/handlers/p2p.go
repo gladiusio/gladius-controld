@@ -61,7 +61,7 @@ func verifyBody(w http.ResponseWriter, r *http.Request) (bool, *signature.Signed
 	if parsed == nil {
 		return false, nil
 	}
-	verified := parsed.IsVerified()
+	verified := parsed.IsInPoolAndVerified()
 
 	return verified, parsed
 }
