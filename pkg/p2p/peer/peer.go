@@ -69,6 +69,7 @@ func (p Peer) pushStateMessage(sm *signature.SignedMessage) {
 							fmt.Println("can't call method:", err)
 						}
 					}
+					conn.Close()
 				}
 			}
 			time.Sleep(100 * time.Millisecond)
