@@ -13,7 +13,7 @@ import (
 
 // New returns a new peer type
 func New() *Peer {
-	return &Peer{peerState: &state.State{}, running: false, maxMessageAge: 1000, server: &server{}, client: &client{}}
+	return &Peer{peerState: &state.State{}, running: false, maxMessageAge: 20, server: &server{}, client: &client{}}
 }
 
 // Peer is a type that represents a peer in the Gladius p2p network.
@@ -51,23 +51,25 @@ func (p Peer) pushStateMessage(sm *signature.SignedMessage) {
 	go func() {
 		timestamp := sm.GetTimestamp()
 		for (time.Now().Unix() - timestamp) < p.maxMessageAge {
-			ipInterface := ipList[r.Intn(len(ipList))]
+			if len(ipList) > 0 {
+				ipInterface := ipList[r.Intn(len(ipList))]
 
-			if ipInterface != nil {
-				// Get the data from the signed field
-				ip := ipInterface.(state.SignedField).Data
+				if ipInterface != nil {
+					// Get the data from the signed field
+					ip := ipInterface.(state.SignedField).Data
 
-				conn, err := net.Dial("tcp", ip+":4351")
-				if err != nil {
-					fmt.Println("dialing:", err)
-				} else {
-					client := rpc.NewClient(conn)
-					var reply string
-					err = client.Call("State.Update", sm, &reply)
+					conn, err := net.Dial("tcp", ip+":4351")
 					if err != nil {
-						fmt.Println("can't call method:", err)
+						fmt.Println("dialing:", err)
+					} else {
+						client := rpc.NewClient(conn)
+						var reply string
+						err = client.Call("State.Update", sm, &reply)
+						if err != nil {
+							fmt.Println("can't call method:", err)
+						}
+						fmt.Println("reply is: " + reply)
 					}
-					fmt.Println("reply is: " + reply)
 				}
 			}
 			time.Sleep(100 * time.Millisecond)
