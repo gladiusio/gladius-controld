@@ -67,3 +67,8 @@ func (response *DefaultResponse) FormatTransactionResponse(transaction string) {
 		},
 	}
 }
+
+type NodeApplication struct {
+	Code int `json:"code"`
+	Status string `json:"status"`
+}

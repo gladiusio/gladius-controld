@@ -6,6 +6,7 @@ import (
 
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"github.com/gorilla/mux"
+	"github.com/gladiusio/gladius-controld/pkg/routing/response"
 )
 
 func NodeRetrieveDataHandler(w http.ResponseWriter, r *http.Request) {
@@ -70,26 +71,13 @@ func NodeApplicationStatusHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var response = "{ \"code\": " + status.String() + ", \"status\": "
-
-	switch status.String() {
-	// Unavailable
-	case "0":
-		response += "\"Unavailable\""
-	// Approved
-	case "1":
-		response += "\"Approved\""
-	// Rejected
-	case "2":
-		response += "\"Rejected\""
-	// Pending
-	case "3":
-		response += "\"Pending\""
+	statusString, err := blockchain.ApplicationStatusFromInt(int(status.Uint64()))
+	if err != nil {
+		ErrorHandler(w, r, "Could not find status for pool application", err, http.StatusBadRequest)
+		return
 	}
-	//TODO
-	response += ",\"availableStatuses\": [{\"status\": \"Not Available\",\"code\": 0},{\"status\": \"Approved\",\"code\": 1},{\"status\": \"Rejected\",\"code\": 2},{\"status\": \"Pending\",\"code\": 3}]"
 
-	response += "}"
+	statusResponse := response.NodeApplication{Status:statusString, Code:int(status.Uint64())}
 
-	ResponseHandler(w, r, "null", true, nil, nil, nil)
+	ResponseHandler(w, r, "null", true, nil, statusResponse, nil)
 }
