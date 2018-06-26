@@ -130,9 +130,13 @@ func PushStateMessageHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.R
 	return func(w http.ResponseWriter, r *http.Request) {
 		v, sm := verifyBody(w, r)
 		if v {
-			p.UpdateAndPushState(sm)
-			text, _ := json.Marshal("Attempted to push message")
-			ResponseHandler(w, r, "null", string(text))
+			err := p.UpdateAndPushState(sm)
+			if err != nil {
+				ErrorHandler(w, r, "Error updating state", err, http.StatusBadRequest)
+			} else {
+				text, _ := json.Marshal("Attempted to push message")
+				ResponseHandler(w, r, "null", string(text))
+			}
 		} else {
 			if sm != nil {
 				ErrorHandler(w, r, "Cannot verifiy signature", errors.New("cannot verifiy signature"), http.StatusBadRequest)

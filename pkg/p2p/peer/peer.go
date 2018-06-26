@@ -42,50 +42,60 @@ func (p *Peer) Stop() {
 func (p *Peer) UpdateAndPushState(sm *signature.SignedMessage) error {
 	if sm.GetAgeInSeconds() < p.maxMessageAge {
 		err := p.peerState.UpdateState(sm)
+		if err != nil {
+			return err
+		}
 		// Send to peers
-		p.pushStateMessage(sm)
-		return err
+		err = p.pushStateMessage(sm)
+		if err != nil {
+			return err
+		}
+		return nil
 	}
 	return errors.New("message signature too old")
 }
 
-func (p Peer) pushStateMessage(sm *signature.SignedMessage) {
-	go func() {
-		ipList := p.peerState.GetNodeFields("IPAddress")
-		s := rand.NewSource(time.Now().Unix())
-		r := rand.New(s) // initialize local pseudorandom generator
-		timestamp := sm.GetTimestamp()
-		for (time.Now().Unix() - timestamp) < p.maxMessageAge {
-			if len(ipList) > 0 {
-				index := r.Intn(len(ipList))
-				ipInterface := ipList[index]
-				// Delete it for this run
-				ipList = append(ipList[:index], ipList[index+1:]...)
-				if ipInterface != nil {
-					// Get the data from the signed field
-					ip := ipInterface.(state.SignedField).Data
+func (p Peer) pushStateMessage(sm *signature.SignedMessage) error {
+	ipList := p.peerState.GetNodeFields("IPAddress")
+	if len(ipList) > 0 {
+		go func() {
+			s := rand.NewSource(time.Now().Unix())
+			r := rand.New(s) // initialize local pseudorandom generator
+			timestamp := sm.GetTimestamp()
+			for (time.Now().Unix() - timestamp) < p.maxMessageAge {
+				if len(ipList) > 0 {
+					index := r.Intn(len(ipList))
+					ipInterface := ipList[index]
+					// Delete it for this run
+					ipList = append(ipList[:index], ipList[index+1:]...)
+					if ipInterface != nil {
+						// Get the data from the signed field
+						ip := ipInterface.(state.SignedField).Data
 
-					conn, err := net.Dial("tcp", ip+":4351")
-					if err != nil {
-						fmt.Println("dialing:", err)
-					} else {
-						client := rpc.NewClient(conn)
-						var reply string
-						err = client.Call("State.Update", sm, &reply)
+						conn, err := net.Dial("tcp", ip+":4351")
 						if err != nil {
-							fmt.Println("can't call method:", err)
+							fmt.Println("dialing:", err)
+						} else {
+							client := rpc.NewClient(conn)
+							var reply string
+							err = client.Call("State.Update", sm, &reply)
+							if err != nil {
+								fmt.Println("can't call method:", err)
+							}
+							err = conn.Close()
+							if err != nil {
+								fmt.Println("can't close connection:", err)
+							}
 						}
-						err = conn.Close()
-						if err != nil {
-							fmt.Println("can't close connection:", err)
-						}
+
 					}
-
 				}
+				time.Sleep(100 * time.Millisecond)
 			}
-			time.Sleep(100 * time.Millisecond)
-		}
-	}()
+		}()
+		return nil
+	}
+	return errors.New("no peers")
 }
 
 // GetState returns the current local state
