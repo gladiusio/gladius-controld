@@ -1,6 +1,7 @@
 package peer
 
 import (
+	"errors"
 	"fmt"
 	"math/rand"
 	"net"
@@ -38,12 +39,14 @@ func (p *Peer) Stop() {
 }
 
 // UpdateAndPushState updates the local state and pushes it to several other peers
-func (p *Peer) UpdateAndPushState(sm *signature.SignedMessage) {
+func (p *Peer) UpdateAndPushState(sm *signature.SignedMessage) error {
 	if sm.GetAgeInSeconds() < p.maxMessageAge {
-		p.peerState.UpdateState(sm)
+		err := p.peerState.UpdateState(sm)
 		// Send to peers
 		p.pushStateMessage(sm)
+		return err
 	}
+	return errors.New("message signature too old")
 }
 
 func (p Peer) pushStateMessage(sm *signature.SignedMessage) {
@@ -72,7 +75,10 @@ func (p Peer) pushStateMessage(sm *signature.SignedMessage) {
 						if err != nil {
 							fmt.Println("can't call method:", err)
 						}
-						conn.Close()
+						err = conn.Close()
+						if err != nil {
+							fmt.Println("can't close connection:", err)
+						}
 					}
 
 				}

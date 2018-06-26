@@ -3,7 +3,6 @@ package state
 import (
 	"encoding/json"
 	"errors"
-	"log"
 	"reflect"
 	"sync"
 
@@ -79,18 +78,16 @@ func (s *State) GetSignatureList() []*signature.SignedMessage {
 }
 
 // UpdateState updates the local state with the signed message information
-func (s *State) UpdateState(sm *signature.SignedMessage) {
+func (s *State) UpdateState(sm *signature.SignedMessage) error {
 	if sm.IsInPoolAndVerified() {
 		jsonBytes, err := sm.Message.MarshalJSON()
 		if err != nil {
-			log.Println(errors.New("Malformed state JSON"))
-			return
+			return errors.New("malformed state message")
 		}
 
 		messageBytes, _, _, err := jsonparser.Get(jsonBytes, "content")
 		if err != nil {
-			log.Println("Couldn't process state update")
-			return
+			return errors.New("can't find content in request")
 		}
 
 		timestamp := sm.GetTimestamp()
@@ -109,7 +106,9 @@ func (s *State) UpdateState(sm *signature.SignedMessage) {
 			return nil
 		}
 		jsonparser.ObjectEach(messageBytes, handler)
+		return nil
 	}
+	return errors.New("message is not verified")
 }
 
 func (s *State) nodeHandler(nodeUpdate []byte, timestamp int64, sm *signature.SignedMessage) {
