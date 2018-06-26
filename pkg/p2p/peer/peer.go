@@ -57,7 +57,8 @@ func (p *Peer) UpdateAndPushState(sm *signature.SignedMessage) error {
 
 func (p Peer) pushStateMessage(sm *signature.SignedMessage) error {
 	ipList := p.peerState.GetNodeFields("IPAddress")
-	if len(ipList) > 0 {
+	fmt.Println(ipList)
+	if len(ipList) > 1 {
 		go func() {
 			s := rand.NewSource(time.Now().Unix())
 			r := rand.New(s) // initialize local pseudorandom generator
@@ -95,7 +96,7 @@ func (p Peer) pushStateMessage(sm *signature.SignedMessage) error {
 		}()
 		return nil
 	}
-	return errors.New("no peers")
+	return errors.New("not enough peers")
 }
 
 // GetState returns the current local state
