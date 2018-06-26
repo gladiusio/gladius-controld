@@ -14,7 +14,7 @@ import (
 
 // New returns a new peer type
 func New() *Peer {
-	peer := &Peer{peerState: &state.State{}, running: false, maxMessageAge: 1000, client: &client{}}
+	peer := &Peer{peerState: &state.State{}, running: false, maxMessageAge: 10, client: &client{}}
 	peer.server = newServer(peer)
 	return peer
 }
@@ -57,14 +57,17 @@ func (p *Peer) UpdateAndPushState(sm *signature.SignedMessage) error {
 
 func (p Peer) pushStateMessage(sm *signature.SignedMessage) error {
 	ipList := p.peerState.GetNodeFields("IPAddress")
-	fmt.Println(ipList)
-	if len(ipList) > 1 {
+	numOfPeers := len(ipList)
+	if numOfPeers > 1 {
+		// Calculate the frequency based on the number of peers to not overload
+		// the network
+		waitTime := calcWaitTimeMillis(numOfPeers)
 		go func() {
 			s := rand.NewSource(time.Now().Unix())
 			r := rand.New(s) // initialize local pseudorandom generator
 			timestamp := sm.GetTimestamp()
 			for (time.Now().Unix() - timestamp) < p.maxMessageAge {
-				if len(ipList) > 0 {
+				if numOfPeers > 0 {
 					index := r.Intn(len(ipList))
 					ipInterface := ipList[index]
 					// Delete it for this run
@@ -72,7 +75,6 @@ func (p Peer) pushStateMessage(sm *signature.SignedMessage) error {
 					if ipInterface != nil {
 						// Get the data from the signed field
 						ip := ipInterface.(state.SignedField).Data
-
 						conn, err := net.Dial("tcp", ip+":4351")
 						if err != nil {
 							fmt.Println("dialing:", err)
@@ -88,15 +90,26 @@ func (p Peer) pushStateMessage(sm *signature.SignedMessage) error {
 								fmt.Println("can't close connection:", err)
 							}
 						}
-
 					}
 				}
-				time.Sleep(100 * time.Millisecond)
+				time.Sleep(waitTime * time.Millisecond)
 			}
 		}()
 		return nil
 	}
 	return errors.New("not enough peers")
+}
+
+func calcWaitTimeMillis(peers int) time.Duration {
+	if peers > 1000 {
+		return 100
+	} else if peers > 200 {
+		return 200
+	} else if peers > 10 {
+		return 300
+	}
+	return 500
+
 }
 
 // GetState returns the current local state
