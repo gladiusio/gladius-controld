@@ -2,8 +2,7 @@ package blockchain
 
 import (
 	"errors"
-	"fmt"
-	"io/ioutil"
+		"io/ioutil"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts"
@@ -11,7 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/viper"
-)
+		)
 
 // GladiusAccountManager is a type that allows the user to create a keystore file,
 // create an in it, and preform actions on the first account stored.
@@ -41,14 +40,6 @@ func (ga GladiusAccountManager) UnlockAccount(passphrase string) error {
 	return ga.Keystore().Unlock(ga.GetAccount(), passphrase)
 }
 
-// AccountResponseFormatter creates a JSON formatted account
-func (ga GladiusAccountManager) AccountResponseFormatter() string {
-	address := ga.GetAccountAddress()
-	accountAddress := fmt.Sprintf("0x%x", address)
-
-	return "{ \"address\": \"" + accountAddress + "\"}"
-}
-
 // CreateAccount will create an account if there isn't one already
 func (ga GladiusAccountManager) CreateAccount(passphrase string) (accounts.Account, error) {
 	ks := ga.Keystore()
@@ -66,9 +57,9 @@ func (ga GladiusAccountManager) GetAccountAddress() common.Address {
 
 // GetAccount gets the actual account type
 func (ga GladiusAccountManager) GetAccount() accounts.Account {
-	keystore := ga.Keystore()
+	store := ga.Keystore()
 
-	return keystore.Accounts()[0]
+	return store.Accounts()[0]
 }
 
 // GetAuth gets the authenticator for the go bindings of our smart contracts

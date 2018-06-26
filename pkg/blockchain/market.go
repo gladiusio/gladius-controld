@@ -25,7 +25,7 @@ func ConnectMarket() *generated.Market {
 	return market
 }
 
-func MarketPoolsOwnedByUser() ([]common.Address, error) {
+func MarketPoolsOwnedByUser(includeData bool) (*PoolArrayResponse, error) {
 	market := ConnectMarket()
 
 	ga := NewGladiusAccountManager()
@@ -36,24 +36,16 @@ func MarketPoolsOwnedByUser() ([]common.Address, error) {
 		return nil, err
 	}
 
-	return pools, nil
+	return MarketPoolAddressesToArrayResponse(pools, includeData)
 }
 
-// MarketPools - List all available market pools
-func MarketPools() ([]common.Address, error) {
-	market := ConnectMarket()
-
-	pools, err := market.GetAllPools(nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return pools, nil
+type PoolArrayResponse struct {
+	Pools []PoolResponse `json:"pools"`
 }
 
 type PoolResponse struct {
 	Address string         `json:"address"`
-	Data    PoolPublicData `json:"data"`
+	Data    *PoolPublicData `json:"data,omitempty"`
 }
 
 func (d *PoolResponse) String() string {
@@ -65,30 +57,35 @@ func (d *PoolResponse) String() string {
 	return string(json)
 }
 
-func MarketPoolsWithData() (string, error) {
-	poolAddresses, err := MarketPools()
+func MarketPools(includeData bool) (*PoolArrayResponse, error) {
+	market := ConnectMarket()
+
+	poolAddresses, err := market.GetAllPools(nil)
 	if err != nil {
-		return "[]", err
+		return nil, err
 	}
 
-	var pools []PoolResponse
+	return MarketPoolAddressesToArrayResponse(poolAddresses, includeData)
+}
+
+func MarketPoolAddressesToArrayResponse(poolAddresses []common.Address, includeData bool) (*PoolArrayResponse, error) {
+	var pools PoolArrayResponse
 
 	for _, poolAddress := range poolAddresses {
-		poolData, err := PoolRetrievePublicData(poolAddress.String())
-		poolResponse := PoolResponse{poolAddress.String(), *poolData}
-		if err != nil {
-			return "[]", err
+		var poolResponse PoolResponse
+		if includeData {
+			poolData, err := PoolRetrievePublicData(poolAddress.String())
+			poolResponse = PoolResponse{poolAddress.String(), poolData}
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			poolResponse = PoolResponse{poolAddress.String(), nil}
 		}
-
-		pools = append(pools, poolResponse)
+		pools.Pools = append(pools.Pools, poolResponse)
 	}
 
-	jsonPayload, err := json.Marshal(pools)
-	if err != nil {
-		return "", err
-	}
-
-	return string(jsonPayload), nil
+	return &pools, nil
 }
 
 //MarketCreatePool - Create new pool

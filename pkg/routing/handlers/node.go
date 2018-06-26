@@ -9,17 +9,18 @@ import (
 )
 
 func NodeRetrieveDataHandler(w http.ResponseWriter, r *http.Request) {
-	nodeData, err := blockchain.NodeRetrieveData()
+	nodeAddress, err := blockchain.NodeOwnedByUser()
+	if err != nil {
+		ErrorHandler(w, r, "Node not found for user", err, http.StatusNotFound)
+	}
+	nodeData, err := blockchain.NodeRetrieveDataForAddress(*nodeAddress)
 	if err != nil {
 		ErrorHandler(w, r, "Node data could not be retrieved or data is not set", err, http.StatusNotFound)
 	}
 
-	jsonPayload, err := json.Marshal(nodeData)
-	if err != nil {
-		ErrorHandler(w, r, "Node data could not be parsed to JSON", err, http.StatusNotFound)
-	}
+	nodeResponse := blockchain.NodeResponse{Address:nodeAddress.String(), Data:nodeData}
 
-	ResponseHandler(w, r, "null", string(jsonPayload))
+	ResponseHandler(w, r, "null", true, nil, nodeResponse, nil)
 }
 
 func NodeSetDataHandler(w http.ResponseWriter, r *http.Request) {
@@ -37,7 +38,8 @@ func NodeSetDataHandler(w http.ResponseWriter, r *http.Request) {
 		ErrorHandler(w, r, "Node data could not be set", err, http.StatusBadRequest)
 		return
 	}
-	TransactionHandler(w, r, "null", transaction)
+
+	ResponseHandler(w, r, "null", true, nil, nil, transaction)
 }
 
 func NodeApplyToPoolHandler(w http.ResponseWriter, r *http.Request) {
@@ -53,9 +55,7 @@ func NodeApplyToPoolHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	println(transaction)
-
-	TransactionHandler(w, r, "null", transaction)
+	ResponseHandler(w, r, "null", true, nil, nil, transaction)
 }
 
 func NodeApplicationStatusHandler(w http.ResponseWriter, r *http.Request) {
@@ -86,9 +86,10 @@ func NodeApplicationStatusHandler(w http.ResponseWriter, r *http.Request) {
 	case "3":
 		response += "\"Pending\""
 	}
+	//TODO
 	response += ",\"availableStatuses\": [{\"status\": \"Not Available\",\"code\": 0},{\"status\": \"Approved\",\"code\": 1},{\"status\": \"Rejected\",\"code\": 2},{\"status\": \"Pending\",\"code\": 3}]"
 
 	response += "}"
 
-	ResponseHandler(w, r, "null", response)
+	ResponseHandler(w, r, "null", true, nil, nil, nil)
 }

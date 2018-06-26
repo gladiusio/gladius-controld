@@ -2,21 +2,15 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
-	"net/http"
+		"net/http"
 
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"github.com/gladiusio/gladius-controld/pkg/crypto"
+	"github.com/gladiusio/gladius-controld/pkg/routing/response"
 )
 
 type accountBody struct {
 	Passphrase string `json:"passphrase"`
-}
-
-type pgpStruct struct {
-	Name    string `json:"name"`
-	Comment string `json:"comment"`
-	Email   string `json:"email"`
 }
 
 func passphraseDecoder(w http.ResponseWriter, r *http.Request) (*accountBody, error) {
@@ -41,22 +35,22 @@ func KeystoreAccountCreationHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	ga := blockchain.NewGladiusAccountManager()
 
-	_, err2 := ga.CreateAccount(wallet.Passphrase)
-	if err2 != nil {
-		ErrorHandler(w, r, "Account could not be created", err2, http.StatusInternalServerError)
+	_, err = ga.CreateAccount(wallet.Passphrase)
+	if err != nil {
+		ErrorHandler(w, r, "Account could not be created", err, http.StatusInternalServerError)
 		return
 	}
 
-	response := ga.AccountResponseFormatter()
+	addressResponse := response.AddressResponse{Address: ga.GetAccountAddress()}
 
-	ResponseHandler(w, r, "null", response)
+	ResponseHandler(w, r, "null", true, nil, addressResponse, nil)
 }
 
 func KeystoreAccountRetrievalHandler(w http.ResponseWriter, r *http.Request) {
 	ga := blockchain.NewGladiusAccountManager()
+	addressResponse := response.AddressResponse{Address: ga.GetAccountAddress()}
 
-	response := ga.AccountResponseFormatter()
-	ResponseHandler(w, r, "null", response)
+	ResponseHandler(w, r, "null", true, nil, addressResponse, nil)
 }
 
 func KeystoreAccountUnlockHandler(w http.ResponseWriter, r *http.Request) {
@@ -74,8 +68,9 @@ func KeystoreAccountUnlockHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := ga.AccountResponseFormatter()
-	ResponseHandler(w, r, "null", response)
+	addressResponse := response.AddressResponse{Address: ga.GetAccountAddress()}
+
+	ResponseHandler(w, r, "null", true, nil, addressResponse, nil)
 }
 
 func KeystorePGPPublicKeyRetrievalHandler(w http.ResponseWriter, r *http.Request) {
@@ -84,7 +79,16 @@ func KeystorePGPPublicKeyRetrievalHandler(w http.ResponseWriter, r *http.Request
 		ErrorHandler(w, r, "Public key not found or cannot be read", err, http.StatusNotFound)
 		return
 	}
-	ResponseHandler(w, r, "null", "{\"publicKey\": \""+publicKey+"\"}")
+
+	publicKeyResponse := response.PublicKeyResponse{PublicKey:publicKey}
+
+	ResponseHandler(w, r, "null", true, nil, publicKeyResponse, nil)
+}
+
+type pgpStruct struct {
+	Name    string `json:"name"`
+	Comment string `json:"comment"`
+	Email   string `json:"email"`
 }
 
 func KeystorePGPCreationHandler(w http.ResponseWriter, r *http.Request) {
@@ -105,6 +109,7 @@ func KeystorePGPCreationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := fmt.Sprintf("{\"created\": true}")
-	ResponseHandler(w, r, "null", response)
+	creationResponse := response.CreationResponse{Created:true}
+
+	ResponseHandler(w, r, "null", true, nil, creationResponse, nil)
 }

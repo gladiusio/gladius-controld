@@ -89,28 +89,23 @@ func PoolNodes(poolAddress string) (*[]common.Address, error) {
 	return &nodeAddressList, nil
 }
 
-func PoolNodesWithData(poolAddress common.Address, nodeAddresses *[]common.Address, status int) (string, error) {
+func PoolNodesWithData(poolAddress common.Address, nodeAddresses *[]common.Address, status int) (*[]NodeApplication, error) {
 	filter := status >= 0
 
-	var applications []NodeData
+	var applications []NodeApplication
 
 	for _, nodeAddress := range *nodeAddresses {
 		nodeApplication, err := NodeRetrieveApplication(&nodeAddress, &poolAddress)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 
 		if filter && nodeApplication.Status == status {
-			applications = append(applications, nodeApplication.Data)
+			applications = append(applications, *nodeApplication)
 		}
 	}
 
-	jsonPayload, err := json.Marshal(applications)
-	if err != nil {
-		return "", err
-	}
-
-	return string(jsonPayload), nil
+	return &applications, nil
 }
 
 func PoolUpdateNodeStatus(passphrase, poolAddress, nodeAddress string, status int) (*types.Transaction, error) {

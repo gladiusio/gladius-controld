@@ -34,6 +34,11 @@ type NodeApplication struct {
 	Data    NodeData `json:"data"`
 }
 
+type NodeResponse struct {
+	Address string `json:"address"`
+	Data *NodeData `json:"data"`
+}
+
 type NodeData struct {
 	Name   string `json:"name"`
 	Email  string `json:"email"`
@@ -66,8 +71,8 @@ func NodeRetrieveApplication(nodeAddress, poolAddress *common.Address) (*NodeApp
 	return nodeStruct, nil
 }
 
-func NodeRetrieveDataForAddress(nodeAddress *common.Address) (*NodeData, error) {
-	node := ConnectNode(*nodeAddress)
+func NodeRetrieveDataForAddress(nodeAddress common.Address) (*NodeData, error) {
+	node := ConnectNode(nodeAddress)
 	ga := NewGladiusAccountManager()
 
 	encData, err := node.Data(&bind.CallOpts{From: ga.GetAccountAddress()})
@@ -85,15 +90,6 @@ func NodeRetrieveDataForAddress(nodeAddress *common.Address) (*NodeData, error) 
 	var nodeData NodeData
 	decoder.Decode(&nodeData)
 	return &nodeData, nil
-}
-
-func NodeRetrieveData() (*NodeData, error) {
-	nodeAddress, err := NodeOwnedByUser()
-	if err != nil {
-		return nil, err
-	}
-	
-	return NodeRetrieveDataForAddress(nodeAddress)
 }
 
 func NodeRetrievePoolData(nodeAddress, poolAddress *common.Address) (*NodeData, error) {
@@ -152,7 +148,7 @@ func NodeSetData(passphrase string, data *NodeData) (*types.Transaction, error) 
 func NodeApplyToPool(passphrase, nodeAddress, poolAddress string) (*types.Transaction, error) {
 	node := ConnectNode(common.HexToAddress(nodeAddress))
 
-	data, err := NodeRetrieveData()
+	data, err := NodeRetrieveDataForAddress(common.HexToAddress(nodeAddress))
 
 	if err != nil {
 		return nil, err
