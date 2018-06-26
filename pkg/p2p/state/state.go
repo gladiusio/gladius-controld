@@ -43,7 +43,7 @@ func (s *sigList) GetList() (values []*signature.SignedMessage) {
 
 // GetNodeFields gets the same field from all nodes
 func (s *State) GetNodeFields(key string) []interface{} {
-	toReturn := make([]interface{}, len(s.NodeDataMap))
+	toReturn := make([]interface{}, 0)
 	for _, value := range s.NodeDataMap {
 		v := reflect.ValueOf(*value)
 		toReturn = append(toReturn, v.FieldByName(key).Interface())
