@@ -60,7 +60,7 @@ func (p Peer) pushStateMessage(sm *signature.SignedMessage) error {
 	numOfPeers := len(ipList)
 	if numOfPeers > 1 {
 		// Calculate the frequency based on the number of peers to not overload
-		// the network
+		// small networks
 		waitTime := calcWaitTimeMillis(numOfPeers)
 		go func() {
 			s := rand.NewSource(time.Now().Unix())
