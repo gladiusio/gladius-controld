@@ -33,7 +33,7 @@ func (s *RPCState) Get(arg *signature.SignedMessage, reply *string) error {
 			*reply = "Error decoding message"
 			return err
 		}
-		timestamp, err := jsonparser.GetInt(jsonBytes, "content.challenge_time")
+		timestamp, err := jsonparser.GetInt(jsonBytes, "content", "challenge_time")
 		if err != nil {
 			*reply = "Can't find field `content.challenge_time`"
 			return err
