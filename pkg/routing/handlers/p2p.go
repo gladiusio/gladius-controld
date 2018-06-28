@@ -169,11 +169,16 @@ func getPullDataFromBody(w http.ResponseWriter, r *http.Request) (ip, passphrase
 
 func PullStateFromDiscoveryHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		err := p.PullState(getPullDataFromBody(w, r))
-		if err != nil {
-			ErrorHandler(w, r, "Could not process the request", err, http.StatusBadRequest)
+		ip, passphrase := getPullDataFromBody(w, r)
+		if ip == "" || passphrase == "" {
+			ErrorHandler(w, r, "Could not find either `ip` or `passphrase` in the request", nil, http.StatusBadRequest)
 		} else {
-			ResponseHandler(w, r, "null", "pulled state")
+			err := p.PullState(ip, passphrase)
+			if err != nil {
+				ErrorHandler(w, r, "Could not process the request", err, http.StatusBadRequest)
+			} else {
+				ResponseHandler(w, r, "null", "pulled state")
+			}
 		}
 	}
 }
