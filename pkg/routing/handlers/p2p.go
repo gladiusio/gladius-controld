@@ -178,7 +178,8 @@ func PullStateFromDiscoveryHandler(p *peer.Peer) func(w http.ResponseWriter, r *
 			if err != nil {
 				ErrorHandler(w, r, "Could not process the request", err, http.StatusBadRequest)
 			} else {
-				ResponseHandler(w, r, "null", "pulled state")
+				text, _ := json.Marshal("Attempted to push message")
+				ResponseHandler(w, r, "null", string(text))
 			}
 		}
 	}

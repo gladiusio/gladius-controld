@@ -46,7 +46,6 @@ func (p *Peer) Stop() {
 func (p *Peer) PullState(ip, passphrase string) error {
 	currTime := strconv.FormatUint(uint64(time.Now().Unix()), 10)
 	m := message.New([]byte("{\"challenge_time\":" + currTime + "}"))
-	fmt.Println(string(m.Serialize()))
 	smString, err := signature.CreateSignedMessageString(m, passphrase)
 	sm := &signature.SignedMessage{}
 	json.Unmarshal([]byte(smString), sm)
