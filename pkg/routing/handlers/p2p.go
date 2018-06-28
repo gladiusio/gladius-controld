@@ -145,6 +145,39 @@ func PushStateMessageHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.R
 	}
 }
 
+func getPullDataFromBody(w http.ResponseWriter, r *http.Request) (ip, passphrase string) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		ErrorHandler(w, r, "Error decoding body", err, http.StatusBadRequest)
+		return "", ""
+	}
+
+	ip, err = jsonparser.GetString(body, "ip")
+	if err != nil {
+		ErrorHandler(w, r, "Could not find `ip` in body", err, http.StatusBadRequest)
+		return "", ""
+	}
+
+	passphrase, err = jsonparser.GetString(body, "passphrase")
+	if err != nil {
+		ErrorHandler(w, r, "Could not find `passphrase` in body", err, http.StatusBadRequest)
+		return "", ""
+	}
+
+	return ip, passphrase
+}
+
+func PullStateFromDiscoveryHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := p.PullState(getPullDataFromBody(w, r))
+		if err != nil {
+			ErrorHandler(w, r, "Could not process the request", err, http.StatusBadRequest)
+		} else {
+			ResponseHandler(w, r, "null", "pulled state")
+		}
+	}
+}
+
 // GetFullStateHandler gets the current state the node has access to.
 func GetFullStateHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {

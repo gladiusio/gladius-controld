@@ -39,39 +39,40 @@ func (p *Peer) Stop() {
 
 }
 
-func (p *Peer) PullState(ip, passphrase string) {
+// PullState pulls the state from a peer and verifies it before loading it into
+// its own state
+func (p *Peer) PullState(ip, passphrase string) error {
 	m := message.New([]byte("{\"challenge_time\": \"" + string(time.Now().Unix()) + "\"}"))
 	sm, err := signature.CreateSignedMessageString(m, passphrase)
 	if err != nil {
-		fmt.Println("cannot make signed message:", err)
+		return errors.New("cannot make signed message:" + err.Error())
 	}
 	conn, err := net.Dial("tcp", ip+":4351")
 	if err != nil {
-		fmt.Println("dialing:", err)
-	} else {
-		client := rpc.NewClient(conn)
-		var reply string
-		err = client.Call("State.Get", sm, &reply)
-		if err != nil {
-			fmt.Println("can't call method:", err)
-		}
-		err = conn.Close()
-		if err != nil {
-			fmt.Println("can't close connection:", err)
-		}
-		// Convert the incoming json to a State type
-		incomingState, err := state.ParseNetworkState([]byte(reply))
-		if err != nil {
-			fmt.Println("corrupted state", err)
-		} else {
-			// Get the signatures and rebuild the state
-			sigList := incomingState.GetSignatureList()
-			for _, sig := range sigList {
-				p.GetState().UpdateState(sig)
-			}
-		}
-
+		return errors.New("dialing: " + err.Error())
 	}
+	client := rpc.NewClient(conn)
+	var reply string
+	err = client.Call("State.Get", sm, &reply)
+	if err != nil {
+		return errors.New("can't call method:" + err.Error())
+	}
+	err = conn.Close()
+	if err != nil {
+		return errors.New("can't close connection:" + err.Error())
+	}
+	// Convert the incoming json to a State type
+	incomingState, err := state.ParseNetworkState([]byte(reply))
+	if err != nil {
+		return errors.New("corrupted state" + err.Error())
+	}
+	// Get the signatures and rebuild the state
+	sigList := incomingState.GetSignatureList()
+	for _, sig := range sigList {
+		p.GetState().UpdateState(sig)
+	}
+
+	return nil
 }
 
 // UpdateAndPushState updates the local state and pushes it to several other peers
