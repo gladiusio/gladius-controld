@@ -8,6 +8,7 @@ import (
 	"net/rpc"
 	"time"
 
+	"github.com/gladiusio/gladius-controld/pkg/p2p/message"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/signature"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/state"
 )
@@ -36,6 +37,41 @@ func (p *Peer) Start() {
 // Stop stops the peer
 func (p *Peer) Stop() {
 
+}
+
+func (p *Peer) PullState(ip, passphrase string) {
+	m := message.New([]byte("{\"challenge_time\": \"" + string(time.Now().Unix()) + "\"}"))
+	sm, err := signature.CreateSignedMessageString(m, passphrase)
+	if err != nil {
+		fmt.Println("cannot make signed message:", err)
+	}
+	conn, err := net.Dial("tcp", ip+":4351")
+	if err != nil {
+		fmt.Println("dialing:", err)
+	} else {
+		client := rpc.NewClient(conn)
+		var reply string
+		err = client.Call("State.Get", sm, &reply)
+		if err != nil {
+			fmt.Println("can't call method:", err)
+		}
+		err = conn.Close()
+		if err != nil {
+			fmt.Println("can't close connection:", err)
+		}
+		// Convert the incoming json to a State type
+		incomingState, err := state.ParseNetworkState([]byte(reply))
+		if err != nil {
+			fmt.Println("corrupted state", err)
+		} else {
+			// Get the signatures and rebuild the state
+			sigList := incomingState.GetSignatureList()
+			for _, sig := range sigList {
+				p.GetState().UpdateState(sig)
+			}
+		}
+
+	}
 }
 
 // UpdateAndPushState updates the local state and pushes it to several other peers

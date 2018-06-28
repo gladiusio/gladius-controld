@@ -185,5 +185,7 @@ type SignedList struct {
 // ParseNetworkState takes the network state json string in and returns a state
 // type if it is valid.
 func ParseNetworkState(stateString []byte) (*State, error) {
-	return &State{}, nil
+	s := &State{}
+	err := json.Unmarshal(stateString, s)
+	return s, err
 }
