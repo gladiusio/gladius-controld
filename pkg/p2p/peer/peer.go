@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"net"
 	"net/rpc"
+	"strconv"
 	"time"
 
 	"github.com/gladiusio/gladius-controld/pkg/p2p/message"
@@ -43,7 +44,9 @@ func (p *Peer) Stop() {
 // PullState pulls the state from a peer and verifies it before loading it into
 // its own state
 func (p *Peer) PullState(ip, passphrase string) error {
-	m := message.New([]byte("{\"challenge_time\": \"" + string(time.Now().Unix()) + "\"}"))
+	currTime := strconv.FormatUint(uint64(time.Now().Unix()), 10)
+	m := message.New([]byte("{\"challenge_time\":" + currTime + "}"))
+	fmt.Println(string(m.Serialize()))
 	smString, err := signature.CreateSignedMessageString(m, passphrase)
 	sm := &signature.SignedMessage{}
 	json.Unmarshal([]byte(smString), sm)
