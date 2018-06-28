@@ -167,6 +167,7 @@ func getPullDataFromBody(w http.ResponseWriter, r *http.Request) (ip, passphrase
 	return ip, passphrase
 }
 
+// PullStateFromDiscoveryHandler takes in an IP and a passhprase and pulls state from the given node
 func PullStateFromDiscoveryHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ip, passphrase := getPullDataFromBody(w, r)
