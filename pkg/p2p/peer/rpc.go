@@ -2,7 +2,6 @@ package peer
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/buger/jsonparser"
@@ -40,7 +39,6 @@ func (s *RPCState) Get(arg *signature.SignedMessage, reply *string) error {
 			return err
 		}
 		now := time.Now().Unix()
-		fmt.Println(now - timestamp)
 		if (now - timestamp) < 2 {
 			jsonstring, err := s.p.GetState().GetJSON()
 			if err != nil {
@@ -48,6 +46,7 @@ func (s *RPCState) Get(arg *signature.SignedMessage, reply *string) error {
 				return err
 			}
 			*reply = string(jsonstring)
+			return nil
 		}
 		*reply = "Challenge exprired"
 		return errors.New("exprired challenge")
