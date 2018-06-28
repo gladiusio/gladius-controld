@@ -2,18 +2,22 @@ package handlers
 
 import (
 	"errors"
-		"net/http"
+	"net/http"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
-		)
+)
 
 // NodeFactoryHandler - Main Node API route handler
 func NodeFactoryNodeAddressHandler(w http.ResponseWriter, r *http.Request) {
 	accountAddress := r.URL.Query().Get("account")
 	ga := blockchain.NewGladiusAccountManager()
 	if accountAddress == "" {
-		accountAddress = ga.GetAccountAddress().String()
+		tempAddress, err := ga.GetAccountAddress()
+		if err != nil {
+			ErrorHandler(w, r, "Could not retrieve account address", err, http.StatusBadRequest)
+		}
+		accountAddress = tempAddress.String()
 	}
 	nodeAddress, err := blockchain.NodeForAccount(common.HexToAddress(accountAddress))
 

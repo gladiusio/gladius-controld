@@ -35,8 +35,8 @@ type NodeApplication struct {
 }
 
 type NodeResponse struct {
-	Address string `json:"address"`
-	Data *NodeData `json:"data"`
+	Address string    `json:"address"`
+	Data    *NodeData `json:"data"`
 }
 
 type NodeData struct {
@@ -74,8 +74,12 @@ func NodeRetrieveApplication(nodeAddress, poolAddress *common.Address) (*NodeApp
 func NodeRetrieveDataForAddress(nodeAddress common.Address) (*NodeData, error) {
 	node := ConnectNode(nodeAddress)
 	ga := NewGladiusAccountManager()
+	address, err := ga.GetAccountAddress()
+	if err != nil {
+		return nil, err
+	}
 
-	encData, err := node.Data(&bind.CallOpts{From: ga.GetAccountAddress()})
+	encData, err := node.Data(&bind.CallOpts{From: *address})
 	if err != nil {
 		return nil, err
 	}
@@ -95,8 +99,12 @@ func NodeRetrieveDataForAddress(nodeAddress common.Address) (*NodeData, error) {
 func NodeRetrievePoolData(nodeAddress, poolAddress *common.Address) (*NodeData, error) {
 	node := ConnectNode(*nodeAddress)
 	ga := NewGladiusAccountManager()
+	address, err := ga.GetAccountAddress()
+	if err != nil {
+		return nil, err
+	}
 
-	encPoolData, err := node.GetPoolData(&bind.CallOpts{From: ga.GetAccountAddress()}, *poolAddress)
+	encPoolData, err := node.GetPoolData(&bind.CallOpts{From: *address}, *poolAddress)
 	if err != nil {
 		return nil, err
 	}

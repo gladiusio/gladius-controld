@@ -2,7 +2,7 @@ package blockchain
 
 import (
 	"errors"
-		"io/ioutil"
+	"io/ioutil"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts"
@@ -10,7 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/viper"
-		)
+)
 
 // GladiusAccountManager is a type that allows the user to create a keystore file,
 // create an in it, and preform actions on the first account stored.
@@ -20,7 +20,7 @@ type GladiusAccountManager struct {
 
 // NewGladiusAccountManager creates a new gladius account manager
 func NewGladiusAccountManager() *GladiusAccountManager {
-  var pathTemp = viper.GetString("DirWallet")
+	var pathTemp = viper.GetString("DirWallet")
 
 	ks := keystore.NewKeyStore(
 		pathTemp,
@@ -36,8 +36,18 @@ func (ga GladiusAccountManager) Keystore() *keystore.KeyStore {
 }
 
 //UnlockAccount Unlocks the account
-func (ga GladiusAccountManager) UnlockAccount(passphrase string) error {
-	return ga.Keystore().Unlock(ga.GetAccount(), passphrase)
+func (ga GladiusAccountManager) UnlockAccount(passphrase string) (bool, error) {
+	account, err := ga.GetAccount()
+	if err != nil {
+		return false, err
+	}
+
+	err = ga.Keystore().Unlock(*account, passphrase)
+	if err == nil {
+		return true, nil
+	}
+
+	return false, err
 }
 
 // CreateAccount will create an account if there isn't one already
@@ -51,21 +61,35 @@ func (ga GladiusAccountManager) CreateAccount(passphrase string) (accounts.Accou
 }
 
 // GetAccountAddress gets the account address
-func (ga GladiusAccountManager) GetAccountAddress() common.Address {
-	return ga.GetAccount().Address
+func (ga GladiusAccountManager) GetAccountAddress() (*common.Address, error) {
+	account, err := ga.GetAccount()
+	if err != nil {
+		return nil, err
+	}
+
+	return &account.Address, nil
 }
 
 // GetAccount gets the actual account type
-func (ga GladiusAccountManager) GetAccount() accounts.Account {
+func (ga GladiusAccountManager) GetAccount() (*accounts.Account, error) {
 	store := ga.Keystore()
+	if len(store.Accounts()) < 1 {
+		return nil, errors.New("Account retrieval error, no existing accounts found")
+	}
 
-	return store.Accounts()[0]
+	account := store.Accounts()[0]
+
+	return &account, nil
 }
 
 // GetAuth gets the authenticator for the go bindings of our smart contracts
 func (ga GladiusAccountManager) GetAuth(passphrase string) (*bind.TransactOpts, error) {
+	account, err := ga.GetAccount()
+	if err != nil {
+		return nil, err
+	}
 	// Create a JSON blob with the same passphrase used to decrypt it
-	key, err := ga.Keystore().Export(ga.GetAccount(), passphrase, passphrase)
+	key, err := ga.Keystore().Export(*account, passphrase, passphrase)
 	if err != nil {
 		return nil, err
 	}

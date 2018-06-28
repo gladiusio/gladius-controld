@@ -2,12 +2,12 @@ package blockchain
 
 import (
 	"encoding/json"
-	"log"
-		"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain/generated"
 	"github.com/spf13/viper"
+	"log"
 )
 
 // ConnectMarket - Connect and return configured market
@@ -29,9 +29,12 @@ func MarketPoolsOwnedByUser(includeData bool) (*PoolArrayResponse, error) {
 	market := ConnectMarket()
 
 	ga := NewGladiusAccountManager()
-	address := ga.GetAccountAddress()
+	address, err := ga.GetAccountAddress()
+	if err != nil {
+		return nil, err
+	}
 
-	pools, err := market.GetOwnedPools(&bind.CallOpts{From: address}, address)
+	pools, err := market.GetOwnedPools(&bind.CallOpts{From: *address}, *address)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +47,7 @@ type PoolArrayResponse struct {
 }
 
 type PoolResponse struct {
-	Address string         `json:"address"`
+	Address string          `json:"address"`
 	Data    *PoolPublicData `json:"data,omitempty"`
 }
 

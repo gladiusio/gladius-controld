@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
-		"net/http"
+	"net/http"
 
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"github.com/gladiusio/gladius-controld/pkg/crypto"
@@ -41,14 +41,26 @@ func KeystoreAccountCreationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	addressResponse := response.AddressResponse{Address: ga.GetAccountAddress()}
+	address, err := ga.GetAccountAddress()
+	if err != nil {
+		ErrorHandler(w, r, "Account address could not be retrieved", err, http.StatusInternalServerError)
+		return
+	}
+
+	addressResponse := response.AddressResponse{Address: *address}
 
 	ResponseHandler(w, r, "null", true, nil, addressResponse, nil)
 }
 
 func KeystoreAccountRetrievalHandler(w http.ResponseWriter, r *http.Request) {
 	ga := blockchain.NewGladiusAccountManager()
-	addressResponse := response.AddressResponse{Address: ga.GetAccountAddress()}
+	address, err := ga.GetAccountAddress()
+	if err != nil {
+		ErrorHandler(w, r, "Account address could not be retrieved", err, http.StatusInternalServerError)
+		return
+	}
+
+	addressResponse := response.AddressResponse{Address: *address}
 
 	ResponseHandler(w, r, "null", true, nil, addressResponse, nil)
 }
@@ -62,13 +74,19 @@ func KeystoreAccountUnlockHandler(w http.ResponseWriter, r *http.Request) {
 
 	ga := blockchain.NewGladiusAccountManager()
 
-	err = ga.UnlockAccount(accountBody.Passphrase)
-	if err != nil {
+	success, err := ga.UnlockAccount(accountBody.Passphrase)
+	if success == false || err != nil {
 		ErrorHandler(w, r, "Wallet could not be opened, passphrase could be incorrect", err, http.StatusBadRequest)
 		return
 	}
 
-	addressResponse := response.AddressResponse{Address: ga.GetAccountAddress()}
+	address, err := ga.GetAccountAddress()
+	if err != nil {
+		ErrorHandler(w, r, "Account address could not be retrieved", err, http.StatusInternalServerError)
+		return
+	}
+
+	addressResponse := response.AddressResponse{Address: *address}
 
 	ResponseHandler(w, r, "null", true, nil, addressResponse, nil)
 }
@@ -80,7 +98,7 @@ func KeystorePGPPublicKeyRetrievalHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	publicKeyResponse := response.PublicKeyResponse{PublicKey:publicKey}
+	publicKeyResponse := response.PublicKeyResponse{PublicKey: publicKey}
 
 	ResponseHandler(w, r, "null", true, nil, publicKeyResponse, nil)
 }
@@ -109,7 +127,7 @@ func KeystorePGPCreationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	creationResponse := response.CreationResponse{Created:true}
+	creationResponse := response.CreationResponse{Created: true}
 
 	ResponseHandler(w, r, "null", true, nil, creationResponse, nil)
 }
