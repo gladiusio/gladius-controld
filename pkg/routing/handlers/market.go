@@ -4,35 +4,26 @@ import (
 	"encoding/json"
 	"net/http"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
-	"github.com/gladiusio/gladius-controld/pkg/routing/response"
-)
+	)
 
 // MarketPoolsHandler - Returns all Pools
 func MarketPoolsHandler(w http.ResponseWriter, r *http.Request) {
-	poolsWithData, err := blockchain.MarketPoolsWithData()
+	poolsWithData, err := blockchain.MarketPools(true)
 	if err != nil {
 		ErrorHandler(w, r, "Could not retrieve pools", err, http.StatusNotFound)
 		return
 	}
-
-	ResponseHandler(w, r, "null", poolsWithData)
+	ResponseHandler(w, r, "null", true, nil, poolsWithData, nil)
 }
 
 func MarketPoolsOwnedHandler(w http.ResponseWriter, r *http.Request) {
-	pools, err := blockchain.MarketPoolsOwnedByUser()
+	pools, err := blockchain.MarketPoolsOwnedByUser(true)
 	if err != nil {
 		ErrorHandler(w, r, "Could not retrieve pools", err, http.StatusNotFound)
 		return
 	}
 
-	var poolsArray response.AddressHashes = pools
-	jsonPayload, err := json.Marshal(poolsArray)
-	if err != nil {
-		ErrorHandler(w, r, "Could not parse pools json", err, http.StatusNotFound)
-		return
-	}
-
-	ResponseHandler(w, r, "null", string(jsonPayload))
+	ResponseHandler(w, r, "null", true, nil, pools, nil)
 }
 
 type poolData struct {
@@ -52,5 +43,5 @@ func MarketPoolsCreateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	TransactionHandler(w, r, "null", transaction)
+	ResponseHandler(w, r, "null", true, nil, nil, transaction)
 }

@@ -2,12 +2,12 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
-	"net/http"
+		"net/http"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"github.com/gorilla/mux"
+	"github.com/gladiusio/gladius-controld/pkg/routing/response"
 )
 
 func PoolPublicDataHandler(w http.ResponseWriter, r *http.Request) {
@@ -22,13 +22,7 @@ func PoolPublicDataHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		body, err := json.Marshal(poolData)
-		if err != nil {
-			ErrorHandler(w, r, "Could not parse Pool's public data as JSON", err, http.StatusNotFound)
-			return
-		}
-
-		ResponseHandler(w, r, "null", string(body))
+		ResponseHandler(w, r, "null", true, nil, poolData, nil)
 	}
 
 	if r.Method == http.MethodPost {
@@ -48,7 +42,7 @@ func PoolPublicDataHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		TransactionHandler(w, r, "\"Public data set, pending transaction\"", transaction)
+		ResponseHandler(w, r, "Public data set, pending transaction", true, nil, nil, transaction)
 	}
 }
 
@@ -62,8 +56,9 @@ func PoolRetrievePublicKeyHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := fmt.Sprintf("{\"publicKey\": \"%s\"}", publicKey)
-	ResponseHandler(w, r, "null", response)
+	publicKeyResponse := response.PublicKeyResponse{PublicKey:publicKey}
+
+	ResponseHandler(w, r, "null", true, nil, publicKeyResponse, nil)
 }
 
 func PoolRetrieveNodesHandler(w http.ResponseWriter, r *http.Request) {
@@ -78,13 +73,9 @@ func PoolRetrieveNodesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response, err := blockchain.PoolNodesWithData(poolAddress, nodeAddresses, statusInt)
-	if err != nil {
-		ErrorHandler(w, r, "Could not retrieve applications", err, http.StatusUnprocessableEntity)
-		return
-	}
+	applications, err := blockchain.PoolNodesWithData(poolAddress, nodeAddresses, statusInt)
 
-	ResponseHandler(w, r, "null", response)
+	ResponseHandler(w, r, "null", true, nil, applications, nil)
 }
 
 func PoolRetrieveNodeApplicationHandler(w http.ResponseWriter, r *http.Request) {
@@ -99,11 +90,7 @@ func PoolRetrieveNodeApplicationHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	jsonPayload, err := json.Marshal(nodeApplication)
-	if err != nil {
-		ErrorHandler(w, r, "Could not parse application to JSON", err, http.StatusUnprocessableEntity)
-	}
-	ResponseHandler(w, r, "null", string(jsonPayload))
+	ResponseHandler(w, r, "null", true, nil, nodeApplication, nil)
 }
 
 func PoolUpdateNodeStatusHandler(w http.ResponseWriter, r *http.Request) {
@@ -125,5 +112,5 @@ func PoolUpdateNodeStatusHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	TransactionHandler(w, r, "\"Public data set, pending transaction\"", transaction)
+	ResponseHandler(w, r, "Public data set, pending transaction", true, nil, nil, transaction)
 }

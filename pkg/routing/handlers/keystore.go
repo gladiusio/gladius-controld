@@ -2,21 +2,15 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"github.com/gladiusio/gladius-controld/pkg/crypto"
+	"github.com/gladiusio/gladius-controld/pkg/routing/response"
 )
 
 type accountBody struct {
 	Passphrase string `json:"passphrase"`
-}
-
-type pgpStruct struct {
-	Name    string `json:"name"`
-	Comment string `json:"comment"`
-	Email   string `json:"email"`
 }
 
 func passphraseDecoder(w http.ResponseWriter, r *http.Request) (*accountBody, error) {
@@ -41,22 +35,34 @@ func KeystoreAccountCreationHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	ga := blockchain.NewGladiusAccountManager()
 
-	_, err2 := ga.CreateAccount(wallet.Passphrase)
-	if err2 != nil {
-		ErrorHandler(w, r, "Account could not be created", err2, http.StatusInternalServerError)
+	_, err = ga.CreateAccount(wallet.Passphrase)
+	if err != nil {
+		ErrorHandler(w, r, "Account could not be created", err, http.StatusInternalServerError)
 		return
 	}
 
-	response := ga.AccountResponseFormatter()
+	address, err := ga.GetAccountAddress()
+	if err != nil {
+		ErrorHandler(w, r, "Account address could not be retrieved", err, http.StatusInternalServerError)
+		return
+	}
 
-	ResponseHandler(w, r, "null", response)
+	addressResponse := response.AddressResponse{Address: *address}
+
+	ResponseHandler(w, r, "null", true, nil, addressResponse, nil)
 }
 
 func KeystoreAccountRetrievalHandler(w http.ResponseWriter, r *http.Request) {
 	ga := blockchain.NewGladiusAccountManager()
+	address, err := ga.GetAccountAddress()
+	if err != nil {
+		ErrorHandler(w, r, "Account address could not be retrieved", err, http.StatusInternalServerError)
+		return
+	}
 
-	response := ga.AccountResponseFormatter()
-	ResponseHandler(w, r, "null", response)
+	addressResponse := response.AddressResponse{Address: *address}
+
+	ResponseHandler(w, r, "null", true, nil, addressResponse, nil)
 }
 
 func KeystoreAccountUnlockHandler(w http.ResponseWriter, r *http.Request) {
@@ -68,14 +74,21 @@ func KeystoreAccountUnlockHandler(w http.ResponseWriter, r *http.Request) {
 
 	ga := blockchain.NewGladiusAccountManager()
 
-	err = ga.UnlockAccount(accountBody.Passphrase)
-	if err != nil {
+	success, err := ga.UnlockAccount(accountBody.Passphrase)
+	if success == false || err != nil {
 		ErrorHandler(w, r, "Wallet could not be opened, passphrase could be incorrect", err, http.StatusBadRequest)
 		return
 	}
 
-	response := ga.AccountResponseFormatter()
-	ResponseHandler(w, r, "null", response)
+	address, err := ga.GetAccountAddress()
+	if err != nil {
+		ErrorHandler(w, r, "Account address could not be retrieved", err, http.StatusInternalServerError)
+		return
+	}
+
+	addressResponse := response.AddressResponse{Address: *address}
+
+	ResponseHandler(w, r, "null", true, nil, addressResponse, nil)
 }
 
 func KeystorePGPPublicKeyRetrievalHandler(w http.ResponseWriter, r *http.Request) {
@@ -84,7 +97,16 @@ func KeystorePGPPublicKeyRetrievalHandler(w http.ResponseWriter, r *http.Request
 		ErrorHandler(w, r, "Public key not found or cannot be read", err, http.StatusNotFound)
 		return
 	}
-	ResponseHandler(w, r, "null", "{\"publicKey\": \""+publicKey+"\"}")
+
+	publicKeyResponse := response.PublicKeyResponse{PublicKey: publicKey}
+
+	ResponseHandler(w, r, "null", true, nil, publicKeyResponse, nil)
+}
+
+type pgpStruct struct {
+	Name    string `json:"name"`
+	Comment string `json:"comment"`
+	Email   string `json:"email"`
 }
 
 func KeystorePGPCreationHandler(w http.ResponseWriter, r *http.Request) {
@@ -105,6 +127,7 @@ func KeystorePGPCreationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := fmt.Sprintf("{\"created\": true}")
-	ResponseHandler(w, r, "null", response)
+	creationResponse := response.CreationResponse{Created: true}
+
+	ResponseHandler(w, r, "null", true, nil, creationResponse, nil)
 }

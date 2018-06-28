@@ -13,7 +13,6 @@ import (
 )
 
 const (
-	STATIC_DIR = "/static/"
 	PORT       = "3001"
 	DEBUG      = false
 )
@@ -34,7 +33,7 @@ func Start() {
 	apiRouter.NotFoundHandler = http.HandlerFunc(handlers.NotFoundHandler)
 
 	// P2P setup
-	peer := peer.New()
+	peerNetwork := peer.New()
 	p2pRouter := apiRouter.PathPrefix("/p2p").Subrouter()
 
 	// P2P Message Routes
@@ -44,11 +43,11 @@ func Start() {
 		Methods("POST")
 
 	// P2P State Routes
-	p2pRouter.HandleFunc("/state/push_message", handlers.PushStateMessageHandler(peer)).
+	p2pRouter.HandleFunc("/state/push_message", handlers.PushStateMessageHandler(peerNetwork)).
 		Methods("POST")
-	p2pRouter.HandleFunc("/state/", handlers.GetFullStateHandler(peer)).
+	p2pRouter.HandleFunc("/state/", handlers.GetFullStateHandler(peerNetwork)).
 		Methods("GET")
-	p2pRouter.HandleFunc("/state/", handlers.PushStateMessageHandler(peer)).
+	p2pRouter.HandleFunc("/state/", handlers.PushStateMessageHandler(peerNetwork)).
 		Methods("POST")
 
 	// Key Management

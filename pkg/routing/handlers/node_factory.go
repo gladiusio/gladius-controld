@@ -2,25 +2,22 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
-	"encoding/json"
 )
-
-// NodeFactoryHandler - Main Node API route handler
-func NodeFactoryHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Main Node Factory API\n"))
-}
 
 // NodeFactoryHandler - Main Node API route handler
 func NodeFactoryNodeAddressHandler(w http.ResponseWriter, r *http.Request) {
 	accountAddress := r.URL.Query().Get("account")
 	ga := blockchain.NewGladiusAccountManager()
 	if accountAddress == "" {
-		accountAddress = ga.GetAccountAddress().String()
+		tempAddress, err := ga.GetAccountAddress()
+		if err != nil {
+			ErrorHandler(w, r, "Could not retrieve account address", err, http.StatusBadRequest)
+		}
+		accountAddress = tempAddress.String()
 	}
 	nodeAddress, err := blockchain.NodeForAccount(common.HexToAddress(accountAddress))
 
@@ -33,20 +30,16 @@ func NodeFactoryNodeAddressHandler(w http.ResponseWriter, r *http.Request) {
 		ErrorHandler(w, r, "Account does not have an associated node", errors.New("account has not created a node"), http.StatusNotFound)
 		return
 	}
-	
-	nodeData, err := blockchain.NodeRetrieveDataForAddress(nodeAddress)
-	var jsonPayload = "null"
-	if err == nil {
-		jsonPayload, err := json.Marshal(nodeData)
-		if err != nil {
-			ErrorHandler(w, r, "Node data could not be parsed to JSON", err, http.StatusNotFound)
-		}
 
-		ResponseHandler(w, r, "null", string(jsonPayload))
+	nodeData, err := blockchain.NodeRetrieveDataForAddress(*nodeAddress)
+	var nodeResponse blockchain.NodeResponse
+	if err == nil {
+		nodeResponse = blockchain.NodeResponse{Address: nodeAddress.String(), Data: nodeData}
+	} else {
+		nodeResponse = blockchain.NodeResponse{Address: nodeAddress.String(), Data: nil}
 	}
-	// TODO fix this
-	jsonResponse := fmt.Sprintf("{\"address\": \"0x%x\",\"data\": %s}", nodeAddress, jsonPayload)
-	ResponseHandler(w, r, "null", string(jsonResponse))
+
+	ResponseHandler(w, r, "null", true, nil, nodeResponse, nil)
 }
 
 func NodeFactoryCreateNodeHandler(w http.ResponseWriter, r *http.Request) {
@@ -58,5 +51,5 @@ func NodeFactoryCreateNodeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	TransactionHandler(w, r, "null", transaction)
+	ResponseHandler(w, r, "null", true, nil, nil, transaction)
 }

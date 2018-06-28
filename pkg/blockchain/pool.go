@@ -10,7 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain/generated"
-	)
+)
 
 // ConnectNode - Connect and grab node
 func ConnectPool(poolAddress common.Address) *generated.Pool {
@@ -27,8 +27,12 @@ func ConnectPool(poolAddress common.Address) *generated.Pool {
 func PoolRetrievePublicKey(poolAddress string) (string, error) {
 	pool := ConnectPool(common.HexToAddress(poolAddress))
 	ga := NewGladiusAccountManager()
+	address, err := ga.GetAccountAddress()
+	if err != nil {
+		return "", err
+	}
 
-	publicKey, err := pool.PublicKey(&bind.CallOpts{From: ga.GetAccountAddress()})
+	publicKey, err := pool.PublicKey(&bind.CallOpts{From: *address})
 	if err != nil {
 		return "null", nil
 	}
@@ -47,8 +51,12 @@ type PoolPublicData struct {
 func PoolRetrievePublicData(poolAddress string) (*PoolPublicData, error) {
 	pool := ConnectPool(common.HexToAddress(poolAddress))
 	ga := NewGladiusAccountManager()
+	address, err := ga.GetAccountAddress()
+	if err != nil {
+		return nil, err
+	}
 
-	publicDataResponse, err := pool.PublicData(&bind.CallOpts{From: ga.GetAccountAddress()})
+	publicDataResponse, err := pool.PublicData(&bind.CallOpts{From: *address})
 	if err != nil {
 		return nil, err
 	}
@@ -81,36 +89,35 @@ func PoolSetPublicData(passphrase, poolAddress, data string) (*types.Transaction
 func PoolNodes(poolAddress string) (*[]common.Address, error) {
 	pool := ConnectPool(common.HexToAddress(poolAddress))
 	ga := NewGladiusAccountManager()
+	address, err := ga.GetAccountAddress()
+	if err != nil {
+		return nil, err
+	}
 
-	nodeAddressList, err := pool.GetNodeList(&bind.CallOpts{From: ga.GetAccountAddress()})
+	nodeAddressList, err := pool.GetNodeList(&bind.CallOpts{From: *address})
 	if err != nil {
 		return nil, err
 	}
 	return &nodeAddressList, nil
 }
 
-func PoolNodesWithData(poolAddress common.Address, nodeAddresses *[]common.Address, status int) (string, error) {
+func PoolNodesWithData(poolAddress common.Address, nodeAddresses *[]common.Address, status int) (*[]NodeApplication, error) {
 	filter := status >= 0
 
-	var applications []NodeData
+	var applications []NodeApplication
 
 	for _, nodeAddress := range *nodeAddresses {
 		nodeApplication, err := NodeRetrieveApplication(&nodeAddress, &poolAddress)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 
 		if filter && nodeApplication.Status == status {
-			applications = append(applications, nodeApplication.Data)
+			applications = append(applications, *nodeApplication)
 		}
 	}
 
-	jsonPayload, err := json.Marshal(applications)
-	if err != nil {
-		return "", err
-	}
-
-	return string(jsonPayload), nil
+	return &applications, nil
 }
 
 func PoolUpdateNodeStatus(passphrase, poolAddress, nodeAddress string, status int) (*types.Transaction, error) {
