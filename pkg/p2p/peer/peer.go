@@ -1,6 +1,7 @@
 package peer
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -43,9 +44,11 @@ func (p *Peer) Stop() {
 // its own state
 func (p *Peer) PullState(ip, passphrase string) error {
 	m := message.New([]byte("{\"challenge_time\": \"" + string(time.Now().Unix()) + "\"}"))
-	sm, err := signature.CreateSignedMessageString(m, passphrase)
+	smString, err := signature.CreateSignedMessageString(m, passphrase)
+	sm := &signature.SignedMessage{}
+	json.Unmarshal([]byte(smString), sm)
 	if err != nil {
-		return errors.New("cannot make signed message:" + err.Error())
+		return errors.New("cannot make signed message: " + err.Error())
 	}
 	conn, err := net.Dial("tcp", ip+":4351")
 	if err != nil {
@@ -55,16 +58,17 @@ func (p *Peer) PullState(ip, passphrase string) error {
 	var reply string
 	err = client.Call("State.Get", sm, &reply)
 	if err != nil {
-		return errors.New("can't call method:" + err.Error())
+		fmt.Println(reply)
+		return errors.New("can't call method: " + err.Error())
 	}
 	err = conn.Close()
 	if err != nil {
-		return errors.New("can't close connection:" + err.Error())
+		return errors.New("can't close connection: " + err.Error())
 	}
 	// Convert the incoming json to a State type
 	incomingState, err := state.ParseNetworkState([]byte(reply))
 	if err != nil {
-		return errors.New("corrupted state" + err.Error())
+		return errors.New("corrupted state: " + err.Error())
 	}
 	// Get the signatures and rebuild the state
 	sigList := incomingState.GetSignatureList()
