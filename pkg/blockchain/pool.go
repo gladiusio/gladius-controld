@@ -3,8 +3,10 @@ package blockchain
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"strings"
+	"sync"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -101,38 +103,51 @@ func PoolNodes(poolAddress string) (*[]common.Address, error) {
 	return &nodeAddressList, nil
 }
 
+func safeSend(ch chan NodeApplication, value NodeApplication) (closed bool) {
+	defer func() {
+		if recover() != nil {
+			closed = true
+		}
+	}()
+	ch <- value  // panic if ch is closed
+	return false // <=> closed = false; return
+}
+
 func PoolNodesWithData(poolAddress common.Address, nodeAddresses *[]common.Address, status int) (*[]NodeApplication, error) {
 	filter := status >= 0
 
 	var applications []NodeApplication
 	appChan := make(chan NodeApplication)
 	var err error
-
 	go func() {
+		var wg sync.WaitGroup
 		running := true
 		for _, nodeAddress := range *nodeAddresses {
 			if !running {
 				break
 			}
+			wg.Add(1)
 			go func() {
+				defer wg.Done()
 				nodeApplication, err1 := NodeRetrieveApplication(&nodeAddress, &poolAddress)
 				if err1 != nil {
+					fmt.Println(err1)
 					err = err1
 					running = false
 					return
 				}
 				if filter && nodeApplication.Status == status {
-					appChan <- *nodeApplication
+					safeSend(appChan, *nodeApplication)
 				}
 			}()
 		}
+		wg.Wait()
 		close(appChan)
 	}()
 
 	for value := range appChan {
 		applications = append(applications, value)
 	}
-
 	return &applications, err
 }
 

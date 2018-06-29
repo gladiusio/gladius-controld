@@ -2,12 +2,12 @@ package handlers
 
 import (
 	"encoding/json"
-		"net/http"
+	"net/http"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
-	"github.com/gorilla/mux"
 	"github.com/gladiusio/gladius-controld/pkg/routing/response"
+	"github.com/gorilla/mux"
 )
 
 func PoolPublicDataHandler(w http.ResponseWriter, r *http.Request) {
@@ -56,7 +56,7 @@ func PoolRetrievePublicKeyHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	publicKeyResponse := response.PublicKeyResponse{PublicKey:publicKey}
+	publicKeyResponse := response.PublicKeyResponse{PublicKey: publicKey}
 
 	ResponseHandler(w, r, "null", true, nil, publicKeyResponse, nil)
 }
@@ -74,6 +74,10 @@ func PoolRetrieveNodesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	applications, err := blockchain.PoolNodesWithData(poolAddress, nodeAddresses, statusInt)
+	if err != nil {
+		ErrorHandler(w, r, "Could not retrieve applications", err, http.StatusUnprocessableEntity)
+		return
+	}
 
 	ResponseHandler(w, r, "null", true, nil, applications, nil)
 }
