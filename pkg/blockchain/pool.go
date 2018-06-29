@@ -3,7 +3,6 @@ package blockchain
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"strings"
 	"sync"
@@ -131,7 +130,6 @@ func PoolNodesWithData(poolAddress common.Address, nodeAddresses *[]common.Addre
 				defer wg.Done()
 				nodeApplication, err1 := NodeRetrieveApplication(&nodeAddress, &poolAddress)
 				if err1 != nil {
-					fmt.Println(err1)
 					err = err1
 					running = false
 					return
