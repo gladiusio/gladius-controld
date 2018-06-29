@@ -3,6 +3,7 @@ package blockchain
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"strings"
 	"sync"
@@ -126,9 +127,10 @@ func PoolNodesWithData(poolAddress common.Address, nodeAddresses *[]common.Addre
 				break
 			}
 			wg.Add(1)
-			go func() {
+			go func(address common.Address) {
 				defer wg.Done()
-				nodeApplication, err1 := NodeRetrieveApplication(&nodeAddress, &poolAddress)
+				fmt.Println(address.String())
+				nodeApplication, err1 := NodeRetrieveApplication(&address, &poolAddress)
 				if err1 != nil {
 					err = err1
 					running = false
@@ -137,7 +139,7 @@ func PoolNodesWithData(poolAddress common.Address, nodeAddresses *[]common.Addre
 				if filter && nodeApplication.Status == status {
 					safeSend(appChan, *nodeApplication)
 				}
-			}()
+			}(nodeAddress)
 		}
 		wg.Wait()
 		close(appChan)
