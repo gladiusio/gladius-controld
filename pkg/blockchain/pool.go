@@ -119,7 +119,7 @@ func PoolNodesWithData(poolAddress common.Address, nodeAddresses *[]common.Addre
 				if err1 != nil {
 					err = err1
 					running = false
-					close(appChan)
+					return
 				}
 				if filter && nodeApplication.Status == status {
 					appChan <- *nodeApplication
