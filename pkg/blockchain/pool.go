@@ -102,16 +102,6 @@ func PoolNodes(poolAddress string) (*[]common.Address, error) {
 	return &nodeAddressList, nil
 }
 
-func safeSend(ch chan NodeApplication, value NodeApplication) (closed bool) {
-	defer func() {
-		if recover() != nil {
-			closed = true
-		}
-	}()
-	ch <- value  // panic if ch is closed
-	return false // <=> closed = false; return
-}
-
 func PoolNodesWithData(poolAddress common.Address, nodeAddresses *[]common.Address, status int) (*[]NodeApplication, error) {
 	filter := status >= 0
 
@@ -121,11 +111,13 @@ func PoolNodesWithData(poolAddress common.Address, nodeAddresses *[]common.Addre
 	go func() {
 		var wg sync.WaitGroup
 		running := true
+		// Go through all of the application addresses
 		for _, nodeAddress := range *nodeAddresses {
 			if !running {
 				break
 			}
 			wg.Add(1)
+			// Fetch the application async
 			go func(address common.Address) {
 				defer wg.Done()
 				nodeApplication, err1 := NodeRetrieveApplication(&address, &poolAddress)
@@ -135,11 +127,13 @@ func PoolNodesWithData(poolAddress common.Address, nodeAddresses *[]common.Addre
 					return
 				}
 				if filter && nodeApplication.Status == status {
-					safeSend(appChan, *nodeApplication)
+					appChan <- *nodeApplication
 				}
 			}(nodeAddress)
 		}
+		// Wait until all goroutines are done
 		wg.Wait()
+		// We close this so the the for loop below knows we're done sending data
 		close(appChan)
 	}()
 
