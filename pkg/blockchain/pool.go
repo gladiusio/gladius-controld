@@ -105,16 +105,25 @@ func PoolNodesWithData(poolAddress common.Address, nodeAddresses *[]common.Addre
 	filter := status >= 0
 
 	var applications []NodeApplication
+	appChan := make(chan NodeApplication)
 
-	for _, nodeAddress := range *nodeAddresses {
-		nodeApplication, err := NodeRetrieveApplication(&nodeAddress, &poolAddress)
-		if err != nil {
-			return nil, err
+	go func() {
+		for _, nodeAddress := range *nodeAddresses {
+			go func() {
+				nodeApplication, err := NodeRetrieveApplication(&nodeAddress, &poolAddress)
+				if err != nil {
+					close(appChan)
+				}
+				if filter && nodeApplication.Status == status {
+					appChan <- *nodeApplication
+				}
+			}()
 		}
+		close(appChan)
+	}()
 
-		if filter && nodeApplication.Status == status {
-			applications = append(applications, *nodeApplication)
-		}
+	for value := range appChan {
+		applications = append(applications, value)
 	}
 
 	return &applications, nil
