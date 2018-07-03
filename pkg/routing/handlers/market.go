@@ -3,8 +3,9 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
-	)
+)
 
 // MarketPoolsHandler - Returns all Pools
 func MarketPoolsHandler(w http.ResponseWriter, r *http.Request) {

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"strings"
+	"sync"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -105,19 +106,41 @@ func PoolNodesWithData(poolAddress common.Address, nodeAddresses *[]common.Addre
 	filter := status >= 0
 
 	var applications []NodeApplication
-
-	for _, nodeAddress := range *nodeAddresses {
-		nodeApplication, err := NodeRetrieveApplication(&nodeAddress, &poolAddress)
-		if err != nil {
-			return nil, err
+	appChan := make(chan NodeApplication)
+	var err error
+	go func() {
+		var wg sync.WaitGroup
+		running := true
+		// Go through all of the application addresses
+		for _, nodeAddress := range *nodeAddresses {
+			if !running {
+				break
+			}
+			wg.Add(1)
+			// Fetch the application async
+			go func(address common.Address) {
+				defer wg.Done()
+				nodeApplication, err1 := NodeRetrieveApplication(&address, &poolAddress)
+				if err1 != nil {
+					err = err1
+					running = false
+					return
+				}
+				if filter && nodeApplication.Status == status {
+					appChan <- *nodeApplication
+				}
+			}(nodeAddress)
 		}
+		// Wait until all goroutines are done
+		wg.Wait()
+		// We close this so the the for loop below knows we're done sending data
+		close(appChan)
+	}()
 
-		if filter && nodeApplication.Status == status {
-			applications = append(applications, *nodeApplication)
-		}
+	for value := range appChan {
+		applications = append(applications, value)
 	}
-
-	return &applications, nil
+	return &applications, err
 }
 
 func PoolUpdateNodeStatus(passphrase, poolAddress, nodeAddress string, status int) (*types.Transaction, error) {
