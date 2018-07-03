@@ -16,4 +16,6 @@
 .DS_Store
 vendor/
 
+.vagrant/
+
 build/
