@@ -22,14 +22,7 @@ endif
 SRC_DIR=./cmd
 DST_DIR=./build
 
-CLI_SRC=$(SRC_DIR)/gladius-cli
-NET_SRC=$(SRC_DIR)/gladius-networkd
-# control daemon source is not yet available
 CTL_SRC=$(SRC_DIR)/gladius-controld
-
-CLI_DEST=$(DST_DIR)/gladius-cli$(BINARY_SUFFIX)
-NET_DEST=$(DST_DIR)/gladius-networkd$(BINARY_SUFFIX)
-# control daemon source is not yet available
 CTL_DEST=$(DST_DIR)/gladius-controld$(BINARY_SUFFIX)
 
 # commands for go
@@ -58,8 +51,8 @@ dependencies:
 	"${GOPATH}/src/github.com/ethereum/go-ethereum/crypto/secp256k1/libsecp256k1" \
 	"vendor/github.com/ethereum/go-ethereum/crypto/secp256k1/"
 
-test: $(NET_SRC)
-	$(GOTEST) $(NET_SRC)
+test: $(CTL_SRC)
+	$(GOTEST) $(CTL_SRC)
 
 controld: test
-	$(GOBUILD) -o $(CTR_DEST) $(CTL_SRC)
+	$(GOBUILD) -o $(CTL_DEST) $(CTL_SRC)
