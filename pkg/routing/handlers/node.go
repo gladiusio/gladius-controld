@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
-	"github.com/gorilla/mux"
 	"github.com/gladiusio/gladius-controld/pkg/routing/response"
+	"github.com/gorilla/mux"
 )
 
 func NodeRetrieveDataHandler(w http.ResponseWriter, r *http.Request) {
@@ -19,7 +19,7 @@ func NodeRetrieveDataHandler(w http.ResponseWriter, r *http.Request) {
 		ErrorHandler(w, r, "Node data could not be retrieved or data is not set", err, http.StatusNotFound)
 	}
 
-	nodeResponse := blockchain.NodeResponse{Address:nodeAddress.String(), Data:nodeData}
+	nodeResponse := blockchain.NodeResponse{Address: nodeAddress.String(), Data: nodeData}
 
 	ResponseHandler(w, r, "null", true, nil, nodeResponse, nil)
 }
@@ -77,7 +77,7 @@ func NodeApplicationStatusHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	statusResponse := response.NodeApplication{Status:statusString, Code:int(status.Uint64())}
+	statusResponse := response.NodeApplication{Status: statusString, Code: int(status.Uint64())}
 
 	ResponseHandler(w, r, "null", true, nil, statusResponse, nil)
 }

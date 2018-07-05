@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	PORT       = "3001"
-	DEBUG      = false
+	PORT  = "3001"
+	DEBUG = false
 )
 
 func Start() {
@@ -33,12 +33,8 @@ func Start() {
 	apiRouter.NotFoundHandler = http.HandlerFunc(handlers.NotFoundHandler)
 
 	// P2P setup
-<<<<<<< HEAD
 	peer := peer.New()
 	peer.Start()
-=======
-	peerNetwork := peer.New()
->>>>>>> develop
 	p2pRouter := apiRouter.PathPrefix("/p2p").Subrouter()
 
 	// P2P Message Routes
@@ -48,23 +44,15 @@ func Start() {
 		Methods("POST")
 
 	// P2P State Routes
-<<<<<<< HEAD
 	p2pRouter.HandleFunc("/state/pull", handlers.PullStateFromDiscoveryHandler(peer)).
 		Methods("POST")
 	p2pRouter.HandleFunc("/state/push_message", handlers.PushStateMessageHandler(peer)).
-=======
-	p2pRouter.HandleFunc("/state/push_message", handlers.PushStateMessageHandler(peerNetwork)).
->>>>>>> develop
 		Methods("POST")
-	p2pRouter.HandleFunc("/state/", handlers.GetFullStateHandler(peerNetwork)).
+	p2pRouter.HandleFunc("/state/", handlers.GetFullStateHandler(peer)).
 		Methods("GET")
-<<<<<<< HEAD
 	p2pRouter.HandleFunc("/state/signatures", handlers.GetSignatureListHandler(peer)).
 		Methods("GET")
 	p2pRouter.HandleFunc("/state/content_diff", handlers.GetContentHandler(peer)).
-=======
-	p2pRouter.HandleFunc("/state/", handlers.PushStateMessageHandler(peerNetwork)).
->>>>>>> develop
 		Methods("POST")
 
 	// Key Management
