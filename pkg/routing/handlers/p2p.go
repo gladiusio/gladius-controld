@@ -116,7 +116,7 @@ func CreateSignedMessageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	signed, err := signature.CreateSignedMessageString(message.New(messageBytes), string(passphrase))
+	signed, err := signature.CreateSignedMessage(message.New(messageBytes), string(passphrase))
 	if err != nil {
 		ErrorHandler(w, r, "Could not create sign message. Passphrase likely incorrect.", err, http.StatusBadRequest)
 		return

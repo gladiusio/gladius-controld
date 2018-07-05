@@ -96,12 +96,11 @@ func (sm SignedMessage) IsInPoolAndVerified() bool {
 	return addressInPool && sm.IsVerified()
 }
 
-// CreateSignedMessageString creates a signed state from the message where
-func CreateSignedMessageString(message *message.Message, passphrase string) (string, error) {
+func CreateSignedMessage(message *message.Message, passphrase string) (*SignedMessage, error) {
 	ga := blockchain.NewGladiusAccountManager()
 	success, err := ga.UnlockAccount(passphrase)
 	if success == false || err != nil {
-		return "", errors.New("Error unlocking wallet")
+		return nil, errors.New("Error unlocking wallet")
 	}
 
 	// Create a serailized JSON string
@@ -118,17 +117,17 @@ func CreateSignedMessageString(message *message.Message, passphrase string) (str
 	account, err := ga.GetAccount()
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	signature, err := ga.Keystore().SignHash(*account, hash)
 	if err != nil {
-		return "", errors.New("Error signing message")
+		return nil, errors.New("Error signing message")
 	}
 
 	address, err := ga.GetAccountAddress()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	addressString := address.String()
@@ -143,11 +142,20 @@ func CreateSignedMessageString(message *message.Message, passphrase string) (str
 		Address:   addressString,
 	}
 
+	return signed, nil
+}
+
+// CreateSignedMessageString creates a signed state from the message where
+func CreateSignedMessageString(message *message.Message, passphrase string) (string, error) {
+	signed, err := CreateSignedMessage(message, passphrase)
+	if err != nil {
+		return "", err
+	}
 	// Encode the struct as a json
 	bytes, err := json.Marshal(signed)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
-	return string(bytes), err
+	return string(bytes), nil
 }
