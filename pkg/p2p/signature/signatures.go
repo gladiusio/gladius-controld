@@ -99,8 +99,8 @@ func (sm SignedMessage) IsInPoolAndVerified() bool {
 // CreateSignedMessageString creates a signed state from the message where
 func CreateSignedMessageString(message *message.Message, passphrase string) (string, error) {
 	ga := blockchain.NewGladiusAccountManager()
-	err := ga.UnlockAccount(passphrase)
-	if err != nil {
+	success, err := ga.UnlockAccount(passphrase)
+	if success == false || err != nil {
 		return "", errors.New("Error unlocking wallet")
 	}
 
@@ -115,16 +115,33 @@ func CreateSignedMessageString(message *message.Message, passphrase string) (str
 	}
 
 	hash := crypto.Keccak256(messageBytes)
-	signature, err := ga.Keystore().SignHash(ga.GetAccount(), hash)
+	account, err := ga.GetAccount()
 
+	if err != nil {
+		return "", err
+	}
+
+	signature, err := ga.Keystore().SignHash(*account, hash)
 	if err != nil {
 		return "", errors.New("Error signing message")
 	}
 
+	address, err := ga.GetAccountAddress()
+	if err != nil {
+		return "", err
+	}
+
+	addressString := address.String()
+
 	h := json.RawMessage(messageBytes)
 
 	// Create the signed message
-	signed := &SignedMessage{Message: &h, Hash: hash, Signature: signature, Address: ga.GetAccountAddress().String()}
+	signed := &SignedMessage{
+		Message:   &h,
+		Hash:      hash,
+		Signature: signature,
+		Address:   addressString,
+	}
 
 	// Encode the struct as a json
 	bytes, err := json.Marshal(signed)

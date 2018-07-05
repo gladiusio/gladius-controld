@@ -6,22 +6,22 @@ import (
 
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"github.com/gorilla/mux"
+	"github.com/gladiusio/gladius-controld/pkg/routing/response"
 )
 
-// NodeHandler - Main Node API route handler
-func NodeHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Main Node API\n"))
-}
-
 func NodeRetrieveDataHandler(w http.ResponseWriter, r *http.Request) {
-	nodeData, err := blockchain.NodeRetrieveData()
+	nodeAddress, err := blockchain.NodeOwnedByUser()
+	if err != nil {
+		ErrorHandler(w, r, "Node not found for user", err, http.StatusNotFound)
+	}
+	nodeData, err := blockchain.NodeRetrieveDataForAddress(*nodeAddress)
 	if err != nil {
 		ErrorHandler(w, r, "Node data could not be retrieved or data is not set", err, http.StatusNotFound)
 	}
 
-	jsonResponse := nodeData.String()
+	nodeResponse := blockchain.NodeResponse{Address:nodeAddress.String(), Data:nodeData}
 
-	ResponseHandler(w, r, "null", jsonResponse)
+	ResponseHandler(w, r, "null", true, nil, nodeResponse, nil)
 }
 
 func NodeSetDataHandler(w http.ResponseWriter, r *http.Request) {
@@ -39,7 +39,8 @@ func NodeSetDataHandler(w http.ResponseWriter, r *http.Request) {
 		ErrorHandler(w, r, "Node data could not be set", err, http.StatusBadRequest)
 		return
 	}
-	TransactionHandler(w, r, "null", transaction)
+
+	ResponseHandler(w, r, "null", true, nil, nil, transaction)
 }
 
 func NodeApplyToPoolHandler(w http.ResponseWriter, r *http.Request) {
@@ -55,9 +56,7 @@ func NodeApplyToPoolHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	println(transaction)
-
-	TransactionHandler(w, r, "null", transaction)
+	ResponseHandler(w, r, "null", true, nil, nil, transaction)
 }
 
 func NodeApplicationStatusHandler(w http.ResponseWriter, r *http.Request) {
@@ -72,25 +71,13 @@ func NodeApplicationStatusHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var response string = "{ \"code\": " + status.String() + ", \"status\": "
-
-	switch status.String() {
-	// Unavailable
-	case "0":
-		response += "\"Unavailable\""
-	// Approved
-	case "1":
-		response += "\"Approved\""
-	// Rejected
-	case "2":
-		response += "\"Rejected\""
-	// Pending
-	case "3":
-		response += "\"Pending\""
+	statusString, err := blockchain.ApplicationStatusFromInt(int(status.Uint64()))
+	if err != nil {
+		ErrorHandler(w, r, "Could not find status for pool application", err, http.StatusBadRequest)
+		return
 	}
-	response += ",\"availableStatuses\": [{\"status\": \"Not Available\",\"code\": 0},{\"status\": \"Approved\",\"code\": 1},{\"status\": \"Rejected\",\"code\": 2},{\"status\": \"Pending\",\"code\": 3}]"
 
-	response += "}"
+	statusResponse := response.NodeApplication{Status:statusString, Code:int(status.Uint64())}
 
-	ResponseHandler(w, r, "null", response)
+	ResponseHandler(w, r, "null", true, nil, statusResponse, nil)
 }

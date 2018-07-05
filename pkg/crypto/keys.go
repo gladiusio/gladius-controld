@@ -28,7 +28,7 @@ type Key struct {
 }
 
 func CreateKeyPair(name, comment, email string) (string, error) {
-	var pathTemp string = viper.GetString("DirKeys")
+	var pathTemp = viper.GetString("DirKeys")
 
 	entity, _ := openpgp.NewEntity(name, comment, email, nil)
 	key := Key{*entity}
@@ -84,7 +84,7 @@ func CreateKeyPair(name, comment, email string) (string, error) {
 }
 
 func EncryptData(data string) (string, error) {
-	var pathTemp string = viper.GetString("DirKeys")
+	var pathTemp = viper.GetString("DirKeys")
 	keyringFileBuffer, err := ioutil.ReadFile(pathTemp + "/public.asc")
 	if err != nil {
 		return "", err
@@ -128,7 +128,7 @@ func EncryptMessage(message, publicKey string) (string, error) {
 }
 
 func DecryptData(message string) (string, error) {
-	var pathTemp string = viper.GetString("DirKeys")
+	var pathTemp = viper.GetString("DirKeys")
 	keyringFileBuffer, err := os.Open(pathTemp + "/private.asc")
 	if err != nil {
 		return "", err
@@ -141,7 +141,8 @@ func DecryptData(message string) (string, error) {
 	// Decode the base64 string
 	dec, err := base64.StdEncoding.DecodeString(message)
 	if err != nil {
-		return "", err
+		// TODO this resolves the prior keybase message submission issue, but should return an err instead of nil
+		return "", nil
 	}
 
 	// Decrypt it with the contents of the private key

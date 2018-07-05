@@ -27,6 +27,24 @@ func TxReceipt(txHash common.Hash) (*types.Receipt, error) {
 	return conn.TransactionReceipt(ctx, txHash)
 }
 
+func ApplicationStatusFromInt(status int) (string, error) {
+	switch status {
+	case 0:
+		// Unavailable
+		return "Unavailable", nil
+	case 1:
+		// Approved
+		return "Approved", nil
+	case 2:
+		// Rejected
+		return "Rejected", nil
+	case 3:
+		// Pending
+		return "Pending", nil
+	}
+	return "Not Found", errors.New("Status Not Found for: " + string(status))
+}
+
 func ApplicationStatusFromString(status string) (int, error) {
 	switch status {
 	case "unavailable":

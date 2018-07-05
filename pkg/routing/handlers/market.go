@@ -7,28 +7,24 @@ import (
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 )
 
-// MarketHandler - Main Market API route handler
-func MarketHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Main Market API\n"))
-}
-
 // MarketPoolsHandler - Returns all Pools
 func MarketPoolsHandler(w http.ResponseWriter, r *http.Request) {
-	pools, err := blockchain.MarketPools()
+	poolsWithData, err := blockchain.MarketPools(true)
+	if err != nil {
+		ErrorHandler(w, r, "Could not retrieve pools", err, http.StatusNotFound)
+		return
+	}
+	ResponseHandler(w, r, "null", true, nil, poolsWithData, nil)
+}
+
+func MarketPoolsOwnedHandler(w http.ResponseWriter, r *http.Request) {
+	pools, err := blockchain.MarketPoolsOwnedByUser(true)
 	if err != nil {
 		ErrorHandler(w, r, "Could not retrieve pools", err, http.StatusNotFound)
 		return
 	}
 
-	length := int(len(pools))
-	response := make([]string, length)
-
-	for i, pool := range pools {
-		response[i] = pool.String()
-	}
-
-	jsonResponse, _ := json.Marshal(response)
-	ResponseHandler(w, r, "null", string(jsonResponse))
+	ResponseHandler(w, r, "null", true, nil, pools, nil)
 }
 
 type poolData struct {
@@ -48,5 +44,5 @@ func MarketPoolsCreateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	TransactionHandler(w, r, "null", transaction)
+	ResponseHandler(w, r, "null", true, nil, nil, transaction)
 }

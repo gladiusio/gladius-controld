@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"strings"
+	"sync"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -27,8 +28,12 @@ func ConnectPool(poolAddress common.Address) *generated.Pool {
 func PoolRetrievePublicKey(poolAddress string) (string, error) {
 	pool := ConnectPool(common.HexToAddress(poolAddress))
 	ga := NewGladiusAccountManager()
+	address, err := ga.GetAccountAddress()
+	if err != nil {
+		return "", err
+	}
 
-	publicKey, err := pool.PublicKey(&bind.CallOpts{From: ga.GetAccountAddress()})
+	publicKey, err := pool.PublicKey(&bind.CallOpts{From: *address})
 	if err != nil {
 		return "null", nil
 	}
@@ -44,20 +49,15 @@ type PoolPublicData struct {
 	MaxBandwidth string `json:"maxBandwidth"`
 }
 
-func (d *PoolPublicData) String() string {
-	json, err := json.Marshal(d)
-	if err != nil {
-		return "{}"
-	}
-
-	return string(json)
-}
-
 func PoolRetrievePublicData(poolAddress string) (*PoolPublicData, error) {
 	pool := ConnectPool(common.HexToAddress(poolAddress))
 	ga := NewGladiusAccountManager()
+	address, err := ga.GetAccountAddress()
+	if err != nil {
+		return nil, err
+	}
 
-	publicDataResponse, err := pool.PublicData(&bind.CallOpts{From: ga.GetAccountAddress()})
+	publicDataResponse, err := pool.PublicData(&bind.CallOpts{From: *address})
 	if err != nil {
 		return nil, err
 	}
@@ -90,35 +90,57 @@ func PoolSetPublicData(passphrase, poolAddress, data string) (*types.Transaction
 func PoolNodes(poolAddress string) (*[]common.Address, error) {
 	pool := ConnectPool(common.HexToAddress(poolAddress))
 	ga := NewGladiusAccountManager()
+	address, err := ga.GetAccountAddress()
+	if err != nil {
+		return nil, err
+	}
 
-	nodeAddressList, err := pool.GetNodeList(&bind.CallOpts{From: ga.GetAccountAddress()})
+	nodeAddressList, err := pool.GetNodeList(&bind.CallOpts{From: *address})
 	if err != nil {
 		return nil, err
 	}
 	return &nodeAddressList, nil
 }
 
-func PoolNodesWithData(poolAddress common.Address, nodeAddresses *[]common.Address, status int) (*string, error) {
-	var filter bool = status >= 0
+func PoolNodesWithData(poolAddress common.Address, nodeAddresses *[]common.Address, status int) (*[]NodeApplication, error) {
+	filter := status >= 0
 
-	response := "["
-
-	for _, nodeAddress := range *nodeAddresses {
-		nodeApplication, err := NodeRetrieveApplication(&nodeAddress, &poolAddress)
-		if err != nil {
-			return nil, err
+	var applications []NodeApplication
+	appChan := make(chan NodeApplication)
+	var err error
+	go func() {
+		var wg sync.WaitGroup
+		running := true
+		// Go through all of the application addresses
+		for _, nodeAddress := range *nodeAddresses {
+			if !running {
+				break
+			}
+			wg.Add(1)
+			// Fetch the application async
+			go func(address common.Address) {
+				defer wg.Done()
+				nodeApplication, err1 := NodeRetrieveApplication(&address, &poolAddress)
+				if err1 != nil {
+					err = err1
+					running = false
+					return
+				}
+				if filter && nodeApplication.Status == status {
+					appChan <- *nodeApplication
+				}
+			}(nodeAddress)
 		}
+		// Wait until all goroutines are done
+		wg.Wait()
+		// We close this so the the for loop below knows we're done sending data
+		close(appChan)
+	}()
 
-		if filter && nodeApplication.Status == status {
-			response += nodeApplication.String() + ","
-		} else if !filter {
-			response += nodeApplication.String() + ","
-		}
+	for value := range appChan {
+		applications = append(applications, value)
 	}
-	response = strings.TrimRight(response, ",")
-	response += "]"
-
-	return &response, nil
+	return &applications, err
 }
 
 func PoolUpdateNodeStatus(passphrase, poolAddress, nodeAddress string, status int) (*types.Transaction, error) {
@@ -139,11 +161,9 @@ func PoolUpdateNodeStatus(passphrase, poolAddress, nodeAddress string, status in
 		err = errors.New("PoolUpdateNodeStatus - Node cannot change status to `Unavailable`")
 	case 1:
 		// Approved
-		println("aprrove")
 		transaction, err = pool.AcceptNode(auth, common.HexToAddress(nodeAddress))
 	case 2:
 		// Rejected
-		println("reject")
 		transaction, err = pool.RejectNode(auth, common.HexToAddress(nodeAddress))
 	case 3:
 		// Pending
@@ -156,6 +176,3 @@ func PoolUpdateNodeStatus(passphrase, poolAddress, nodeAddress string, status in
 
 	return transaction, nil
 }
-
-//
-// func NodesByStatus(poolAddress string, status int) (*[]generated.Node, error) {}

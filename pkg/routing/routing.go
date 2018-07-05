@@ -13,7 +13,6 @@ import (
 )
 
 const (
-	STATIC_DIR = "/static/"
 	PORT       = "3001"
 	DEBUG      = false
 )
@@ -34,8 +33,12 @@ func Start() {
 	apiRouter.NotFoundHandler = http.HandlerFunc(handlers.NotFoundHandler)
 
 	// P2P setup
+<<<<<<< HEAD
 	peer := peer.New()
 	peer.Start()
+=======
+	peerNetwork := peer.New()
+>>>>>>> develop
 	p2pRouter := apiRouter.PathPrefix("/p2p").Subrouter()
 
 	// P2P Message Routes
@@ -45,15 +48,23 @@ func Start() {
 		Methods("POST")
 
 	// P2P State Routes
+<<<<<<< HEAD
 	p2pRouter.HandleFunc("/state/pull", handlers.PullStateFromDiscoveryHandler(peer)).
 		Methods("POST")
 	p2pRouter.HandleFunc("/state/push_message", handlers.PushStateMessageHandler(peer)).
+=======
+	p2pRouter.HandleFunc("/state/push_message", handlers.PushStateMessageHandler(peerNetwork)).
+>>>>>>> develop
 		Methods("POST")
-	p2pRouter.HandleFunc("/state/", handlers.GetFullStateHandler(peer)).
+	p2pRouter.HandleFunc("/state/", handlers.GetFullStateHandler(peerNetwork)).
 		Methods("GET")
+<<<<<<< HEAD
 	p2pRouter.HandleFunc("/state/signatures", handlers.GetSignatureListHandler(peer)).
 		Methods("GET")
 	p2pRouter.HandleFunc("/state/content_diff", handlers.GetContentHandler(peer)).
+=======
+	p2pRouter.HandleFunc("/state/", handlers.PushStateMessageHandler(peerNetwork)).
+>>>>>>> develop
 		Methods("POST")
 
 	// Key Management
@@ -115,6 +126,7 @@ func Start() {
 	// Market Sub-Routes
 	marketRouter := apiRouter.PathPrefix("/market").Subrouter()
 	marketRouter.HandleFunc("/pools", handlers.MarketPoolsHandler)
+	marketRouter.HandleFunc("/pools/owned", handlers.MarketPoolsOwnedHandler)
 	marketRouter.HandleFunc("/pools/create", handlers.MarketPoolsCreateHandler).
 		Methods("POST")
 
