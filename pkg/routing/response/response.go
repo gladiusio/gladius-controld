@@ -44,9 +44,9 @@ type DefaultResponse struct {
 
 type TxHash struct {
 	Value string `json:"value,omitempty"`
-	Status bool `json:"status,omitempty"`
-	EndPoint string `json:"statusEndpoint"`
-	Complete bool `json:"complete,omitempty"`
+	Status bool `json:"status"`
+	EndPoint string `json:"statusEndpoint,omitempty"`
+	Complete bool `json:"complete"`
 	Etherscan etherscan `json:"etherscan,omitempty"`
 	Transaction json.RawMessage `json:"transaction, omitempty"`
 	Receipt json.RawMessage `json:"receipt,omitempty"`
