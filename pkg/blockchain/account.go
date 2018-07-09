@@ -5,13 +5,13 @@ import (
 	"io/ioutil"
 	"strings"
 
+	"encoding/json"
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/viper"
 	"net/http"
-	"encoding/json"
 	"strconv"
 )
 
@@ -93,8 +93,8 @@ const (
 )
 
 type Balance struct {
-	Value 	uint64
-	Symbol 	string
+	Value  uint64
+	Symbol string
 }
 
 func GetAccountBalance(address common.Address, symbol BalanceType) (Balance, error) {
@@ -124,9 +124,9 @@ func GetAccountBalance(address common.Address, symbol BalanceType) (Balance, err
 	body, err := ioutil.ReadAll(resp.Body)
 
 	type etherscanResult struct {
-		Status string `json:"status"`
+		Status  string `json:"status"`
 		Message string `json:"message"`
-		Result string `json:"result"`
+		Result  string `json:"result"`
 	}
 
 	result := etherscanResult{}
@@ -137,13 +137,73 @@ func GetAccountBalance(address common.Address, symbol BalanceType) (Balance, err
 		return Balance{}, err
 	}
 
-	balance := Balance{Value:balanceInt, Symbol: symbolString}
+	balance := Balance{Value: balanceInt, Symbol: symbolString}
 
 	return balance, nil
 }
 
-func GetAccountTransactions() {
-	
+type TransactionOptions struct {
+	Filters *TransactionFilter `json:"filters"`
+}
+
+type TransactionFilter struct {
+	EthTransfer bool `json:"eth_transfer"`
+}
+
+type EtherscanTransactionsResponse struct {
+	Status  		string `json:"status"`
+	Message 		string `json:"message"`
+	Transactions  	[]EtherscanTransaction `json:"result"`
+}
+
+type EtherscanTransaction struct {
+	BlockNumber       	string `json:"blockNumber"`
+	TimeStamp         	string `json:"timeStamp"`
+	Hash              	string `json:"hash"`
+	Nonce             	string `json:"nonce"`
+	BlockHash         	string `json:"blockHash"`
+	TransactionIndex  	string `json:"transactionIndex"`
+	From              	string `json:"from"`
+	To                	string `json:"to"`
+	Value             	string `json:"value"`
+	Gas               	string `json:"gas"`
+	GasPrice          	string `json:"gasPrice"`
+	IsError           	string `json:"isError"`
+	TxReceiptStatus  	string `json:"txreceipt_status"`
+	Input             	string `json:"input"`
+	ContractAddress   	string `json:"contractAddress"`
+	CumulativeGasUsed 	string `json:"cumulativeGasUsed"`
+	GasUsed           	string `json:"gasUsed"`
+	Confirmations     	string `json:"confirmations"`
+}
+
+func GetAccountTransactions(address common.Address, options TransactionOptions) (EtherscanTransactionsResponse, error) {
+	resp, err := http.Get("https://api-ropsten.etherscan.io/api?module=account&action=txlist&address=" + address.String() + "&startblock=0&endblock=latest&sort=asc&apikey=3VRW685YYESSYIFVND3DVN9ZNF4BTT1GB8")
+
+	if err != nil {
+		return EtherscanTransactionsResponse{}, err
+	}
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+
+	result := EtherscanTransactionsResponse{}
+	json.Unmarshal(body, &result)
+	var filteredTransactions []EtherscanTransaction
+
+	if options.Filters != nil {
+		for _, transaction := range result.Transactions {
+			if options.Filters.EthTransfer && transaction.Value != "0" {
+				filteredTransactions = append(filteredTransactions, transaction)
+			} else if !options.Filters.EthTransfer && transaction.Value == "0" {
+				filteredTransactions = append(filteredTransactions, transaction)
+			}
+		}
+
+		result.Transactions = filteredTransactions
+	}
+
+	return result, nil
 }
 
 // GetAuth gets the authenticator for the go bindings of our smart contracts

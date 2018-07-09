@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/mux"
 	"errors"
 	"github.com/ethereum/go-ethereum/common"
+	"encoding/json"
 )
 
 func AccountBalanceHandler(w http.ResponseWriter, r *http.Request) {
@@ -32,4 +33,22 @@ func AccountBalanceHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ResponseHandler(w, r, "null", true, nil, balance, nil)
+}
+
+func AccountTransactionsHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	address := vars["address"]
+
+	decoder := json.NewDecoder(r.Body)
+	var options blockchain.TransactionOptions
+	err := decoder.Decode(&options)
+
+	transactions, err := blockchain.GetAccountTransactions(common.HexToAddress(address), options)
+
+	if err != nil {
+		ErrorHandler(w, r, "Could not retrieve transactions for " + address, err, http.StatusInternalServerError)
+		return
+	}
+
+	ResponseHandler(w, r, "null", true, nil, transactions.Transactions, nil)
 }

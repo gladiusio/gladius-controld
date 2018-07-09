@@ -64,7 +64,8 @@ func Start() {
 	// Account Management
 	accountRouter := apiRouter.PathPrefix("/account/{address:0[xX][0-9a-fA-F]{40}}").Subrouter()
 	accountRouter.HandleFunc("/balance/{symbol:[a-z]{3}}", handlers.AccountBalanceHandler)
-	accountRouter.HandleFunc("/transactions", nil)
+	accountRouter.HandleFunc("/transactions", handlers.AccountTransactionsHandler).
+		Methods("POST")
 
 	// Status Sub-Routes
 	statusRouter := apiRouter.PathPrefix("/status").Subrouter()
