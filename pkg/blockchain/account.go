@@ -10,6 +10,9 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/viper"
+	"net/http"
+	"encoding/json"
+	"strconv"
 )
 
 // GladiusAccountManager is a type that allows the user to create a keystore file,
@@ -74,12 +77,73 @@ func (ga GladiusAccountManager) GetAccountAddress() (*common.Address, error) {
 func (ga GladiusAccountManager) GetAccount() (*accounts.Account, error) {
 	store := ga.Keystore()
 	if len(store.Accounts()) < 1 {
-		return nil, errors.New("Account retrieval error, no existing accounts found")
+		return nil, errors.New("account retrieval error, no existing accounts found")
 	}
 
 	account := store.Accounts()[0]
 
 	return &account, nil
+}
+
+type BalanceType int32
+
+const (
+	ETH BalanceType = 0
+	GLA BalanceType = 1
+)
+
+type Balance struct {
+	Value 	uint64
+	Symbol 	string
+}
+
+func GetAccountBalance(address common.Address, symbol BalanceType) (Balance, error) {
+	var resp *http.Response
+	var err error
+	var symbolString string
+
+	glaTokenAddress := "0x972c1e9698b218acc3e7869c1ccfefd3808bdbb2"
+
+	switch symbol {
+	case ETH:
+		resp, err = http.Get("https://api-ropsten.etherscan.io/api?module=account&action=balance&address=" + address.String() + "&tag=latest&apikey=3VRW685YYESSYIFVND3DVN9ZNF4BTT1GB8")
+		symbolString = "ETH"
+		break
+	case GLA:
+		// https://api.etherscan.io/api?module=account&action=tokenbalance&contractaddress=0x57d90b64a1a57749b0f932f1a3395792e12e7055&address=0xe04f27eb70e025b78871a2ad7eabe85e61212761&tag=latest&apikey=YourApiKeyToken
+		resp, err = http.Get("https://api-ropsten.etherscan.io/api?module=account&action=tokenbalance&contractaddress=" + glaTokenAddress + "&address=" + address.String() + "&apikey=3VRW685YYESSYIFVND3DVN9ZNF4BTT1GB8")
+		symbolString = "GLA"
+		break
+	}
+
+	if err != nil {
+		return Balance{}, err
+	}
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+
+	type etherscanResult struct {
+		Status string `json:"status"`
+		Message string `json:"message"`
+		Result string `json:"result"`
+	}
+
+	result := etherscanResult{}
+	json.Unmarshal(body, &result)
+
+	balanceInt, err := strconv.ParseUint(result.Result, 10, 64)
+	if err != nil {
+		return Balance{}, err
+	}
+
+	balance := Balance{Value:balanceInt, Symbol: symbolString}
+
+	return balance, nil
+}
+
+func GetAccountTransactions() {
+	
 }
 
 // GetAuth gets the authenticator for the go bindings of our smart contracts

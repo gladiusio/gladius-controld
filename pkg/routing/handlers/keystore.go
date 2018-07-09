@@ -7,7 +7,7 @@ import (
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"github.com/gladiusio/gladius-controld/pkg/crypto"
 	"github.com/gladiusio/gladius-controld/pkg/routing/response"
-)
+			)
 
 type accountBody struct {
 	Passphrase string `json:"passphrase"`

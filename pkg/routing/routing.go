@@ -10,7 +10,7 @@ import (
 	"github.com/gladiusio/gladius-controld/pkg/routing/handlers"
 	ghandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-)
+		)
 
 const (
 	PORT       = "3001"
@@ -60,6 +60,11 @@ func Start() {
 	walletRouter.HandleFunc("/pgp/view/public", handlers.KeystorePGPPublicKeyRetrievalHandler)
 	walletRouter.HandleFunc("/pgp/create", handlers.KeystorePGPCreationHandler).
 		Methods("POST")
+
+	// Account Management
+	accountRouter := apiRouter.PathPrefix("/account/{address:0[xX][0-9a-fA-F]{40}}").Subrouter()
+	accountRouter.HandleFunc("/balance/{symbol:[a-z]{3}}", handlers.AccountBalanceHandler)
+	accountRouter.HandleFunc("/transactions", nil)
 
 	// Status Sub-Routes
 	statusRouter := apiRouter.PathPrefix("/status").Subrouter()
