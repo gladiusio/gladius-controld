@@ -140,7 +140,7 @@ func (p Peer) pushStateMessage(sm *signature.SignedMessage) error {
 		}()
 		return nil
 	}
-
+	// No data has been sent to peers because there are none
 	return errors.New("not enough peers, only updating local state")
 }
 
