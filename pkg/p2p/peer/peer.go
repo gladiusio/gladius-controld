@@ -110,7 +110,7 @@ func (p Peer) pushStateMessage(sm *signature.SignedMessage) error {
 			r := rand.New(s) // initialize local pseudorandom generator
 			timestamp := sm.GetTimestamp()
 			for (time.Now().Unix() - timestamp) < p.maxMessageAge {
-				if numOfPeers > 0 {
+				if len(ipList) > 0 {
 					index := r.Intn(len(ipList))
 					ipInterface := ipList[index]
 					// Delete it for this run
