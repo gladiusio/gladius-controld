@@ -140,7 +140,8 @@ func (p Peer) pushStateMessage(sm *signature.SignedMessage) error {
 		}()
 		return nil
 	}
-	return errors.New("not enough peers")
+
+	return errors.New("not enough peers, only updating local state")
 }
 
 func calcWaitTimeMillis(peers int) time.Duration {
