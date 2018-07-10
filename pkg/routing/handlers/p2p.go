@@ -12,6 +12,37 @@ import (
 	"github.com/gladiusio/gladius-controld/pkg/p2p/signature"
 )
 
+func parseSignedMessageFromBytes(smBytes []byte) (*signature.SignedMessage, error) {
+	messageBytes, _, _, err := jsonparser.Get(smBytes, "message")
+	if err != nil {
+		return nil, errors.New("Can't find `message` in body")
+	}
+
+	hash, err := jsonparser.GetString(smBytes, "hash")
+	if err != nil {
+		return nil, errors.New("Can't find `hash` in body")
+	}
+
+	signatureString, err := jsonparser.GetString(smBytes, "signature")
+	if err != nil {
+		return nil, errors.New("Could not find `signature` in body")
+
+	}
+
+	address, err := jsonparser.GetString(smBytes, "address")
+	if err != nil {
+		return nil, errors.New("Could not find `address` in body")
+	}
+
+	parsed, err := signature.ParseSignedMessage(string(messageBytes), hash, signatureString, address)
+	if err != nil {
+		return nil, errors.New("Couldn't parse body")
+
+	}
+
+	return parsed, nil
+}
+
 // Helper to create signed message from body
 func getSignedMessageFromBody(w http.ResponseWriter, r *http.Request) *signature.SignedMessage {
 	body, err := ioutil.ReadAll(r.Body)
@@ -20,37 +51,13 @@ func getSignedMessageFromBody(w http.ResponseWriter, r *http.Request) *signature
 		return nil
 	}
 
-	messageBytes, _, _, err := jsonparser.Get(body, "message")
+	sm, err := parseSignedMessageFromBytes(body)
+
 	if err != nil {
-		ErrorHandler(w, r, "Could not find `message` in body", err, http.StatusBadRequest)
-		return nil
+		ErrorHandler(w, r, "Error parsing signed message", err, http.StatusBadRequest)
 	}
 
-	hash, err := jsonparser.GetString(body, "hash")
-	if err != nil {
-		ErrorHandler(w, r, "Could not find `hash` in body", err, http.StatusBadRequest)
-		return nil
-	}
-
-	signatureString, err := jsonparser.GetString(body, "signature")
-	if err != nil {
-		ErrorHandler(w, r, "Could not find `signature` in body", err, http.StatusBadRequest)
-		return nil
-	}
-
-	address, err := jsonparser.GetString(body, "address")
-	if err != nil {
-		ErrorHandler(w, r, "Could not find `address` in body", err, http.StatusBadRequest)
-		return nil
-	}
-
-	parsed, err := signature.ParseSignedMessage(string(messageBytes), hash, signatureString, address)
-	if err != nil {
-		ErrorHandler(w, r, "Couldn't parse body", err, http.StatusBadRequest)
-		return nil
-	}
-
-	return parsed
+	return sm
 }
 
 // Helper to get fields from the json body and verify the signature
@@ -146,37 +153,50 @@ func PushStateMessageHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.R
 	}
 }
 
-func getPullDataFromBody(w http.ResponseWriter, r *http.Request) (ip, passphrase string) {
+func getIntroductionDataFromBody(w http.ResponseWriter, r *http.Request) (ip, passphrase string, signedMessage []byte) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		ErrorHandler(w, r, "Error decoding body", err, http.StatusBadRequest)
-		return "", ""
+		return "", "", []byte("")
 	}
 
 	ip, err = jsonparser.GetString(body, "ip")
 	if err != nil {
 		ErrorHandler(w, r, "Could not find `ip` in body", err, http.StatusBadRequest)
-		return "", ""
+		return "", "", []byte("")
 	}
 
 	passphrase, err = jsonparser.GetString(body, "passphrase")
 	if err != nil {
 		ErrorHandler(w, r, "Could not find `passphrase` in body", err, http.StatusBadRequest)
-		return "", ""
+		return "", "", []byte("")
 	}
 
-	return ip, passphrase
+	signedMessage, _, _, err = jsonparser.Get(body, "signed_message")
+	if err != nil {
+		ErrorHandler(w, r, "Could not find `signed_message` in body", err, http.StatusBadRequest)
+		return "", "", []byte("")
+	}
+
+	return ip, passphrase, signedMessage
 }
 
-// PullStateFromDiscoveryHandler takes in an IP and a passhprase and pulls state from the given node
-func PullStateFromDiscoveryHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
+// IntroductionHandler takes in an IP and a passhprase and pulls state from the
+// given node, and then introduces itself to it.
+func IntroductionHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ip, passphrase := getPullDataFromBody(w, r)
+		ip, passphrase, signedMessage := getIntroductionDataFromBody(w, r)
 		if ip != "" && passphrase != "" {
 			err := p.PullState(ip, passphrase)
 			if err != nil {
-				ErrorHandler(w, r, "Could not process the request", err, http.StatusBadRequest)
+				ErrorHandler(w, r, "Could not pull state from peer", err, http.StatusBadRequest)
 			} else {
+				sm, err := parseSignedMessageFromBytes(signedMessage)
+				if err != nil {
+					ErrorHandler(w, r, "Could not parse signed message", err, http.StatusBadRequest)
+					return
+				}
+				p.UpdateAndPushState(sm)
 				ResponseHandler(w, r, "Pulled state", true, nil, nil, nil)
 			}
 		}

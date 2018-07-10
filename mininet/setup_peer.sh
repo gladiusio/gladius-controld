@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Run the conrold
-GLADIUSBASE=/gladius /vagrant/build/gladius-controld &
+GLADIUSBASE=/gladius /vagrant/build/gladius-controld >> /tmp/gladius-connrold.out &
 
 # Wait for it to start
 sleep 3s

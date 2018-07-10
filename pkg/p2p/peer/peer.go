@@ -19,7 +19,7 @@ import (
 
 // New returns a new peer type
 func New() *Peer {
-	peer := &Peer{peerState: &state.State{}, running: false, maxMessageAge: 10, client: &client{}}
+	peer := &Peer{peerState: &state.State{}, running: false, maxMessageAge: 3, client: &client{}}
 	peer.server = newServer(peer)
 	return peer
 }
@@ -80,14 +80,13 @@ func (p *Peer) PullState(ip, passphrase string) error {
 }
 
 func (p *Peer) getPeerIPs() []string {
-	ipList := p.peerState.GetNodeFields("IPAddress")
+	ipList := p.GetState().GetNodeFields("IPAddress")
 	ips := make([]string, 0)
 	ga := blockchain.NewGladiusAccountManager()
 	address, err := ga.GetAccountAddress()
 	myIP := ""
 	if err == nil {
 		myIP = p.GetState().GetNodeField(address.String(), "IPAddress").(state.SignedField).Data
-		fmt.Println("MyIP: " + myIP)
 	}
 	// Go through all of the fields and get the string IP
 	for _, ip := range ipList {
@@ -102,12 +101,12 @@ func (p *Peer) getPeerIPs() []string {
 // UpdateAndPushState updates the local state and pushes it to several other peers
 func (p *Peer) UpdateAndPushState(sm *signature.SignedMessage) error {
 	if sm.GetAgeInSeconds() < p.maxMessageAge {
-		err := p.peerState.UpdateState(sm)
+		updated, err := p.peerState.UpdateState(sm)
 		if err != nil {
 			return err
 		}
 		// Send to peers
-		err = p.pushStateMessage(sm)
+		err = p.pushStateMessage(sm, updated)
 		if err != nil {
 			return err
 		}
@@ -116,7 +115,20 @@ func (p *Peer) UpdateAndPushState(sm *signature.SignedMessage) error {
 	return errors.New("message signature too old: was " + strconv.Itoa(int(sm.GetAgeInSeconds())))
 }
 
-func (p Peer) pushStateMessage(sm *signature.SignedMessage) error {
+// SendUpdate forces a send to a specific peer while not updating local state
+func SendUpdate(sm *signature.SignedMessage, ip string, reply *string) {
+	client, err := rpc.DialHTTP("tcp", ip+":4351")
+	if err != nil {
+		fmt.Println("dialing:", err)
+	} else {
+		err = client.Call("State.Update", sm, reply)
+		if err != nil {
+			fmt.Println("can't call method State.Update:", err)
+		}
+	}
+}
+
+func (p Peer) pushStateMessage(sm *signature.SignedMessage, stateChanged bool) error {
 	ipList := p.getPeerIPs()
 	numOfPeers := len(ipList)
 
@@ -126,31 +138,33 @@ func (p Peer) pushStateMessage(sm *signature.SignedMessage) error {
 		// // waitTime := calcWaitTimeMillis(numOfPeers)
 		go func() {
 			s := rand.NewSource(time.Now().Unix())
-			r := rand.New(s) // initialize local pseudorandom generator
-			timestamp := sm.GetTimestamp()
+			r := rand.New(s)               // initialize local pseudorandom generator
+			timestamp := sm.GetTimestamp() // get timestamp of the signed message
 			count := 0
-			for (time.Now().Unix() - timestamp) < 3 {
-				// If we decide to modify the peer list this is useful
-				if len(ipList) > 0 {
-					index := r.Intn(len(ipList))
-					// Get the data from the signed field
-					ip := ipList[index]
-					client, err := rpc.DialHTTP("tcp", ip+":4351")
-					if err != nil {
-						fmt.Println("dialing:", err)
-					} else {
+
+			if stateChanged {
+				for (time.Now().Unix()-timestamp) < p.maxMessageAge || count > 15 {
+					ipList := p.getPeerIPs()
+
+					// If we decide to modify the peer list this is useful
+					if len(ipList) > 0 {
+						index := r.Intn(len(ipList))
+						// Get the data from the signed field
+						ip := ipList[index]
 						var reply string
-						err = client.Call("State.Update", sm, &reply)
-						if err != nil {
-							fmt.Println("can't call method State.Update:", err)
-							break
-						}
+						SendUpdate(sm, ip, &reply)
+					} else {
+						break
 					}
-				} else {
-					break
+					count++
+					time.Sleep(100 * time.Millisecond)
 				}
-				count++
-				time.Sleep(10 * time.Millisecond)
+			} else {
+				// index := r.Intn(len(ipList))
+				// // Get the data from the signed field
+				// ip := ipList[index]
+				// var reply string
+				// sendUpdate(sm, ip, &reply)
 			}
 		}()
 		return nil
