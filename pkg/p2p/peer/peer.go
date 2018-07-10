@@ -87,6 +87,7 @@ func (p *Peer) getPeerIPs() []string {
 	myIP := ""
 	if err == nil {
 		myIP = p.GetState().GetNodeField(address.String(), "IPAddress").(state.SignedField).Data
+		fmt.Println("MyIP: " + myIP)
 	}
 	// Go through all of the fields and get the string IP
 	for _, ip := range ipList {
