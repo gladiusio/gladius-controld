@@ -4,13 +4,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"math/rand"
-	"net"
 	"net/rpc"
 	"strconv"
 	"time"
 
+	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/message"
+
 	"github.com/gladiusio/gladius-controld/pkg/p2p/signature"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/state"
 )
@@ -52,24 +54,20 @@ func (p *Peer) PullState(ip, passphrase string) error {
 	if err != nil {
 		return errors.New("cannot make signed message: " + err.Error())
 	}
-	conn, err := net.Dial("tcp", ip+":4351")
+	client, err := rpc.DialHTTP("tcp", ip+":4351")
 	if err != nil {
-		return errors.New("dialing: " + err.Error())
+		log.Fatal("dialing:", err)
 	}
-	client := rpc.NewClient(conn)
 	var reply string
 	err = client.Call("State.Get", sm, &reply)
 	if err != nil {
 		fmt.Println(reply)
 		return errors.New("can't call method: " + err.Error())
 	}
-	err = conn.Close()
-	if err != nil {
-		return errors.New("can't close connection: " + err.Error())
-	}
 	// Convert the incoming json to a State type
 	incomingState, err := state.ParseNetworkState([]byte(reply))
 	if err != nil {
+		fmt.Println(reply)
 		return errors.New("corrupted state: " + err.Error())
 	}
 	// Get the signatures and rebuild the state
@@ -79,6 +77,25 @@ func (p *Peer) PullState(ip, passphrase string) error {
 	}
 
 	return nil
+}
+
+func (p *Peer) getPeerIPs() []string {
+	ipList := p.peerState.GetNodeFields("IPAddress")
+	ips := make([]string, 0)
+	ga := blockchain.NewGladiusAccountManager()
+	address, err := ga.GetAccountAddress()
+	myIP := ""
+	if err == nil {
+		myIP = p.GetState().GetNodeField(address.String(), "IPAddress").(state.SignedField).Data
+	}
+	// Go through all of the fields and get the string IP
+	for _, ip := range ipList {
+		if ip != myIP {
+			ips = append(ips, ip.(state.SignedField).Data)
+		}
+	}
+
+	return ips
 }
 
 // UpdateAndPushState updates the local state and pushes it to several other peers
@@ -95,47 +112,44 @@ func (p *Peer) UpdateAndPushState(sm *signature.SignedMessage) error {
 		}
 		return nil
 	}
-	return errors.New("message signature too old")
+	return errors.New("message signature too old: was " + strconv.Itoa(int(sm.GetAgeInSeconds())))
 }
 
 func (p Peer) pushStateMessage(sm *signature.SignedMessage) error {
-	ipList := p.peerState.GetNodeFields("IPAddress")
+	ipList := p.getPeerIPs()
 	numOfPeers := len(ipList)
-	if numOfPeers > 1 {
+
+	if numOfPeers > 0 {
 		// Calculate the frequency based on the number of peers to not overload
 		// small networks
-		waitTime := calcWaitTimeMillis(numOfPeers)
+		// // waitTime := calcWaitTimeMillis(numOfPeers)
 		go func() {
 			s := rand.NewSource(time.Now().Unix())
 			r := rand.New(s) // initialize local pseudorandom generator
 			timestamp := sm.GetTimestamp()
-			for (time.Now().Unix() - timestamp) < p.maxMessageAge {
+			count := 0
+			for (time.Now().Unix() - timestamp) < 3 {
+				// If we decide to modify the peer list this is useful
 				if len(ipList) > 0 {
 					index := r.Intn(len(ipList))
-					ipInterface := ipList[index]
-					// Delete it for this run
-					ipList = append(ipList[:index], ipList[index+1:]...)
-					if ipInterface != nil {
-						// Get the data from the signed field
-						ip := ipInterface.(state.SignedField).Data
-						conn, err := net.Dial("tcp", ip+":4351")
+					// Get the data from the signed field
+					ip := ipList[index]
+					client, err := rpc.DialHTTP("tcp", ip+":4351")
+					if err != nil {
+						fmt.Println("dialing:", err)
+					} else {
+						var reply string
+						err = client.Call("State.Update", sm, &reply)
 						if err != nil {
-							fmt.Println("dialing:", err)
-						} else {
-							client := rpc.NewClient(conn)
-							var reply string
-							err = client.Call("State.Update", sm, &reply)
-							if err != nil {
-								fmt.Println("can't call method:", err)
-							}
-							err = conn.Close()
-							if err != nil {
-								fmt.Println("can't close connection:", err)
-							}
+							fmt.Println("can't call method State.Update:", err)
+							break
 						}
 					}
+				} else {
+					break
 				}
-				time.Sleep(waitTime * time.Millisecond)
+				count++
+				time.Sleep(10 * time.Millisecond)
 			}
 		}()
 		return nil

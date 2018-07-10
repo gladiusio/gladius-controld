@@ -51,6 +51,12 @@ func (s *State) GetNodeFields(key string) []interface{} {
 	return toReturn
 }
 
+func (s *State) GetNodeField(address, key string) interface{} {
+	node := s.NodeDataMap[address]
+	v := reflect.ValueOf(*node)
+	return v.FieldByName(key).Interface()
+}
+
 // GetSignatureList returns a list of all of the signed messages used to make
 // the current state
 func (s *State) GetSignatureList() []*signature.SignedMessage {

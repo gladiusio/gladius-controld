@@ -18,7 +18,11 @@ type RPCLogging struct {
 
 func (s *RPCState) Update(arg *signature.SignedMessage, reply *string) error {
 	if arg.IsInPoolAndVerified() {
-		s.p.UpdateAndPushState(arg)
+		err := s.p.UpdateAndPushState(arg)
+		if err != nil {
+			*reply = "Error updating state: " + err.Error()
+			return err
+		}
 		*reply = "State Updated"
 	} else {
 		*reply = "Invalid SignedMessage"

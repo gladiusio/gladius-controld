@@ -6,12 +6,10 @@ GLADIUSBASE=/gladius /vagrant/build/gladius-controld &
 # Wait for it to start
 sleep 3s
 
-echo "REEEEEE"
-
 # Create a new gladius account
 body='{"passphrase":"password"}'
 
-curl -s -X POST "http://localhost:3001/api/keystore/account/create" \
+curl -X POST "http://localhost:3001/api/keystore/account/create" \
     -H "Content-Type: application/json; charset=utf-8" \
     -d "$body"
 
@@ -20,7 +18,7 @@ sleep 1s
 # Fetch the discovery node state
 body='{"ip": "'$1'", "passphrase":"password"}'
 
-curl  -X POST "http://localhost:3001/api/p2p/state/pull" \
+curl -X POST "http://localhost:3001/api/p2p/state/pull" \
     -H "Content-Type: application/json; charset=utf-8" \
     -d "$body"
 
@@ -37,6 +35,6 @@ signedMessage=$(curl -s -X POST "http://localhost:3001/api/p2p/message/sign" \
     -H "Content-Type: application/json; charset=utf-8" \
     -d "$body" | jq '.response' --sort-keys)
 
-curl -s -X POST "http://localhost:3001/api/p2p/state/push_message" \
+curl -X POST "http://localhost:3001/api/p2p/state/push_message" \
      -H "Content-Type: application/json; charset=utf-8" \
      -d "$signedMessage"

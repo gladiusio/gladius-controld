@@ -3,6 +3,7 @@ package peer
 import (
 	"log"
 	"net"
+	"net/http"
 	"net/rpc"
 	"sync"
 )
@@ -20,16 +21,14 @@ func newServer(p *Peer) *server {
 
 // Start starts the p2p server
 func (s *server) Start() {
-	rpcServer := rpc.NewServer()
 	rpcState := &RPCState{p: s.peer}
-	rpcServer.RegisterName("State", rpcState)
-	// Listen for incoming tcp packets on specified port.
+	rpc.RegisterName("State", rpcState)
+	rpc.HandleHTTP()
+
 	l, e := net.Listen("tcp", ":4351")
 	if e != nil {
 		log.Fatal("listen error:", e)
 	}
 
-	// This statement links rpc server to the socket, and allows rpc server to accept
-	// rpc request coming from that socket.
-	go rpcServer.Accept(l)
+	go http.Serve(l, nil)
 }
