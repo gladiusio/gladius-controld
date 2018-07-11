@@ -37,17 +37,15 @@ def setupNetwork(num_of_nodes=10):
     for node_num in range(1, num_of_nodes):
         sleep(1)
         h = net.get('h%s' % (node_num + 1))
-        h.cmd('/vagrant/mininet/setup_peer.sh ' +
-              seed_ip + ' >> /tmp/%s.out &' % h.name)
+        h.cmd('python /vagrant/mininet/setup_peer.py ' + h.name + ' ' +
+              seed_ip + ' &')
 
     # Give some time for the nodes to complete their work
     sleep(60)
 
     responses = set()
     for node in net.hosts:
-        filename = "/tmp/final_" + node.name + ".out"
-        jsonResponse = node.cmd(
-            "curl --request GET --url http://localhost:3001/api/p2p/state/ > " + filename)
+        filename = "/tmp/%s_state.out" % node
         file = open(filename, "r")
 
         responses.add(file.read())
@@ -62,6 +60,6 @@ def setupNetwork(num_of_nodes=10):
 
 if __name__ == '__main__':
     setLogLevel('info')
-    setupNetwork(25)
+    setupNetwork(5)
 
-topos = { 'mytopo': ( lambda: SingleSwitchTopo(5) ) }
+topos = {'mytopo': (lambda: SingleSwitchTopo(5))}

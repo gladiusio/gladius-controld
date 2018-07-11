@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"math/rand"
 	"net/rpc"
 	"strconv"
@@ -56,7 +55,7 @@ func (p *Peer) PullState(ip, passphrase string) error {
 	}
 	client, err := rpc.DialHTTP("tcp", ip+":4351")
 	if err != nil {
-		log.Fatal("dialing:", err)
+		return errors.New("can't dial host " + ip + ":4351: " + err.Error())
 	}
 	var reply string
 	err = client.Call("State.Get", sm, &reply)
@@ -116,16 +115,30 @@ func (p *Peer) UpdateAndPushState(sm *signature.SignedMessage) error {
 }
 
 // SendUpdate forces a send to a specific peer while not updating local state
-func SendUpdate(sm *signature.SignedMessage, ip string, reply *string) {
+func (p *Peer) SendUpdate(sm *signature.SignedMessage, ip string, reply *string) error {
 	client, err := rpc.DialHTTP("tcp", ip+":4351")
 	if err != nil {
-		fmt.Println("dialing:", err)
-	} else {
-		err = client.Call("State.Update", sm, reply)
-		if err != nil {
-			fmt.Println("can't call method State.Update:", err)
-		}
+		return errors.New("Error dialing peer " + ip + " " + err.Error())
 	}
+	err = client.Call("State.Update", sm, reply)
+	if err != nil {
+		return errors.New("can't call method State.Update: " + err.Error())
+	}
+
+	return nil
+}
+
+// UpdateInternalState is a wrapper to update internal state if message is valid
+func (p Peer) UpdateInternalState(sm *signature.SignedMessage) (error, bool) {
+	if sm.GetAgeInSeconds() < p.maxMessageAge {
+		updated, err := p.peerState.UpdateState(sm)
+		if err != nil {
+			return err, false
+		}
+		return nil, updated
+	}
+
+	return nil, false
 }
 
 func (p Peer) pushStateMessage(sm *signature.SignedMessage, stateChanged bool) error {
@@ -152,7 +165,7 @@ func (p Peer) pushStateMessage(sm *signature.SignedMessage, stateChanged bool) e
 						// Get the data from the signed field
 						ip := ipList[index]
 						var reply string
-						SendUpdate(sm, ip, &reply)
+						p.SendUpdate(sm, ip, &reply)
 					} else {
 						break
 					}

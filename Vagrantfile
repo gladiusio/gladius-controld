@@ -4,6 +4,7 @@ sudo apt-get -y install python-pip python-dev git jq xauth
 cd /home/vagrant && git clone https://github.com/mininet/mininet.git
 cd /home/vagrant && sudo mininet/util/install.sh
 sudo mkdir /gladius/
+pip install requests
 SCRIPT
 
 Vagrant.configure("2") do |config|

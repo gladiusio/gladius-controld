@@ -190,15 +190,19 @@ func IntroductionHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Reque
 			err := p.PullState(ip, passphrase)
 			if err != nil {
 				ErrorHandler(w, r, "Could not pull state from peer", err, http.StatusBadRequest)
-			} else {
-				sm, err := parseSignedMessageFromBytes(signedMessage)
-				if err != nil {
-					ErrorHandler(w, r, "Could not parse signed message", err, http.StatusBadRequest)
-					return
-				}
-				p.UpdateAndPushState(sm)
-				ResponseHandler(w, r, "Pulled state", true, nil, nil, nil)
+				return
 			}
+			sm, err := parseSignedMessageFromBytes(signedMessage)
+			if err != nil {
+				ErrorHandler(w, r, "Could not parse signed message", err, http.StatusBadRequest)
+				return
+			}
+			// Update and send message
+			p.UpdateInternalState(sm)
+			var reply string
+			p.SendUpdate(sm, ip, &reply)
+
+			ResponseHandler(w, r, "Pulled state and sent introduction", true, nil, nil, nil)
 		}
 	}
 }
