@@ -93,8 +93,8 @@ const (
 )
 
 type Balance struct {
-	Value  uint64
-	Symbol string
+	Value  uint64 `json:"value"`
+	Symbol string `json:"symbol"`
 }
 
 func GetAccountBalance(address common.Address, symbol BalanceType) (Balance, error) {
@@ -151,30 +151,30 @@ type TransactionFilter struct {
 }
 
 type EtherscanTransactionsResponse struct {
-	Status  		string `json:"status"`
-	Message 		string `json:"message"`
-	Transactions  	[]EtherscanTransaction `json:"result"`
+	Status       string                 `json:"status"`
+	Message      string                 `json:"message"`
+	Transactions []EtherscanTransaction `json:"result"`
 }
 
 type EtherscanTransaction struct {
-	BlockNumber       	string `json:"blockNumber"`
-	TimeStamp         	string `json:"timeStamp"`
-	Hash              	string `json:"hash"`
-	Nonce             	string `json:"nonce"`
-	BlockHash         	string `json:"blockHash"`
-	TransactionIndex  	string `json:"transactionIndex"`
-	From              	string `json:"from"`
-	To                	string `json:"to"`
-	Value             	string `json:"value"`
-	Gas               	string `json:"gas"`
-	GasPrice          	string `json:"gasPrice"`
-	IsError           	string `json:"isError"`
-	TxReceiptStatus  	string `json:"txreceipt_status"`
-	Input             	string `json:"input"`
-	ContractAddress   	string `json:"contractAddress"`
-	CumulativeGasUsed 	string `json:"cumulativeGasUsed"`
-	GasUsed           	string `json:"gasUsed"`
-	Confirmations     	string `json:"confirmations"`
+	BlockNumber       string `json:"blockNumber"`
+	TimeStamp         string `json:"timeStamp"`
+	Hash              string `json:"hash"`
+	Nonce             string `json:"nonce"`
+	BlockHash         string `json:"blockHash"`
+	TransactionIndex  string `json:"transactionIndex"`
+	From              string `json:"from"`
+	To                string `json:"to"`
+	Value             string `json:"value"`
+	Gas               string `json:"gas"`
+	GasPrice          string `json:"gasPrice"`
+	IsError           string `json:"isError"`
+	TxReceiptStatus   string `json:"txreceipt_status"`
+	Input             string `json:"input"`
+	ContractAddress   string `json:"contractAddress"`
+	CumulativeGasUsed string `json:"cumulativeGasUsed"`
+	GasUsed           string `json:"gasUsed"`
+	Confirmations     string `json:"confirmations"`
 }
 
 func GetAccountTransactions(address common.Address, options TransactionOptions) (EtherscanTransactionsResponse, error) {
