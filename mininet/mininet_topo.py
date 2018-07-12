@@ -18,7 +18,7 @@ class SingleSwitchTopo(Topo):
         switch = self.addSwitch('s1')
         for h in range(n):
             host = self.addHost('h%s' % (h + 1), privateDirs=['/gladius'])
-            self.addLink(host, switch, bw=100, delay='10ms')
+            self.addLink(host, switch, bw=1000, delay='10ms')
 
 
 def setupNetwork(num_of_nodes=10):
@@ -27,12 +27,12 @@ def setupNetwork(num_of_nodes=10):
 
     net.start()
     # net.pingAll()
-    between_nodes = 3
+    between_nodes = 5
     completion_time = (between_nodes * num_of_nodes) + 10
 
     h1 = net.get('h1')
     h1.cmd('python /vagrant/mininet/setup_seed.py ' +
-           h1.name + ' ' + str(completion_time + 15) + ' >> ' + h1.name + '_log.out 2>&1 &')
+           h1.name + ' ' + str(completion_time + 20) + ' >> /tmp/' + h1.name + '_log.out 2>&1 &')
     seed_ip = h1.IP()
 
     sleep(15)
@@ -40,18 +40,18 @@ def setupNetwork(num_of_nodes=10):
     for node_num in range(1, num_of_nodes):
         h = net.get('h%s' % (node_num + 1))
         h.cmd('python /vagrant/mininet/setup_peer.py ' + h.name + ' ' +
-              str(completion_time) + ' >> ' + h.name + '_log.out 2>&1 &')
+              str(completion_time) + ' >> /tmp/' + h.name + '_log.out 2>&1 &')
 
-    sleep(5)
+    sleep(25)
 
     for node_num in range(1, num_of_nodes):
         h = net.get('h%s' % (node_num + 1))
         h.cmd('python /vagrant/mininet/start_peer.py ' + h.name + ' ' +
-              seed_ip + ' >> ' + h.name + '_log.out 2>&1 &')
+              seed_ip + ' >> /tmp/' + h.name + '_log.out 2>&1 &')
         sleep(between_nodes)
 
-    # Give some time for the nodes to complete their work
-    sleep(completion_time + 10)
+    # Give some time for the last few nodes
+    sleep(30)
 
     responses = set()
     for node in net.hosts:
@@ -70,6 +70,4 @@ def setupNetwork(num_of_nodes=10):
 
 if __name__ == '__main__':
     setLogLevel('info')
-    setupNetwork(50)
-
-topos = {'mytopo': (lambda: SingleSwitchTopo(50))}
+    setupNetwork(100)

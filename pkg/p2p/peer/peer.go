@@ -63,6 +63,7 @@ func (p *Peer) PullState(ip, passphrase string) error {
 		fmt.Println(reply)
 		return errors.New("can't call method: " + err.Error())
 	}
+	client.Close()
 	// Convert the incoming json to a State type
 	incomingState, err := state.ParseNetworkState([]byte(reply))
 	if err != nil {
@@ -124,7 +125,7 @@ func (p *Peer) SendUpdate(sm *signature.SignedMessage, ip string, reply *string)
 	if err != nil {
 		return errors.New("can't call method State.Update: " + err.Error())
 	}
-
+	client.Close()
 	return nil
 }
 
