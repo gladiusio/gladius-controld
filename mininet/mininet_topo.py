@@ -32,7 +32,7 @@ def setupNetwork(num_of_nodes=10):
 
     h1 = net.get('h1')
     h1.cmd('python /vagrant/mininet/setup_seed.py ' +
-           h1.name + ' ' + str(completion_time + 20) + ' >> /tmp/' + h1.name + '_log.out 2>&1 &')
+           h1.name + ' ' + str(completion_time + 29) + ' >> /tmp/' + h1.name + '_log.out 2>&1 &')
     seed_ip = h1.IP()
 
     sleep(15)
