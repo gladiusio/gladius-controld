@@ -44,14 +44,18 @@ func (s *sigList) GetList() (values []*signature.SignedMessage) {
 // GetNodeFields gets the same field from all nodes
 func (s *State) GetNodeFields(key string) []interface{} {
 	toReturn := make([]interface{}, 0)
+	s.mux.Lock()
 	for _, value := range s.NodeDataMap {
 		v := reflect.ValueOf(*value)
 		toReturn = append(toReturn, v.FieldByName(key).Interface())
 	}
+	s.mux.Unlock()
 	return toReturn
 }
 
 func (s *State) GetNodeField(address, key string) interface{} {
+	s.mux.Lock()
+	defer s.mux.Unlock()
 	node := s.NodeDataMap[address]
 	v := reflect.ValueOf(*node)
 	return v.FieldByName(key).Interface()

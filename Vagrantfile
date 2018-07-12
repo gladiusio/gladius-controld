@@ -9,8 +9,8 @@ SCRIPT
 
 Vagrant.configure("2") do |config|
   config.vm.provider "virtualbox" do |v|
-    v.memory = 4096
-    v.cpus = 4
+    v.memory = 16384
+    v.cpus = 8
   end
   config.vm.define "mininet" do |v|
     v.vm.box = "ubuntu/xenial64"
@@ -19,8 +19,5 @@ Vagrant.configure("2") do |config|
     v.ssh.forward_agent = true
     v.ssh.forward_x11 = true
     v.vm.provision :shell, :inline => $init
-    v.trigger.after :up do |trigger|
-      trigger.run_remote = {inline: "sudo mn -c && python /vagrant/mininet/mininet_topo.py"}
-    end
   end
 end
