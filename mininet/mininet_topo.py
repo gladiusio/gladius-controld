@@ -16,6 +16,9 @@ class SingleSwitchTopo(Topo):
 
     def build(self, n=2):
         switch = self.addSwitch('s1')
+        query = self.addHost('query_node')
+        self.addLink(query, switch, bw=1000, delay='10ms')
+
         for h in range(n):
             host = self.addHost('h%s' % (h + 1), privateDirs=['/gladius'])
             self.addLink(host, switch, bw=1000, delay='10ms')
@@ -27,43 +30,42 @@ def setupNetwork(num_of_nodes=10):
 
     net.start()
     # net.pingAll()
-    between_nodes = 5
-    completion_time = (between_nodes * num_of_nodes) + 10
+    between_nodes = 3
 
+    info("Setting up seed node\n")
     h1 = net.get('h1')
     h1.cmd('python /vagrant/mininet/setup_seed.py ' +
-           h1.name + ' ' + str(completion_time + 29) + ' >> /tmp/' + h1.name + '_log.out 2>&1 &')
+           h1.name + ' >> /tmp/' + h1.name + '_log.out 2>&1 &')
     seed_ip = h1.IP()
 
     sleep(15)
 
+    info("Setting up accounts\n")
     for node_num in range(1, num_of_nodes):
         h = net.get('h%s' % (node_num + 1))
-        h.cmd('python /vagrant/mininet/setup_peer.py ' + h.name + ' ' +
-              str(completion_time) + ' >> /tmp/' + h.name + '_log.out 2>&1 &')
+        h.cmd('python /vagrant/mininet/setup_peer.py ' +
+              h.name + ' >> /tmp/' + h.name + '_log.out 2>&1 &')
 
-    sleep(25)
+    sleep(20)
 
+    info("Starting peers\n")
     for node_num in range(1, num_of_nodes):
+        info("\rStarting node: %d" % node_num)
         h = net.get('h%s' % (node_num + 1))
         h.cmd('python /vagrant/mininet/start_peer.py ' + h.name + ' ' +
               seed_ip + ' >> /tmp/' + h.name + '_log.out 2>&1 &')
         sleep(between_nodes)
 
     # Give some time for the last few nodes
-    sleep(30)
+    sleep(40)
 
-    responses = set()
-    for node in net.hosts:
-        filename = "/tmp/%s_state.out" % node
-        file = open(filename, "r")
+    info("\nRunning query on all nodes\n")
+    query_node = net.get('query_node')
+    result = query_node.cmd(
+        'python /vagrant/mininet/query_all.py ' + ' '.join([host.IP() for host in net.hosts[:len(net.hosts) - 1]]))
 
-        responses.add(file.read())
+    info(result)
 
-    if len(responses) > 1:
-        warn("Test failed, there were %d different responses." % len(responses))
-    else:
-        info("Test passed")
     CLI(net)
     net.stop()
 

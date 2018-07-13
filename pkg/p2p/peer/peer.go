@@ -18,7 +18,7 @@ import (
 
 // New returns a new peer type
 func New() *Peer {
-	peer := &Peer{peerState: &state.State{}, running: false, maxMessageAge: 20, client: &client{}}
+	peer := &Peer{peerState: &state.State{}, running: false, maxMessageAge: 10, client: &client{}}
 	peer.server = newServer(peer)
 	return peer
 }
@@ -157,7 +157,7 @@ func (p Peer) pushStateMessage(sm *signature.SignedMessage, stateChanged bool) e
 			count := 0
 
 			if stateChanged {
-				for (time.Now().Unix() - timestamp) < p.maxMessageAge {
+				for (time.Now().Unix()-timestamp) < p.maxMessageAge && count < 10 {
 					ipList := p.getPeerIPs()
 
 					// If we decide to modify the peer list this is useful
@@ -174,11 +174,13 @@ func (p Peer) pushStateMessage(sm *signature.SignedMessage, stateChanged bool) e
 					time.Sleep(100 * time.Millisecond)
 				}
 			} else {
-				// index := r.Intn(len(ipList))
-				// // Get the data from the signed field
-				// ip := ipList[index]
-				// var reply string
-				// sendUpdate(sm, ip, &reply)
+				if (time.Now().Unix() - timestamp) < p.maxMessageAge {
+					// index := r.Intn(len(ipList))
+					// // Get the data from the signed field
+					// ip := ipList[index]
+					// var reply string
+					// sendUpdate(sm, ip, &reply)
+				}
 			}
 		}()
 		return nil
