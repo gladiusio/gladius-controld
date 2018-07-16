@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
-	"github.com/gorilla/mux"
 	"github.com/gladiusio/gladius-controld/pkg/routing/response"
+	"github.com/gorilla/mux"
 )
 
 func NodeRetrieveDataHandler(w http.ResponseWriter, r *http.Request) {
@@ -19,7 +20,7 @@ func NodeRetrieveDataHandler(w http.ResponseWriter, r *http.Request) {
 		ErrorHandler(w, r, "Node data could not be retrieved or data is not set", err, http.StatusNotFound)
 	}
 
-	nodeResponse := blockchain.NodeResponse{Address:nodeAddress.String(), Data:nodeData}
+	nodeResponse := blockchain.NodeResponse{Address: nodeAddress.String(), Data: nodeData}
 
 	ResponseHandler(w, r, "null", true, nil, nodeResponse, nil)
 }
@@ -77,7 +78,44 @@ func NodeApplicationStatusHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	statusResponse := response.NodeApplication{Status:statusString, Code:int(status.Uint64())}
+	statusResponse := response.NodeApplication{Status: statusString, Code: int(status.Uint64())}
 
 	ResponseHandler(w, r, "null", true, nil, statusResponse, nil)
+}
+
+func NodePoolApplications(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	nodeAddress := vars["nodeAddress"]
+
+	address := common.HexToAddress(nodeAddress)
+
+	pools, err := blockchain.NodePools(&address)
+	if err != nil {
+		ErrorHandler(w, r, "Could not retrieve applications", err, http.StatusBadRequest)
+		return
+	}
+
+	var applications []response.NodeApplication
+
+	for _, pool := range pools {
+		status, err := blockchain.NodeApplicationStatus(nodeAddress, pool.String())
+		if err != nil {
+			ErrorHandler(w, r, "Could not find status for pool application", err, http.StatusBadRequest)
+			return
+		}
+
+		statusString, err := blockchain.ApplicationStatusFromInt(int(status.Uint64()))
+		if err != nil {
+			ErrorHandler(w, r, "Could not find status for pool application", err, http.StatusBadRequest)
+			return
+		}
+
+		app := response.NodeApplication{Status: statusString, Code: int(status.Uint64()), PoolAddress: pool.String()}
+
+		applications = append(applications, app)
+	}
+
+	applicationsResponse := response.NodePoolApplications{NodeApplications: applications, Address: nodeAddress}
+
+	ResponseHandler(w, r, "null", true, nil, applicationsResponse, nil)
 }

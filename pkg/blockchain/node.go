@@ -204,3 +204,13 @@ func NodeApplicationStatus(nodeAddress, poolAddress string) (*big.Int, error) {
 
 	return statusCode, nil
 }
+
+func NodePools(nodeAddress *common.Address) ([]common.Address, error) {
+	node := ConnectNode(*nodeAddress)
+	poolList, err := node.GetPoolList(&bind.CallOpts{From: *nodeAddress})
+	if err != nil {
+		return nil, err
+	}
+
+	return poolList, nil
+}
