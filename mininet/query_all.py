@@ -1,21 +1,25 @@
 #!/usr/bin/python
 import sys
 import requests
+import json
 
 
 def query_nodes(nodes):
-    results = set()
+    results = {}
+    state_set = set()
     for node in nodes:
         url = "http://%s:3001/api/p2p/state/" % node
         state = requests.get(url).text
-        results.add(state)
+        state_set.add(state)
+        results[node] = json.loads(state)
 
-    if (len(results) > 1):
-        print "Test failed, there were %d results" % len(results)
-        print "State was: " + str(results)
+    results_len = len(state_set)
+    if (results_len > 1):
+        print json.dumps(results)
+        print "Test failed, there were %d results." % results_len
     else:
+        print json.dumps(results)
         print "Test passed!"
-        print "State was: " + str(results)
 
 
 if __name__ == '__main__':

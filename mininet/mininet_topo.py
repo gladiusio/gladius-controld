@@ -21,7 +21,7 @@ class SingleSwitchTopo(Topo):
 
         for h in range(n):
             host = self.addHost('h%s' % (h + 1), privateDirs=['/gladius'])
-            self.addLink(host, switch, bw=1000, delay='10ms')
+            self.addLink(host, switch, bw=1000, delay='20ms')
 
 
 def setupNetwork(num_of_nodes=10):
@@ -30,7 +30,7 @@ def setupNetwork(num_of_nodes=10):
 
     net.start()
     # net.pingAll()
-    between_nodes = 3
+    between_nodes = 5
 
     info("Setting up seed node\n")
     h1 = net.get('h1')
@@ -46,7 +46,7 @@ def setupNetwork(num_of_nodes=10):
         h.cmd('python /vagrant/mininet/setup_peer.py ' +
               h.name + ' >> /tmp/' + h.name + '_log.out 2>&1 &')
 
-    sleep(20)
+    sleep(25)
 
     info("Starting peers\n")
     for node_num in range(1, num_of_nodes):
@@ -64,7 +64,8 @@ def setupNetwork(num_of_nodes=10):
     result = query_node.cmd(
         'python /vagrant/mininet/query_all.py ' + ' '.join([host.IP() for host in net.hosts[:len(net.hosts) - 1]]))
 
-    info(result)
+    with open('/tmp/final_output.log', 'w') as f:
+        f.write(result)
 
     CLI(net)
     net.stop()
@@ -72,4 +73,4 @@ def setupNetwork(num_of_nodes=10):
 
 if __name__ == '__main__':
     setLogLevel('info')
-    setupNetwork(100)
+    setupNetwork(20)

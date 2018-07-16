@@ -13,7 +13,7 @@ def setup_peer(node_name):
                      shell=True)
 
     # Wait for controld to start
-    sleep(10)
+    sleep(20)
 
     # Create an account
     url = "http://localhost:3001/api/keystore/account/create"

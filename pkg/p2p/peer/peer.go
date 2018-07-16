@@ -18,7 +18,7 @@ import (
 
 // New returns a new peer type
 func New() *Peer {
-	peer := &Peer{peerState: &state.State{}, running: false, maxMessageAge: 10, client: &client{}}
+	peer := &Peer{peerState: &state.State{}, running: false, maxMessageAge: 5, client: &client{}}
 	peer.server = newServer(peer)
 	return peer
 }
@@ -45,14 +45,21 @@ func (p *Peer) Stop() {
 // PullState pulls the state from a peer and verifies it before loading it into
 // its own state
 func (p *Peer) PullState(ip, passphrase string) error {
+	// Create a signed challenge timestamp, the remote peer will only accept this
+	// if it was within the last few seconds. This prevents replay attacks from
+	// and arbitrary node.
 	currTime := strconv.FormatUint(uint64(time.Now().Unix()), 10)
 	m := message.New([]byte("{\"challenge_time\":" + currTime + "}"))
+
+	// TODO: Switch to new direct signed message creation
 	smString, err := signature.CreateSignedMessageString(m, passphrase)
 	sm := &signature.SignedMessage{}
 	json.Unmarshal([]byte(smString), sm)
 	if err != nil {
 		return errors.New("cannot make signed message: " + err.Error())
 	}
+
+	// Dial the remote peer and ask it for it's state with the challenge
 	client, err := rpc.DialHTTP("tcp", ip+":4351")
 	if err != nil {
 		return errors.New("can't dial host " + ip + ":4351: " + err.Error())
@@ -149,39 +156,32 @@ func (p Peer) pushStateMessage(sm *signature.SignedMessage, stateChanged bool) e
 	if numOfPeers > 0 {
 		// Calculate the frequency based on the number of peers to not overload
 		// small networks
-		// // waitTime := calcWaitTimeMillis(numOfPeers)
 		go func() {
 			s := rand.NewSource(time.Now().Unix())
 			r := rand.New(s)               // initialize local pseudorandom generator
 			timestamp := sm.GetTimestamp() // get timestamp of the signed message
 			count := 0
 
-			if stateChanged {
-				for (time.Now().Unix()-timestamp) < p.maxMessageAge && count < 10 {
-					ipList := p.getPeerIPs()
+			for (time.Now().Unix() - timestamp) < p.maxMessageAge {
+				// Check for new peers
+				ipList := p.getPeerIPs()
 
-					// If we decide to modify the peer list this is useful
-					if len(ipList) > 0 {
-						index := r.Intn(len(ipList))
-						// Get the data from the signed field
-						ip := ipList[index]
-						var reply string
-						p.SendUpdate(sm, ip, &reply)
-					} else {
-						break
-					}
-					count++
-					time.Sleep(100 * time.Millisecond)
+				// This is before so we don't end up with an instant growth of the
+				// message.
+				time.Sleep(300 * time.Millisecond)
+
+				index := r.Intn(len(ipList))
+				// Get the data from the signed field
+				ip := ipList[index]
+				var reply string
+				err := p.SendUpdate(sm, ip, &reply)
+				if err != nil {
+					fmt.Println(err)
 				}
-			} else {
-				if (time.Now().Unix() - timestamp) < p.maxMessageAge {
-					// index := r.Intn(len(ipList))
-					// // Get the data from the signed field
-					// ip := ipList[index]
-					// var reply string
-					// sendUpdate(sm, ip, &reply)
-				}
+
+				count++
 			}
+
 		}()
 		return nil
 	}
@@ -191,13 +191,13 @@ func (p Peer) pushStateMessage(sm *signature.SignedMessage, stateChanged bool) e
 
 func calcWaitTimeMillis(peers int) time.Duration {
 	if peers > 1000 {
-		return 100
+		return 200 * time.Millisecond
 	} else if peers > 200 {
-		return 200
+		return 200 * time.Millisecond
 	} else if peers > 10 {
-		return 300
+		return 200 * time.Millisecond
 	}
-	return 500
+	return 300 * time.Millisecond
 
 }
 
