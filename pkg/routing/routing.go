@@ -10,11 +10,11 @@ import (
 	"github.com/gladiusio/gladius-controld/pkg/routing/handlers"
 	ghandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-		)
+)
 
 const (
-	PORT       = "3001"
-	DEBUG      = false
+	PORT  = "3001"
+	DEBUG = false
 )
 
 func Start() {
@@ -94,6 +94,8 @@ func Start() {
 	nodeRouter.HandleFunc("/{nodeAddress:0[xX][0-9a-fA-F]{40}}/apply/{poolAddress:0[xX][0-9a-fA-F]{40}}", handlers.NodeApplyToPoolHandler)
 	// Node application status
 	nodeRouter.HandleFunc("/{nodeAddress:0[xX][0-9a-fA-F]{40}}/application/{poolAddress:0[xX][0-9a-fA-F]{40}}", handlers.NodeApplicationStatusHandler)
+	// Node pool applications
+	nodeRouter.HandleFunc("/{nodeAddress:0[xX][0-9a-fA-F]{40}}/applications", handlers.NodePoolApplications)
 
 	// Pool Sub-Routes
 	poolRouter := apiRouter.PathPrefix("/pool").Subrouter()
