@@ -2,18 +2,13 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
+	"github.com/gladiusio/gladius-controld/pkg/routing/response"
 	"github.com/gorilla/mux"
 )
-
-// PoolHandler - Main Node API route handler
-func PoolHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Main Node API\n"))
-}
 
 func PoolPublicDataHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -21,12 +16,13 @@ func PoolPublicDataHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodGet {
 		poolData, err := blockchain.PoolRetrievePublicData(poolAddress)
+
 		if err != nil {
 			ErrorHandler(w, r, "Could not retrieve Pool's public data", err, http.StatusNotFound)
 			return
 		}
 
-		ResponseHandler(w, r, "null", poolData.String())
+		ResponseHandler(w, r, "null", true, nil, poolData, nil)
 	}
 
 	if r.Method == http.MethodPost {
@@ -35,13 +31,18 @@ func PoolPublicDataHandler(w http.ResponseWriter, r *http.Request) {
 		var data blockchain.PoolPublicData
 		err := decoder.Decode(&data)
 
-		transaction, err := blockchain.PoolSetPublicData(auth, poolAddress, data.String())
+		jsonPayload, err := json.Marshal(data)
+		if err != nil {
+			ErrorHandler(w, r, "Could not decode request into JSON", err, http.StatusNotFound)
+		}
+
+		transaction, err := blockchain.PoolSetPublicData(auth, poolAddress, string(jsonPayload))
 		if err != nil {
 			ErrorHandler(w, r, "Could not set Pool's public data", err, http.StatusUnprocessableEntity)
 			return
 		}
 
-		TransactionHandler(w, r, "\"Public data set, pending transaction\"", transaction)
+		ResponseHandler(w, r, "Public data set, pending transaction", true, nil, nil, transaction)
 	}
 }
 
@@ -55,8 +56,9 @@ func PoolRetrievePublicKeyHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := fmt.Sprintf("{\"publicKey\": \"%s\"}", publicKey)
-	ResponseHandler(w, r, "null", response)
+	publicKeyResponse := response.PublicKeyResponse{PublicKey: publicKey}
+
+	ResponseHandler(w, r, "null", true, nil, publicKeyResponse, nil)
 }
 
 func PoolRetrieveNodesHandler(w http.ResponseWriter, r *http.Request) {
@@ -71,13 +73,13 @@ func PoolRetrieveNodesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response, err := blockchain.PoolNodesWithData(poolAddress, nodeAddresses, statusInt)
+	applications, err := blockchain.PoolNodesWithData(poolAddress, nodeAddresses, statusInt)
 	if err != nil {
 		ErrorHandler(w, r, "Could not retrieve applications", err, http.StatusUnprocessableEntity)
 		return
 	}
 
-	ResponseHandler(w, r, "null", *response)
+	ResponseHandler(w, r, "null", true, nil, applications, nil)
 }
 
 func PoolRetrieveNodeApplicationHandler(w http.ResponseWriter, r *http.Request) {
@@ -91,7 +93,8 @@ func PoolRetrieveNodeApplicationHandler(w http.ResponseWriter, r *http.Request) 
 		ErrorHandler(w, r, "Could not retrieve application", err, http.StatusUnprocessableEntity)
 		return
 	}
-	ResponseHandler(w, r, "null", nodeApplication.String())
+
+	ResponseHandler(w, r, "null", true, nil, nodeApplication, nil)
 }
 
 func PoolUpdateNodeStatusHandler(w http.ResponseWriter, r *http.Request) {
@@ -113,5 +116,5 @@ func PoolUpdateNodeStatusHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	TransactionHandler(w, r, "\"Public data set, pending transaction\"", transaction)
+	ResponseHandler(w, r, "Public data set, pending transaction", true, nil, nil, transaction)
 }

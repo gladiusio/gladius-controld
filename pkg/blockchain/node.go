@@ -34,13 +34,9 @@ type NodeApplication struct {
 	Data    NodeData `json:"data"`
 }
 
-func (d *NodeApplication) String() string {
-	json, err := json.Marshal(d)
-	if err != nil {
-		return "{}"
-	}
-
-	return string(json)
+type NodeResponse struct {
+	Address string    `json:"address"`
+	Data    *NodeData `json:"data"`
 }
 
 type NodeData struct {
@@ -48,15 +44,6 @@ type NodeData struct {
 	Email  string `json:"email"`
 	IP     string `json:"ip"`
 	Status string `json:"status"`
-}
-
-func (d *NodeData) String() string {
-	json, err := json.Marshal(d)
-	if err != nil {
-		return "{}"
-	}
-
-	return string(json)
 }
 
 func NodeRetrieveApplication(nodeAddress, poolAddress *common.Address) (*NodeApplication, error) {
@@ -84,11 +71,15 @@ func NodeRetrieveApplication(nodeAddress, poolAddress *common.Address) (*NodeApp
 	return nodeStruct, nil
 }
 
-func NodeRetrieveData() (*NodeData, error) {
-	nodeAddress, _ := NodeOwnedByUser()
-	node := ConnectNode(*nodeAddress)
+func NodeRetrieveDataForAddress(nodeAddress common.Address) (*NodeData, error) {
+	node := ConnectNode(nodeAddress)
+	ga := NewGladiusAccountManager()
+	address, err := ga.GetAccountAddress()
+	if err != nil {
+		return nil, err
+	}
 
-	encData, err := node.Data(&bind.CallOpts{From: GetDefaultAccountAddress()})
+	encData, err := node.Data(&bind.CallOpts{From: *address})
 	if err != nil {
 		return nil, err
 	}
@@ -107,8 +98,13 @@ func NodeRetrieveData() (*NodeData, error) {
 
 func NodeRetrievePoolData(nodeAddress, poolAddress *common.Address) (*NodeData, error) {
 	node := ConnectNode(*nodeAddress)
+	ga := NewGladiusAccountManager()
+	address, err := ga.GetAccountAddress()
+	if err != nil {
+		return nil, err
+	}
 
-	encPoolData, err := node.GetPoolData(&bind.CallOpts{From: GetDefaultAccountAddress()}, *poolAddress)
+	encPoolData, err := node.GetPoolData(&bind.CallOpts{From: *address}, *poolAddress)
 	if err != nil {
 		return nil, err
 	}
@@ -131,12 +127,19 @@ func NodeSetData(passphrase string, data *NodeData) (*types.Transaction, error) 
 	nodeAddress, _ := NodeOwnedByUser()
 	node := ConnectNode(*nodeAddress)
 
-	encData, err := crypto.EncryptData(data.String())
+	dataPayload, err := json.Marshal(data)
 	if err != nil {
 		return nil, err
 	}
 
-	auth, err := GetDefaultAuth(passphrase)
+	encData, err := crypto.EncryptData(string(dataPayload))
+	if err != nil {
+		return nil, err
+	}
+
+	ga := NewGladiusAccountManager()
+
+	auth, err := ga.GetAuth(passphrase)
 	if err != nil {
 		return nil, err
 	}
@@ -153,8 +156,13 @@ func NodeSetData(passphrase string, data *NodeData) (*types.Transaction, error) 
 func NodeApplyToPool(passphrase, nodeAddress, poolAddress string) (*types.Transaction, error) {
 	node := ConnectNode(common.HexToAddress(nodeAddress))
 
-	data, err := NodeRetrieveData()
+	data, err := NodeRetrieveDataForAddress(common.HexToAddress(nodeAddress))
 
+	if err != nil {
+		return nil, err
+	}
+
+	dataPayload, err := json.Marshal(data)
 	if err != nil {
 		return nil, err
 	}
@@ -165,12 +173,14 @@ func NodeApplyToPool(passphrase, nodeAddress, poolAddress string) (*types.Transa
 		return nil, err
 	}
 
-	encData, err := crypto.EncryptMessage(data.String(), poolPubKey)
+	encData, err := crypto.EncryptMessage(string(dataPayload), poolPubKey)
 	if err != nil {
 		return nil, err
 	}
 
-	auth, err := GetDefaultAuth(passphrase)
+	ga := NewGladiusAccountManager()
+
+	auth, err := ga.GetAuth(passphrase)
 	if err != nil {
 		return nil, err
 	}
@@ -193,4 +203,14 @@ func NodeApplicationStatus(nodeAddress, poolAddress string) (*big.Int, error) {
 	}
 
 	return statusCode, nil
+}
+
+func NodePools(nodeAddress *common.Address) ([]common.Address, error) {
+	node := ConnectNode(*nodeAddress)
+	poolList, err := node.GetPoolList(&bind.CallOpts{From: *nodeAddress})
+	if err != nil {
+		return nil, err
+	}
+
+	return poolList, nil
 }

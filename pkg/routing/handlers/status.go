@@ -1,12 +1,12 @@
 package handlers
 
 import (
-	"fmt"
-	"net/http"
+		"net/http"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"github.com/gorilla/mux"
+	"github.com/gladiusio/gladius-controld/pkg/routing/response"
 )
 
 // StatusHandler Main Status API route handler
@@ -34,7 +34,7 @@ func StatusTxHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var receiptResponseJSON []byte
-	status := []byte("null")
+	var status bool
 
 	if complete {
 		receipt, err := blockchain.TxReceipt(common.HexToHash(txHash))
@@ -45,9 +45,9 @@ func StatusTxHandler(w http.ResponseWriter, r *http.Request) {
 
 		statusResponse := !(receipt.Status == 0)
 		if statusResponse {
-			status = []byte("true")
+			status = true
 		} else {
-			status = []byte("false")
+			status = false
 		}
 
 		receiptJSON, err := receipt.MarshalJSON()
@@ -63,6 +63,7 @@ func StatusTxHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 
-	response := fmt.Sprintf("{ \"txHash\": \"%s\", \"complete\": %t, \"status\": %s, \"transaction\": %s, \"receipt\": %s }", txHash, complete, status, transactionJSON, receiptResponseJSON)
-	ResponseHandler(w, r, "null", response)
+	txHashResponse := response.TxHash{Value:txHash, Status:status, Complete:complete, Transaction: transactionJSON, Receipt:receiptResponseJSON}
+
+	ResponseHandler(w, r, "null", true, nil, txHashResponse, transaction)
 }

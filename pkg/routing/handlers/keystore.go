@@ -2,103 +2,93 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"github.com/gladiusio/gladius-controld/pkg/crypto"
-	"github.com/gorilla/mux"
-)
+	"github.com/gladiusio/gladius-controld/pkg/routing/response"
+			)
 
-type wallet_struct struct {
+type accountBody struct {
 	Passphrase string `json:"passphrase"`
 }
 
-type pgp_struct struct {
-	Name    string `json:"name"`
-	Comment string `json:"comment"`
-	Email   string `json:"email"`
-}
-
-func passphraseDecoder(w http.ResponseWriter, r *http.Request) (wallet_struct, error) {
+func passphraseDecoder(w http.ResponseWriter, r *http.Request) (*accountBody, error) {
 	decoder := json.NewDecoder(r.Body)
-	var wallet wallet_struct
-	err := decoder.Decode(&wallet)
+	var ab accountBody
+	err := decoder.Decode(&ab)
 
 	if err != nil {
-		return wallet_struct{}, err
+		return nil, err
 	}
 
 	defer r.Body.Close()
 
-	return wallet, nil
+	return &ab, nil
 }
 
-func KeystoreCreationHandler(w http.ResponseWriter, r *http.Request) {
+func KeystoreAccountCreationHandler(w http.ResponseWriter, r *http.Request) {
 	wallet, err := passphraseDecoder(w, r)
 	if err != nil {
 		ErrorHandler(w, r, "Could not find `passphrase` in request", err, http.StatusInternalServerError)
 		return
 	}
+	ga := blockchain.NewGladiusAccountManager()
 
-	account, err := blockchain.CreateAccount(wallet.Passphrase)
+	_, err = ga.CreateAccount(wallet.Passphrase)
 	if err != nil {
-		ErrorHandler(w, r, "Wallet could not be created", err, http.StatusInternalServerError)
+		ErrorHandler(w, r, "Account could not be created", err, http.StatusInternalServerError)
 		return
 	}
 
-	response := blockchain.AccountResponseFormatter(&account)
+	address, err := ga.GetAccountAddress()
+	if err != nil {
+		ErrorHandler(w, r, "Account address could not be retrieved", err, http.StatusInternalServerError)
+		return
+	}
 
-	ResponseHandler(w, r, "null", response)
+	addressResponse := response.AddressResponse{Address: *address}
+
+	ResponseHandler(w, r, "null", true, nil, addressResponse, nil)
 }
 
-func KeystoreWalletRetrievalHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	indexString := vars["index"]
-	index, _ := strconv.Atoi(indexString)
+func KeystoreAccountRetrievalHandler(w http.ResponseWriter, r *http.Request) {
+	ga := blockchain.NewGladiusAccountManager()
+	address, err := ga.GetAccountAddress()
+	if err != nil {
+		ErrorHandler(w, r, "Account address could not be retrieved", err, http.StatusInternalServerError)
+		return
+	}
 
-	wallet := blockchain.Wallets()[index]
+	addressResponse := response.AddressResponse{Address: *address}
 
-	response := blockchain.WalletResponseFormatter(wallet)
-	ResponseHandler(w, r, "null", response)
+	ResponseHandler(w, r, "null", true, nil, addressResponse, nil)
 }
 
-func KeystoreWalletOpenHandler(w http.ResponseWriter, r *http.Request) {
-	walletStruct, err := passphraseDecoder(w, r)
+func KeystoreAccountUnlockHandler(w http.ResponseWriter, r *http.Request) {
+	accountBody, err := passphraseDecoder(w, r)
 	if err != nil {
 		ErrorHandler(w, r, "Could not find `passphrase` in request", err, http.StatusInternalServerError)
 		return
 	}
-	vars := mux.Vars(r)
-	indexString := vars["index"]
-	index, _ := strconv.Atoi(indexString)
 
-	wallet, err := blockchain.OpenWallet(index, walletStruct.Passphrase)
-	if err != nil {
+	ga := blockchain.NewGladiusAccountManager()
+
+	success, err := ga.UnlockAccount(accountBody.Passphrase)
+	if success == false || err != nil {
 		ErrorHandler(w, r, "Wallet could not be opened, passphrase could be incorrect", err, http.StatusBadRequest)
 		return
 	}
 
-	response := blockchain.WalletResponseFormatter(*wallet)
-	ResponseHandler(w, r, "null", response)
-}
-
-func KeystoreWalletsRetrievalHandler(w http.ResponseWriter, r *http.Request) {
-	wallets := blockchain.Wallets()
-
-	response := "["
-
-	for index, wallet := range wallets {
-		response += blockchain.WalletResponseFormatter(wallet)
-		if index < len(wallets)-1 {
-			response += ","
-		}
+	address, err := ga.GetAccountAddress()
+	if err != nil {
+		ErrorHandler(w, r, "Account address could not be retrieved", err, http.StatusInternalServerError)
+		return
 	}
 
-	response += "]"
+	addressResponse := response.AddressResponse{Address: *address}
 
-	ResponseHandler(w, r, "null", response)
+	ResponseHandler(w, r, "null", true, nil, addressResponse, nil)
 }
 
 func KeystorePGPPublicKeyRetrievalHandler(w http.ResponseWriter, r *http.Request) {
@@ -107,20 +97,29 @@ func KeystorePGPPublicKeyRetrievalHandler(w http.ResponseWriter, r *http.Request
 		ErrorHandler(w, r, "Public key not found or cannot be read", err, http.StatusNotFound)
 		return
 	}
-	ResponseHandler(w, r, "null", "{\"publicKey\": \""+publicKey+"\"}")
+
+	publicKeyResponse := response.PublicKeyResponse{PublicKey: publicKey}
+
+	ResponseHandler(w, r, "null", true, nil, publicKeyResponse, nil)
+}
+
+type pgpStruct struct {
+	Name    string `json:"name"`
+	Comment string `json:"comment"`
+	Email   string `json:"email"`
 }
 
 func KeystorePGPCreationHandler(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
-	var pgpStruct pgp_struct
-	err := decoder.Decode(&pgpStruct)
+	var ps pgpStruct
+	err := decoder.Decode(&ps)
 
 	if err != nil {
 		ErrorHandler(w, r, "Request invalid, body is missing either `name`, `comment`, and/or `email`", err, http.StatusBadRequest)
 		return
 	}
 
-	path, err := crypto.CreateKeyPair(pgpStruct.Name, pgpStruct.Comment, pgpStruct.Email)
+	path, err := crypto.CreateKeyPair(ps.Name, ps.Comment, ps.Email)
 	println(path)
 
 	if err != nil {
@@ -128,6 +127,7 @@ func KeystorePGPCreationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := fmt.Sprintf("{\"created\": true}")
-	ResponseHandler(w, r, "null", response)
+	creationResponse := response.CreationResponse{Created: true}
+
+	ResponseHandler(w, r, "null", true, nil, creationResponse, nil)
 }

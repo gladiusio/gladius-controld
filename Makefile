@@ -52,10 +52,7 @@ dependencies:
 	"vendor/github.com/ethereum/go-ethereum/crypto/secp256k1/"
 
 test: $(CTL_SRC)
-	$(GOTEST) ./...
-
-lint:
-	gometalinter.v2 ./...
+	$(GOTEST) $(CTL_SRC)
 
 controld: test
 	$(GOBUILD) -o $(CTL_DEST) $(CTL_SRC)
