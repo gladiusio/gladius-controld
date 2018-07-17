@@ -42,7 +42,10 @@ func Start() {
 	p2pRouter.HandleFunc("/message/verify", handlers.VerifySignedMessageHandler).
 		Methods("POST")
 
-	p2pRouter.HandleFunc("/discovery/introduce", handlers.IntroductionHandler(peer)).
+	p2pRouter.HandleFunc("/network/join", handlers.JoinHandler(peer)).
+		Methods("POST")
+
+	p2pRouter.HandleFunc("/network/leave", handlers.LeaveHandler(peer)).
 		Methods("POST")
 
 	// P2P State Routes
