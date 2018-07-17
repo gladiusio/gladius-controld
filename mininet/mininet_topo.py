@@ -9,6 +9,7 @@ from mininet.log import setLogLevel
 from mininet.cli import CLI
 from mininet.log import info, warn, output
 from time import sleep
+import argparse
 
 
 class SingleSwitchTopo(Topo):
@@ -73,4 +74,12 @@ def setupNetwork(num_of_nodes=10):
 
 if __name__ == '__main__':
     setLogLevel('info')
-    setupNetwork(100)
+    ap = argparse.ArgumentParser()
+    ap.add_argument("-t", "--topology", required=True, help="Network Topology: flat")
+    ap.add_argument("-n", "--nodes", required=True, help="Number of nodes")
+    args = vars(ap.parse_args())
+    topology = args["topology"]
+    node_count = int(args["nodes"])
+
+    if topology == "flat":
+        setupNetwork(node_count)
