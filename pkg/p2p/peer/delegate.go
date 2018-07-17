@@ -17,14 +17,14 @@ func (d *delegate) NodeMeta(limit int) []byte {
 
 // NotifyMsg is called when a new SignedMessage is recieved by this peer
 func (d *delegate) NotifyMsg(b []byte) {
-	sm := &signature.SignedMessage{}
+	var sm *signature.SignedMessage
 	var update *update
 	if err := json.Unmarshal(b, &update); err != nil {
-		return
+		panic(err)
 	}
 	switch update.Action {
 	case "merge":
-		err := json.Unmarshal([]byte(update.Data), sm)
+		err := json.Unmarshal([]byte(update.Data), &sm)
 		if err != nil {
 			panic(err)
 		}

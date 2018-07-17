@@ -100,14 +100,14 @@ func (p *Peer) StopAndLeave() error {
 
 // UpdateAndPushState updates the local state and pushes it to several other peers
 func (p *Peer) UpdateAndPushState(sm *signature.SignedMessage) error {
-	stateJSON, err := p.GetState().GetJSON()
+	signedBytes, err := json.Marshal(sm)
 	if err != nil {
 		return err
 	}
 
 	b, err := json.Marshal(&update{
 		Action: "merge",
-		Data:   stateJSON,
+		Data:   signedBytes,
 	})
 
 	if err != nil {
