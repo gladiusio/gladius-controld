@@ -17,7 +17,11 @@ const (
 	DEBUG = false
 )
 
-func Start() {
+func Start(router *mux.Router)  {
+	log.Fatal(http.ListenAndServe(":"+PORT, ghandlers.CORS()(router)))
+}
+
+func InitializeRouter() (*mux.Router, error) {
 	fmt.Println("Starting API at http://localhost:" + PORT)
 
 	// Main Router
@@ -26,6 +30,10 @@ func Start() {
 		router.Use(loggingMiddleware)
 	}
 
+	return router, nil
+}
+
+func AppendNodeEndpoints(router *mux.Router) (*mux.Router, error) {
 	// Base API Sub-Routes
 	apiRouter := router.PathPrefix("/api").Subrouter()
 	apiRouter.Use(responseMiddleware)
@@ -121,7 +129,11 @@ func Start() {
 	marketRouter.HandleFunc("/pools/create", handlers.MarketPoolsCreateHandler).
 		Methods("POST")
 
-	log.Fatal(http.ListenAndServe(":"+PORT, ghandlers.CORS()(router)))
+	return router, nil
+}
+
+func AppendPoolManagerEndpoints(router *mux.Router) (*mux.Router, error) {
+	return router, nil
 }
 
 func responseMiddleware(next http.Handler) http.Handler {
