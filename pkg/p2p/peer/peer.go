@@ -27,7 +27,7 @@ func New() *Peer {
 	}
 
 	queue := &memberlist.TransmitLimitedQueue{
-		RetransmitMult: 3,
+		RetransmitMult: 6,
 	}
 
 	peer := &Peer{peerState: &state.State{}, running: false, peerDelegate: d, member: m, PeerQueue: queue}

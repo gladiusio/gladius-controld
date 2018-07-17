@@ -38,7 +38,7 @@ def setupNetwork(num_of_nodes=10):
            h1.name + ' >> /tmp/' + h1.name + '_log.out 2>&1 &')
     seed_ip = h1.IP()
 
-    sleep(15)
+    sleep(20)
 
     info("Setting up accounts\n")
     for node_num in range(1, num_of_nodes):
@@ -56,8 +56,8 @@ def setupNetwork(num_of_nodes=10):
               seed_ip + ' >> /tmp/' + h.name + '_log.out 2>&1 &')
         sleep(between_nodes)
 
-    # Give some time for the last few nodes
-    sleep(40)
+    # Wait for the network to reach equalibrium
+    sleep(200)
 
     info("\nRunning query on all nodes\n")
     query_node = net.get('query_node')
