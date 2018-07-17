@@ -17,7 +17,7 @@ func New() *Peer {
 	d := &delegate{}
 	hostname, _ := os.Hostname()
 
-	c := memberlist.DefaultWANConfig()
+	c := memberlist.DefaultLocalConfig()
 	c.Delegate = d
 	c.Name = hostname + "-" + uuid.NewV4().String()
 

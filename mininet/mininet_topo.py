@@ -57,7 +57,7 @@ def setupNetwork(num_of_nodes=10):
         sleep(between_nodes)
 
     # Give some time for the last few nodes
-    sleep(10)
+    sleep(40)
 
     info("\nRunning query on all nodes\n")
     query_node = net.get('query_node')
@@ -73,4 +73,4 @@ def setupNetwork(num_of_nodes=10):
 
 if __name__ == '__main__':
     setLogLevel('info')
-    setupNetwork(4)
+    setupNetwork(100)
