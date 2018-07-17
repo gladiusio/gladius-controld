@@ -181,15 +181,30 @@ func getIntroductionDataFromBody(w http.ResponseWriter, r *http.Request) (ip, pa
 	return ip, passphrase, signedMessage
 }
 
-// IntroductionHandler takes in an IP and a passhprase and pulls state from the
+// JoinHandler takes in an IP and a passhprase and pulls state from the
 // given node, and then introduces itself to it.
-func IntroductionHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
+func JoinHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ip, passphrase, _ := getIntroductionDataFromBody(w, r)
 		if ip != "" && passphrase != "" {
-			p.Join([]string{ip})
+			err := p.Join([]string{ip})
+			if err != nil {
+				ErrorHandler(w, r, "Couldn't join network", err, http.StatusBadRequest)
+				return
+			}
 			ResponseHandler(w, r, "Pulled state and sent introduction", true, nil, nil, nil)
 		}
+	}
+}
+
+func LeaveHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := p.StopAndLeave()
+		if err != nil {
+			ErrorHandler(w, r, "Couldn't leave network", err, http.StatusBadRequest)
+			return
+		}
+		ResponseHandler(w, r, "Pulled state and sent introduction", true, nil, nil, nil)
 	}
 }
 
