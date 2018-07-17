@@ -34,7 +34,6 @@ func Start() {
 
 	// P2P setup
 	peer := peer.New()
-	peer.Start()
 	p2pRouter := apiRouter.PathPrefix("/p2p").Subrouter()
 
 	// P2P Message Routes

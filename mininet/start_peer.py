@@ -26,6 +26,8 @@ def start_peer(node_name, discovery_ip):
     response = requests.post(url, data=data).text
     print "intro: " + response
 
+    sleep(5)
+
     # For good measure inform the peers we just learned about
     url = "http://localhost:3001/api/p2p/state/push_message"
     data = singed_message_string

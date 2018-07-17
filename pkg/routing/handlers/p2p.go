@@ -185,23 +185,9 @@ func getIntroductionDataFromBody(w http.ResponseWriter, r *http.Request) (ip, pa
 // given node, and then introduces itself to it.
 func IntroductionHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ip, passphrase, signedMessage := getIntroductionDataFromBody(w, r)
+		ip, passphrase, _ := getIntroductionDataFromBody(w, r)
 		if ip != "" && passphrase != "" {
-			err := p.PullState(ip, passphrase)
-			if err != nil {
-				ErrorHandler(w, r, "Could not pull state from peer", err, http.StatusBadRequest)
-				return
-			}
-			sm, err := parseSignedMessageFromBytes(signedMessage)
-			if err != nil {
-				ErrorHandler(w, r, "Could not parse signed message", err, http.StatusBadRequest)
-				return
-			}
-			// Update and send message
-			p.UpdateInternalState(sm)
-			var reply string
-			p.SendUpdate(sm, ip, &reply)
-
+			p.Join([]string{ip})
 			ResponseHandler(w, r, "Pulled state and sent introduction", true, nil, nil, nil)
 		}
 	}
