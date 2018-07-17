@@ -20,7 +20,7 @@ def start_peer(node_name, discovery_ip):
     print "sm: " + singed_message.text
 
     # Introduce to the discovery peer
-    url = "http://localhost:3001/api/p2p/discovery/introduce"
+    url = "http://localhost:3001/api/p2p/network/join"
     data = '''{"ip": "''' + discovery_ip + '''","passphrase": "password","signed_message": ''' + \
         singed_message_string + '''}'''
     response = requests.post(url, data=data).text
