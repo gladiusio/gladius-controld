@@ -47,6 +47,7 @@ type PoolPublicData struct {
 	Rating       string `json:"rating"`
 	NodeCount    string `json:"nodeCount"`
 	MaxBandwidth string `json:"maxBandwidth"`
+	URL          string `json:"url"`
 }
 
 func PoolRetrievePublicData(poolAddress string) (*PoolPublicData, error) {

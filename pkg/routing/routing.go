@@ -19,13 +19,17 @@ const (
 
 var apiRouter *mux.Router
 
-func Start(router *mux.Router)  {
-	log.Fatal(http.ListenAndServe(":"+PORT, ghandlers.CORS()(router)))
+func Start(router *mux.Router, port *string)  {
+	if port != nil {
+		fmt.Println("Starting API at http://localhost:" + *port)
+		log.Fatal(http.ListenAndServe(":" + *port, ghandlers.CORS()(router)))
+	} else {
+		fmt.Println("Starting API at http://localhost:" + PORT)
+		log.Fatal(http.ListenAndServe(":"+PORT, ghandlers.CORS()(router)))
+	}
 }
 
 func InitializeRouter() (*mux.Router, error) {
-	fmt.Println("Starting API at http://localhost:" + PORT)
-
 	// Main Router
 	router := mux.NewRouter()
 	if DEBUG {
@@ -104,7 +108,8 @@ func AppendNodeEndpoints(router *mux.Router) (*mux.Router, error) {
 	nodeRouter.HandleFunc("/{nodeAddress:0[xX][0-9a-fA-F]{40}}/data", handlers.NodeSetDataHandler).
 		Methods("POST")
 	// Node application to Pool
-	nodeRouter.HandleFunc("/{nodeAddress:0[xX][0-9a-fA-F]{40}}/apply/{poolAddress:0[xX][0-9a-fA-F]{40}}", handlers.NodeApplyToPoolHandler)
+	nodeRouter.HandleFunc("/apply/{poolAddress:0[xX][0-9a-fA-F]{40}}", handlers.NodeApplyToPoolHandler)
+	//nodeRouter.HandleFunc("/{nodeAddress:0[xX][0-9a-fA-F]{40}}/apply/{poolAddress:0[xX][0-9a-fA-F]{40}}", handlers.NodeApplyToPoolHandler)
 	// Node application status
 	nodeRouter.HandleFunc("/{nodeAddress:0[xX][0-9a-fA-F]{40}}/application/{poolAddress:0[xX][0-9a-fA-F]{40}}", handlers.NodeApplicationStatusHandler)
 	// Node pool applications
@@ -130,6 +135,7 @@ func AppendNodeEndpoints(router *mux.Router) (*mux.Router, error) {
 func AppendPoolManagerEndpoints(router *mux.Router) (*mux.Router, error) {
 	// Initialize Base API sub-route
 	InitializeAPISubRoutes(router)
+
 	// Pool
 	poolRouter := apiRouter.PathPrefix("/pool").Subrouter()
 	// Pool data, both public and private data can be set here
@@ -149,6 +155,15 @@ func AppendPoolManagerEndpoints(router *mux.Router) (*mux.Router, error) {
 	marketRouter.HandleFunc("/pools/create", handlers.MarketPoolsCreateHandler).
 		Methods("POST")
 
+	// Applications
+	applicationRouter := apiRouter.PathPrefix("/application").Subrouter()
+	applicationRouter.HandleFunc("/new", handlers.PoolNewApplicationHandler).
+		Methods("POST")
+	applicationRouter.HandleFunc("/edit", handlers.PoolEditApplicationHandler).
+		Methods("POST")
+	applicationRouter.HandleFunc("/view/{wallet:0[xX][0-9a-fA-F]{40}}", handlers.PoolViewApplicationHandler).
+		Methods("GET")
+	applicationRouter.HandleFunc("/status/{wallet:0[xX][0-9a-fA-F]{40}}", handlers.PoolStatusViewHandler)
 
 	return router, nil
 }

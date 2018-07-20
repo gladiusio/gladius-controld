@@ -57,6 +57,15 @@
   version = "v1.4.7"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/gladiusio/gladius-application-server"
+  packages = [
+    "pkg/controller",
+    "pkg/db/models"
+  ]
+  revision = "790844bf1602916c53a7aaa6caeff5d32857ba92"
+
+[[projects]]
   name = "github.com/gladiusio/gladius-utils"
   packages = [
     "config",
@@ -113,6 +122,21 @@
   revision = "ef8a98b0bbce4a65b5aa4c368430a80ddc533168"
 
 [[projects]]
+  name = "github.com/jinzhu/gorm"
+  packages = [
+    ".",
+    "dialects/sqlite"
+  ]
+  revision = "6ed508ec6a4ecb3531899a69cbc746ccf65a4166"
+  version = "v1.9.1"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/jinzhu/inflection"
+  packages = ["."]
+  revision = "04140366298a54a039076d798123ffa108fff46c"
+
+[[projects]]
   branch = "master"
   name = "github.com/kardianos/osext"
   packages = ["."]
@@ -129,6 +153,12 @@
   packages = ["."]
   revision = "c2353362d570a7bfa228149c62842019201cfb71"
   version = "v1.8.0"
+
+[[projects]]
+  name = "github.com/mattn/go-sqlite3"
+  packages = ["."]
+  revision = "25ecb14adfc7543176f7d85291ec7dba82c6f7e4"
+  version = "v1.9.0"
 
 [[projects]]
   branch = "master"
@@ -317,6 +347,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4106961918c7f166d2348e3cc0f97774a2e5afba3ba2ce17ed9c8e8c91fea0cf"
+  inputs-digest = "a79c2431e85507b334d83665b354ad1147d684da73d610a552eeacc0a2a49575"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -16,5 +16,5 @@ func main() {
 
 func initialize() {
 	router := NodeRouter()
-	routing.Start(router)
+	routing.Start(router, nil)
 }
