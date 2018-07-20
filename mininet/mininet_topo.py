@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 from mininet.topo import Topo
+from mininet.topolib import TreeTopo
 from mininet.net import Mininet
 from mininet.node import CPULimitedHost
 from mininet.link import TCLink
@@ -10,6 +11,7 @@ from mininet.cli import CLI
 from mininet.log import info, warn, output
 from time import sleep
 import argparse
+import sys
 
 
 class SingleSwitchTopo(Topo):
@@ -24,15 +26,19 @@ class SingleSwitchTopo(Topo):
             host = self.addHost('h%s' % (h + 1), privateDirs=['/gladius'])
             self.addLink(host, switch, bw=1000, delay='20ms')
 
-
-def setupNetwork(num_of_nodes=10):
-    topo = SingleSwitchTopo(n=num_of_nodes)
+def setupNetwork(topology="flat", num_of_hosts=10, depth=3, fanout=2):
+    if topology == "flat":
+        topo = SingleSwitchTopo(n=num_of_hosts)
+   
     net = Mininet(topo=topo, link=TCLink)
+    num_of_hosts = len(net.hosts)
+    info('Host count: %d\n' % num_of_hosts)
 
     net.start()
-    # net.pingAll()
+
     between_nodes = 5
 
+    # seed node is always 10.0.0.1
     info("Setting up seed node\n")
     h1 = net.get('h1')
     h1.cmd('python /vagrant/mininet/setup_seed.py ' +
@@ -42,7 +48,7 @@ def setupNetwork(num_of_nodes=10):
     sleep(20)
 
     info("Setting up accounts\n")
-    for node_num in range(1, num_of_nodes):
+    for node_num in range(1, num_of_hosts):
         h = net.get('h%s' % (node_num + 1))
         h.cmd('python /vagrant/mininet/setup_peer.py ' +
               h.name + ' >> /tmp/' + h.name + '_log.out 2>&1 &')
@@ -50,7 +56,7 @@ def setupNetwork(num_of_nodes=10):
     sleep(25)
 
     info("Starting peers\n")
-    for node_num in range(1, num_of_nodes):
+    for node_num in range(1, num_of_hosts):
         info("\rStarting node: %d" % node_num)
         h = net.get('h%s' % (node_num + 1))
         h.cmd('python /vagrant/mininet/start_peer.py ' + h.name + ' ' +
@@ -58,7 +64,7 @@ def setupNetwork(num_of_nodes=10):
         sleep(between_nodes)
 
     # Wait for the network to reach equalibrium
-    sleep(200)
+    sleep(10)
 
     info("\nRunning query on all nodes\n")
     query_node = net.get('query_node')
@@ -74,12 +80,13 @@ def setupNetwork(num_of_nodes=10):
 
 if __name__ == '__main__':
     setLogLevel('info')
-    ap = argparse.ArgumentParser()
-    ap.add_argument("-t", "--topology", required=True, help="Network Topology: flat")
-    ap.add_argument("-n", "--nodes", required=True, help="Number of nodes")
-    args = vars(ap.parse_args())
-    topology = args["topology"]
-    node_count = int(args["nodes"])
 
-    if topology == "flat":
-        setupNetwork(node_count)
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--topology", action="store", dest="topology", required=True, choices=('flat', 'tree'), help="Network Topology")
+    ap.add_argument("--nodes", action="store", dest="nodes", required='flat' in sys.argv, type=int, help="Number of nodes in a flat topology")
+    ap.add_argument("--depth", action="store", dest="depth", required='tree' in sys.argv, type=int, help="Depth of tree topology")
+    ap.add_argument("--fanout", action="store", dest="fanout", required='tree' in sys.argv, type=int, help="Fanout of tree topology")
+
+    args = ap.parse_args()
+
+    setupNetwork(args.topology, args.nodes, args.depth, args.fanout)
