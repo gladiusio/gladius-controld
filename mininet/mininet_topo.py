@@ -15,13 +15,20 @@ class SingleSwitchTopo(Topo):
     "Single switch connected to n hosts."
 
     def build(self, n=2, bw=100, lat=10):
-        switch = self.addSwitch('s1')
         query = self.addHost('qnode')
-        self.addLink(query, switch, bw=bw, latency_ms=lat, delay='10ms')
+        total_nodes = 0
+        for s in range(10):
+            switch = self.addSwitch('s%s' % s)
+            if (s > 0):
+                self.addLink("s%s" % (s - 1), "s%s" % s)
+            for h in range(20):
+                host = self.addHost('h%s' % (total_nodes + 1),
+                                    privateDirs=['/gladius'])
+                self.addLink(host, switch)
+                total_nodes += 1
 
-        for h in range(n):
-            host = self.addHost('h%s' % (h + 1), privateDirs=['/gladius'])
-            self.addLink(host, switch, bw=bw, latency_ms=lat, delay='20ms')
+        self.addLink("s0", "qnode")
+
 
 def setupNetwork(num_of_hosts=10, bandwidth=100, latency=10):
     topo = SingleSwitchTopo(n=num_of_hosts, bw=bandwidth, lat=latency)
@@ -30,7 +37,7 @@ def setupNetwork(num_of_hosts=10, bandwidth=100, latency=10):
 
     net.start()
 
-    between_nodes = 5
+    between_nodes = 4
 
     # seed node is always 10.0.0.1
     info("Setting up seed node\n")
@@ -58,7 +65,7 @@ def setupNetwork(num_of_hosts=10, bandwidth=100, latency=10):
         sleep(between_nodes)
 
     # Wait for the network to reach equalibrium
-    sleep(10)
+    sleep(200)
 
     info("\nRunning query on all nodes\n")
     query_node = net.get('qnode')
@@ -76,9 +83,12 @@ if __name__ == '__main__':
     setLogLevel('info')
 
     ap = argparse.ArgumentParser()
-    ap.add_argument("--nodes", default=10, action="store", dest="nodes", type=int, help="Number of nodes")
-    ap.add_argument("--bw", default=100, action="store", dest="bw", type=int, help="Speed in Mbps of network links")
-    ap.add_argument("--latency", default='10ms', action="store", dest="latency", type=int, help="Latency in ms between links")
+    ap.add_argument("--nodes", default=10, action="store",
+                    dest="nodes", type=int, help="Number of nodes")
+    ap.add_argument("--bw", default=100, action="store", dest="bw",
+                    type=int, help="Speed in Mbps of network links")
+    ap.add_argument("--latency", default='10', action="store",
+                    dest="latency", type=int, help="Latency in ms between links")
 
     args = ap.parse_args()
 
