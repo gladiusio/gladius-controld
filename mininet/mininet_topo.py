@@ -2,36 +2,37 @@
 
 from mininet.topo import Topo
 from mininet.net import Mininet
-from mininet.node import CPULimitedHost
 from mininet.link import TCLink
 from mininet.util import dumpNodeConnections
 from mininet.log import setLogLevel
 from mininet.cli import CLI
 from mininet.log import info, warn, output
 from time import sleep
+import argparse
 
 
 class SingleSwitchTopo(Topo):
     "Single switch connected to n hosts."
 
-    def build(self, n=2):
+    def build(self, n=2, bw=100, lat=10):
         switch = self.addSwitch('s1')
-        query = self.addHost('query_node')
-        self.addLink(query, switch, bw=100, delay='5ms')
+        query = self.addHost('qnode')
+        self.addLink(query, switch, bw=bw, latency_ms=lat, delay='10ms')
 
         for h in range(n):
             host = self.addHost('h%s' % (h + 1), privateDirs=['/gladius'])
-            self.addLink(host, switch, bw=100, delay='5ms')
+            self.addLink(host, switch, bw=bw, latency_ms=lat, delay='20ms')
 
+def setupNetwork(num_of_hosts=10, bandwidth=100, latency=10):
+    topo = SingleSwitchTopo(n=num_of_hosts, bw=bandwidth, lat=latency)
 
-def setupNetwork(num_of_nodes=10):
-    topo = SingleSwitchTopo(n=num_of_nodes)
     net = Mininet(topo=topo, link=TCLink)
 
     net.start()
-    # net.pingAll()
-    between_nodes = 4
 
+    between_nodes = 5
+
+    # seed node is always 10.0.0.1
     info("Setting up seed node\n")
     h1 = net.get('h1')
     h1.cmd('python /vagrant/mininet/setup_seed.py ' +
@@ -41,7 +42,7 @@ def setupNetwork(num_of_nodes=10):
     sleep(20)
 
     info("Setting up accounts\n")
-    for node_num in range(1, num_of_nodes):
+    for node_num in range(1, num_of_hosts):
         h = net.get('h%s' % (node_num + 1))
         h.cmd('python /vagrant/mininet/setup_peer.py ' +
               h.name + ' >> /tmp/' + h.name + '_log.out 2>&1 &')
@@ -49,7 +50,7 @@ def setupNetwork(num_of_nodes=10):
     sleep(25)
 
     info("Starting peers\n")
-    for node_num in range(1, num_of_nodes):
+    for node_num in range(1, num_of_hosts):
         info("\rStarting node: %d" % node_num)
         h = net.get('h%s' % (node_num + 1))
         h.cmd('python /vagrant/mininet/start_peer.py ' + h.name + ' ' +
@@ -57,10 +58,10 @@ def setupNetwork(num_of_nodes=10):
         sleep(between_nodes)
 
     # Wait for the network to reach equalibrium
-    sleep(200)
+    sleep(10)
 
     info("\nRunning query on all nodes\n")
-    query_node = net.get('query_node')
+    query_node = net.get('qnode')
     result = query_node.cmd(
         'python /vagrant/mininet/query_all.py ' + ' '.join([host.IP() for host in net.hosts[:len(net.hosts) - 1]]))
 
@@ -73,4 +74,12 @@ def setupNetwork(num_of_nodes=10):
 
 if __name__ == '__main__':
     setLogLevel('info')
-    setupNetwork(200)
+
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--nodes", default=10, action="store", dest="nodes", type=int, help="Number of nodes")
+    ap.add_argument("--bw", default=100, action="store", dest="bw", type=int, help="Speed in Mbps of network links")
+    ap.add_argument("--latency", default='10ms', action="store", dest="latency", type=int, help="Latency in ms between links")
+
+    args = ap.parse_args()
+
+    setupNetwork(args.nodes, args.bw, args.latency)
