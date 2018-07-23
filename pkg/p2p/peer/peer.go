@@ -19,7 +19,10 @@ func New() *Peer {
 
 	c := memberlist.DefaultWANConfig()
 	c.PushPullInterval = 15 * time.Second
-	c.GossipInterval = 300 * time.Millisecond
+	c.GossipInterval = 400 * time.Millisecond
+	c.ProbeTimeout = 4 * time.Second
+	c.ProbeInterval = 8 * time.Second
+	c.GossipNodes = 3
 	c.Delegate = d
 	c.Name = hostname + "-" + uuid.NewV4().String()
 
@@ -29,7 +32,7 @@ func New() *Peer {
 	}
 
 	queue := &memberlist.TransmitLimitedQueue{
-		RetransmitMult: 3,
+		RetransmitMult: 2,
 	}
 
 	peer := &Peer{peerState: &state.State{}, running: false, peerDelegate: d, member: m, PeerQueue: queue}

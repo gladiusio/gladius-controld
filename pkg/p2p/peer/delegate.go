@@ -15,7 +15,7 @@ func (d *delegate) NodeMeta(limit int) []byte {
 	return []byte{}
 }
 
-// NotifyMsg is called when a new SignedMessage is recieved by this peer
+// NotifyMsg is called when a new message is recieved by this peer
 func (d *delegate) NotifyMsg(b []byte) {
 	var sm *signature.SignedMessage
 	var update *update
@@ -32,7 +32,7 @@ func (d *delegate) NotifyMsg(b []byte) {
 		panic("unsupported update action")
 	}
 
-	d.peer.GetState().UpdateState(sm)
+	go d.peer.GetState().UpdateState(sm)
 }
 
 // GetBroadcasts returns the list of broadcast messages (not for us)
@@ -56,14 +56,15 @@ func (d *delegate) LocalState(join bool) []byte {
 // remote side's LocalState call. The 'join'
 // boolean indicates this is for a join instead of a push/pull.
 func (d *delegate) MergeRemoteState(buf []byte, join bool) {
-	incomingState, err := state.ParseNetworkState(buf)
-	if err != nil {
-		panic(err)
-	}
-	// Get the signatures and rebuild the state
-	sigList := incomingState.GetSignatureList()
-	for _, sig := range sigList {
-		d.peer.GetState().UpdateState(sig)
-	}
-
+	go func() {
+		incomingState, err := state.ParseNetworkState(buf)
+		if err != nil {
+			panic(err)
+		}
+		// Get the signatures and rebuild the state
+		sigList := incomingState.GetSignatureList()
+		for _, sig := range sigList {
+			d.peer.GetState().UpdateState(sig)
+		}
+	}()
 }

@@ -17,11 +17,11 @@ class SingleSwitchTopo(Topo):
     def build(self, n=2):
         switch = self.addSwitch('s1')
         query = self.addHost('query_node')
-        self.addLink(query, switch, bw=1000, delay='10ms')
+        self.addLink(query, switch, bw=100, delay='5ms')
 
         for h in range(n):
             host = self.addHost('h%s' % (h + 1), privateDirs=['/gladius'])
-            self.addLink(host, switch, bw=1000, delay='20ms')
+            self.addLink(host, switch, bw=100, delay='5ms')
 
 
 def setupNetwork(num_of_nodes=10):
@@ -30,7 +30,7 @@ def setupNetwork(num_of_nodes=10):
 
     net.start()
     # net.pingAll()
-    between_nodes = 5
+    between_nodes = 4
 
     info("Setting up seed node\n")
     h1 = net.get('h1')
