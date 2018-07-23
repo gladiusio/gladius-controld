@@ -17,22 +17,19 @@ import sys
 class SingleSwitchTopo(Topo):
     "Single switch connected to n hosts."
 
-    def build(self, n=2):
+    def build(self, n=2, bw=100, lat=10):
         switch = self.addSwitch('s1')
-        query = self.addHost('query_node')
-        self.addLink(query, switch, bw=1000, delay='10ms')
+        query = self.addHost('qnode')
+        self.addLink(query, switch, bw=bw, latency_ms=lat, delay='10ms')
 
         for h in range(n):
             host = self.addHost('h%s' % (h + 1), privateDirs=['/gladius'])
-            self.addLink(host, switch, bw=1000, delay='20ms')
+            self.addLink(host, switch, bw=bw, latency_ms=lat, delay='20ms')
 
-def setupNetwork(topology="flat", num_of_hosts=10, depth=3, fanout=2):
-    if topology == "flat":
-        topo = SingleSwitchTopo(n=num_of_hosts)
+def setupNetwork(num_of_hosts=10, bandwidth=100, latency=10):
+    topo = SingleSwitchTopo(n=num_of_hosts, bw=bandwidth, lat=latency)
    
     net = Mininet(topo=topo, link=TCLink)
-    num_of_hosts = len(net.hosts)
-    info('Host count: %d\n' % num_of_hosts)
 
     net.start()
 
@@ -67,7 +64,7 @@ def setupNetwork(topology="flat", num_of_hosts=10, depth=3, fanout=2):
     sleep(10)
 
     info("\nRunning query on all nodes\n")
-    query_node = net.get('query_node')
+    query_node = net.get('qnode')
     result = query_node.cmd(
         'python /vagrant/mininet/query_all.py ' + ' '.join([host.IP() for host in net.hosts[:len(net.hosts) - 1]]))
 
@@ -82,11 +79,10 @@ if __name__ == '__main__':
     setLogLevel('info')
 
     ap = argparse.ArgumentParser()
-    ap.add_argument("--topology", action="store", dest="topology", required=True, choices=('flat', 'tree'), help="Network Topology")
-    ap.add_argument("--nodes", action="store", dest="nodes", required='flat' in sys.argv, type=int, help="Number of nodes in a flat topology")
-    ap.add_argument("--depth", action="store", dest="depth", required='tree' in sys.argv, type=int, help="Depth of tree topology")
-    ap.add_argument("--fanout", action="store", dest="fanout", required='tree' in sys.argv, type=int, help="Fanout of tree topology")
+    ap.add_argument("--nodes", default=10, action="store", dest="nodes", type=int, help="Number of nodes")
+    ap.add_argument("--bw", default=100, action="store", dest="bw", type=int, help="Speed in Mbps of network links")
+    ap.add_argument("--latency", default='10ms', action="store", dest="latency", type=int, help="Latency in ms between links")
 
     args = ap.parse_args()
 
-    setupNetwork(args.topology, args.nodes, args.depth, args.fanout)
+    setupNetwork(args.nodes, args.bw, args.latency)
