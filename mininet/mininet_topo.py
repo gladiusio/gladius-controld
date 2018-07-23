@@ -73,4 +73,4 @@ def setupNetwork(num_of_nodes=10):
 
 if __name__ == '__main__':
     setLogLevel('info')
-    setupNetwork(100)
+    setupNetwork(200)
