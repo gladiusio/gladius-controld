@@ -16,14 +16,13 @@ type mergeDelegate struct {
 // into the network by sending them a challenge that they must sign with their
 // Ethereum key.
 func (md *mergeDelegate) NotifyMerge(peers []*memberlist.Node) error {
-	questions := make([]string, len(peers))
-
+	challengeID =
 	for i, peer := range peers {
 		questionString := uuid.NewV4().String()
-		questions[i] = questionString
 
 		challenge := &challenge{question: questionString}
 		challengeBytes, _ := json.Marshal(challenge)
+
 		md.peer.member.SendReliable(peer, challengeBytes)
 	}
 

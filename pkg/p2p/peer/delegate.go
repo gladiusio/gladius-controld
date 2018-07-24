@@ -37,6 +37,7 @@ func (d *delegate) NotifyMsg(b []byte) {
 		if err != nil {
 			panic(err)
 		}
+
 	case "challenge_question": // This is a node recieving a question
 
 	default:
