@@ -63,7 +63,7 @@
     "pkg/controller",
     "pkg/db/models"
   ]
-  revision = "790844bf1602916c53a7aaa6caeff5d32857ba92"
+  revision = "c18637e3d5f0129f4388a34e7acbd7c07a3d6304"
 
 [[projects]]
   name = "github.com/gladiusio/gladius-utils"

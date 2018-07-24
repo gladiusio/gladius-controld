@@ -25,18 +25,18 @@ func ConnectMarket() *generated.Market {
 	return market
 }
 
-func MarketPoolsOwnedByUser(includeData bool) (*PoolArrayResponse, error) {
+func MarketPoolsOwnedByUser(includeData bool) (PoolArrayResponse, error) {
 	market := ConnectMarket()
 
 	ga := NewGladiusAccountManager()
 	address, err := ga.GetAccountAddress()
 	if err != nil {
-		return nil, err
+		return PoolArrayResponse{}, err
 	}
 
 	pools, err := market.GetOwnedPools(&bind.CallOpts{From: *address}, *address)
 	if err != nil {
-		return nil, err
+		return PoolArrayResponse{}, err
 	}
 
 	return MarketPoolAddressesToArrayResponse(pools, includeData)
@@ -60,18 +60,18 @@ func (d *PoolResponse) String() string {
 	return string(json)
 }
 
-func MarketPools(includeData bool) (*PoolArrayResponse, error) {
+func MarketPools(includeData bool) (PoolArrayResponse, error) {
 	market := ConnectMarket()
 
 	poolAddresses, err := market.GetAllPools(nil)
 	if err != nil {
-		return nil, err
+		return PoolArrayResponse{}, err
 	}
 
 	return MarketPoolAddressesToArrayResponse(poolAddresses, includeData)
 }
 
-func MarketPoolAddressesToArrayResponse(poolAddresses []common.Address, includeData bool) (*PoolArrayResponse, error) {
+func MarketPoolAddressesToArrayResponse(poolAddresses []common.Address, includeData bool) (PoolArrayResponse, error) {
 	var pools PoolArrayResponse
 
 	for _, poolAddress := range poolAddresses {
@@ -80,7 +80,7 @@ func MarketPoolAddressesToArrayResponse(poolAddresses []common.Address, includeD
 			poolData, err := PoolRetrievePublicData(poolAddress.String())
 			poolResponse = PoolResponse{poolAddress.String(), poolData}
 			if err != nil {
-				return nil, err
+				return PoolArrayResponse{}, err
 			}
 		} else {
 			poolResponse = PoolResponse{poolAddress.String(), nil}
@@ -88,7 +88,7 @@ func MarketPoolAddressesToArrayResponse(poolAddresses []common.Address, includeD
 		pools.Pools = append(pools.Pools, poolResponse)
 	}
 
-	return &pools, nil
+	return pools, nil
 }
 
 //MarketCreatePool - Create new pool
