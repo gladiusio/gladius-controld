@@ -15,18 +15,18 @@ class SingleSwitchTopo(Topo):
     "Single switch connected to n hosts."
 
     def build(self, n=2, bw=100, lat=10):
-        query = self.addHost('qnode')
         total_nodes = 0
-        for s in range(10):
+        for s in range(4):
             switch = self.addSwitch('s%s' % s)
             if (s > 0):
                 self.addLink("s%s" % (s - 1), "s%s" % s)
-            for h in range(20):
+            for h in range(10):
                 host = self.addHost('h%s' % (total_nodes + 1),
                                     privateDirs=['/gladius'])
                 self.addLink(host, switch)
                 total_nodes += 1
 
+        query = self.addHost('qnode')
         self.addLink("s0", "qnode")
 
 
