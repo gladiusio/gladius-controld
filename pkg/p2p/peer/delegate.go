@@ -17,22 +17,32 @@ func (d *delegate) NodeMeta(limit int) []byte {
 
 // NotifyMsg is called when a new message is recieved by this peer
 func (d *delegate) NotifyMsg(b []byte) {
-	var sm *signature.SignedMessage
 	var update *update
 	if err := json.Unmarshal(b, &update); err != nil {
 		panic(err)
 	}
 	switch update.Action {
-	case "merge":
+	case "merge": // This is when a node is propigating a new message via gossip
+		var sm *signature.SignedMessage
+
 		err := json.Unmarshal([]byte(update.Data), &sm)
 		if err != nil {
 			panic(err)
 		}
+		go d.peer.GetState().UpdateState(sm)
+	case "challenge_response": // This is from a node responding to a challenge question
+		var sm *signature.SignedMessage
+
+		err := json.Unmarshal([]byte(update.Data), &sm)
+		if err != nil {
+			panic(err)
+		}
+	case "challenge_question": // This is a node recieving a question
+
 	default:
 		panic("unsupported update action")
 	}
 
-	go d.peer.GetState().UpdateState(sm)
 }
 
 // GetBroadcasts returns the list of broadcast messages (not for us)

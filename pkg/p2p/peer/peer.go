@@ -35,7 +35,7 @@ func New() *Peer {
 		RetransmitMult: 3,
 	}
 
-	peer := &Peer{peerState: &state.State{}, running: false, peerDelegate: d, member: m, PeerQueue: queue}
+	peer := &Peer{peerState: &state.State{}, running: false, peerDelegate: d, member: m, PeerQueue: queue, challengeReceiveMap: make(map[string]chan string)}
 
 	queue.NumNodes = func() int { return peer.member.NumMembers() }
 	d.peer = peer
@@ -44,11 +44,12 @@ func New() *Peer {
 
 // Peer is a type that represents a peer in the Gladius p2p network.
 type Peer struct {
-	peerDelegate *delegate
-	PeerQueue    *memberlist.TransmitLimitedQueue
-	peerState    *state.State
-	member       *memberlist.Memberlist
-	running      bool
+	peerDelegate        *delegate
+	PeerQueue           *memberlist.TransmitLimitedQueue
+	peerState           *state.State
+	member              *memberlist.Memberlist
+	running             bool
+	challengeReceiveMap map[string]chan string // Map of challenge set ids to a receive channel of the responses from the questioned peers.
 }
 
 type broadcast struct {
@@ -57,8 +58,14 @@ type broadcast struct {
 }
 
 type update struct {
-	Action string          // merge
-	Data   json.RawMessage // crdt.GCounterJSON
+	Action string          // Can be "merge", "challenge_question", or "challenge_response"
+	Data   json.RawMessage // Usually a signed message, but can also be a challenge question
+}
+
+// Used to send to a node through an "update"
+type challenge struct {
+	challengeID string
+	question    string
 }
 
 func (b *broadcast) Invalidates(other memberlist.Broadcast) bool {
