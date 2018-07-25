@@ -89,6 +89,7 @@ func (md *mergeDelegate) NotifyMerge(peers []*memberlist.Node) error {
 				successfulCount++
 			}
 
+			// All challenges have successfully been received
 			if successfulCount == len(challengeMap) {
 				return nil
 			}
