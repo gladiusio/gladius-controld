@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/gladiusio/gladius-controld/pkg/p2p/signature"
@@ -35,7 +36,7 @@ func New() *Peer {
 		RetransmitMult: 3,
 	}
 
-	peer := &Peer{peerState: &state.State{}, running: false, peerDelegate: d, member: m, PeerQueue: queue, challengeReceiveMap: make(map[string]chan string)}
+	peer := &Peer{peerState: &state.State{}, running: false, peerDelegate: d, member: m, PeerQueue: queue, challengeReceiveMap: make(map[string]chan []byte)}
 
 	queue.NumNodes = func() int { return peer.member.NumMembers() }
 	d.peer = peer
@@ -49,7 +50,8 @@ type Peer struct {
 	peerState           *state.State
 	member              *memberlist.Memberlist
 	running             bool
-	challengeReceiveMap map[string]chan string // Map of challenge set ids to a receive channel of the responses from the questioned peers.
+	challengeReceiveMap map[string]chan []byte // Map of challenge set ids to a receive channel of the responses from the questioned peers.
+	mux                 sync.Mutex
 }
 
 type broadcast struct {
@@ -108,6 +110,18 @@ func (p *Peer) StopAndLeave() error {
 	}
 
 	return nil
+}
+
+func (p *Peer) registerOutgoingChallenge(challengeID string) {
+	p.mux.Lock()
+	p.challengeReceiveMap[challengeID] = make(chan []byte)
+	p.mux.Unlock()
+}
+
+func (p *Peer) getChallengeResponseChannel(challengeID string) chan []byte {
+	p.mux.Lock()
+	defer p.mux.Unlock()
+	return p.challengeReceiveMap[challengeID]
 }
 
 // UpdateAndPushState updates the local state and pushes it to several other peers
