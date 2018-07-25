@@ -18,11 +18,13 @@ func PoolNewApplicationHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		ErrorHandler(w, r, "Could not decode request payload", err, http.StatusBadRequest)
+		return
 	}
 
 	db, err := controller.Initialize(nil)
 	if err != nil {
 		ErrorHandler(w, r, "Could not apply to pool", err, http.StatusBadRequest)
+		return
 	}
 
 	controller.NodeApplyToPool(db, requestPayload)
@@ -35,11 +37,13 @@ func PoolEditApplicationHandler(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&requestPayload)
 	if err != nil {
 		ErrorHandler(w, r, "Could not decode request payload", err, http.StatusBadRequest)
+		return
 	}
 
 	db, err := controller.Initialize(nil)
 	if err != nil {
 		ErrorHandler(w, r, "Could not apply to pool", err, http.StatusBadRequest)
+		return
 	}
 
 	controller.NodeUpdateProfile(db, requestPayload)
@@ -70,6 +74,7 @@ func viewApplication(w http.ResponseWriter, r *http.Request, wallet string) {
 	profile, err := getProfile(wallet)
 	if err != nil {
 		ErrorHandler(w, r, "Could not retrieve profile for wallet: " + wallet, err, http.StatusBadRequest)
+		return
 	}
 
 	ResponseHandler(w, r, "null", true, nil, profile, nil)
@@ -88,6 +93,7 @@ func PoolStatusViewHandler(w http.ResponseWriter, r *http.Request) {
 	profile, err := getProfile(wallet)
 	if err != nil {
 		ErrorHandler(w, r, "Could not retrieve profile for wallet: " + wallet, err, http.StatusBadRequest)
+		return
 	}
 
 	response := statusResponse{

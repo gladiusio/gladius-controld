@@ -75,6 +75,7 @@ func NodeViewAllApplicationsHandler(w http.ResponseWriter, r *http.Request) {
 	poolArrayResponse, err := blockchain.MarketPools(true)
 	if err != nil {
 		ErrorHandler(w, r, "Could not retrieve pools", err, http.StatusBadRequest)
+		return
 	}
 
 	address, err := blockchain.NewGladiusAccountManager().GetAccountAddress()

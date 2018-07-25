@@ -34,6 +34,7 @@ func PoolPublicDataHandler(w http.ResponseWriter, r *http.Request) {
 		jsonPayload, err := json.Marshal(data)
 		if err != nil {
 			ErrorHandler(w, r, "Could not decode request into JSON", err, http.StatusNotFound)
+			return
 		}
 
 		transaction, err := blockchain.PoolSetPublicData(auth, poolAddress, string(jsonPayload))
