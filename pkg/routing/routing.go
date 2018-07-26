@@ -74,9 +74,6 @@ func AppendNodeEndpoints(router *mux.Router) (*mux.Router, error) {
 	walletRouter.HandleFunc("/account", handlers.KeystoreAccountRetrievalHandler)
 	walletRouter.HandleFunc("/account/open", handlers.KeystoreAccountUnlockHandler).
 		Methods(http.MethodPost)
-	walletRouter.HandleFunc("/pgp/view/public", handlers.KeystorePGPPublicKeyRetrievalHandler)
-	walletRouter.HandleFunc("/pgp/create", handlers.KeystorePGPCreationHandler).
-		Methods(http.MethodPost)
 
 	// Account Management
 	accountRouter := apiRouter.PathPrefix("/account/{address:0[xX][0-9a-fA-F]{40}}").Subrouter()
@@ -108,10 +105,8 @@ func AppendNodeEndpoints(router *mux.Router) (*mux.Router, error) {
 	poolRouter := apiRouter.PathPrefix("/pool").Subrouter()
 	// Retrieve owned Pool if available
 	poolRouter.HandleFunc("/", nil)
-	// Pool object, data, public key, etc
-	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}", handlers.PoolRetrievePublicKeyHandler) // TODO temp to display public key
 	// Pool Retrieve Data
-	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/data", handlers.PoolPublicDataHandler).
+	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}", handlers.PoolPublicDataHandler).
 		Methods(http.MethodGet)
 
 	// Market Sub-Routes
@@ -132,11 +127,6 @@ func AppendPoolManagerEndpoints(router *mux.Router) (*mux.Router, error) {
 		Methods(http.MethodPost)
 	// Retrieve nodes with query parameters for inc data, approved, pending, rejected
 	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/nodes/{status:.*}", handlers.PoolRetrieveNodesHandler)
-	// Retrieve node application
-	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/node/{nodeAddress:0[xX][0-9a-fA-F]{40}}/application", handlers.PoolRetrieveNodeApplicationHandler)
-	// Retrieve or update the status of a node's application
-	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/node/{nodeAddress:0[xX][0-9a-fA-F]{40}}/{status}", handlers.PoolUpdateNodeStatusHandler).
-		Methods(http.MethodPut)
 
 	// Market
 	marketRouter := apiRouter.PathPrefix("/market").Subrouter()
@@ -145,7 +135,7 @@ func AppendPoolManagerEndpoints(router *mux.Router) (*mux.Router, error) {
 		Methods(http.MethodPost)
 
 	// Applications
-	applicationRouter := apiRouter.PathPrefix("/application").Subrouter()
+	applicationRouter := apiRouter.PathPrefix("/applications").Subrouter()
 	applicationRouter.HandleFunc("/new", handlers.PoolNewApplicationHandler).
 		Methods(http.MethodPost)
 	applicationRouter.HandleFunc("/edit", handlers.PoolEditApplicationHandler).
@@ -153,6 +143,7 @@ func AppendPoolManagerEndpoints(router *mux.Router) (*mux.Router, error) {
 	applicationRouter.HandleFunc("/view/{wallet:0[xX][0-9a-fA-F]{40}}", handlers.PoolViewApplicationHandler).
 		Methods(http.MethodGet)
 	applicationRouter.HandleFunc("/status/{wallet:0[xX][0-9a-fA-F]{40}}", handlers.PoolStatusViewHandler)
+	applicationRouter.HandleFunc("/status/{status:.*}", nil)
 
 	return router, nil
 }

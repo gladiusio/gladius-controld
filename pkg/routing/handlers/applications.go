@@ -56,15 +56,15 @@ func PoolViewApplicationHandler(w http.ResponseWriter, r *http.Request) {
 	viewApplication(w, r, wallet)
 }
 
-func getProfile(wallet string) (models.NodeProfile, error) {
+func getProfile(wallet string) (controller.FullProfile, error) {
 	db, err := controller.Initialize(nil)
 	if err != nil {
-		return models.NodeProfile{}, err
+		return controller.FullProfile{}, err
 	}
 
-	profile, err := controller.NodeProfile(db, wallet)
+	profile, err := controller.NodePoolApplication(db, wallet)
 	if err != nil {
-		return models.NodeProfile{}, err
+		return controller.FullProfile{}, err
 	}
 
 	return profile, err
@@ -97,9 +97,9 @@ func PoolStatusViewHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := statusResponse{
-		Accepted: profile.Accepted.Valid && profile.Accepted.Bool,
-		NodeAccepted: profile.NodeAccepted.Valid && profile.NodeAccepted.Bool,
-		PoolAccepted: profile.PoolAccepted.Valid && profile.PoolAccepted.Bool,
+		Accepted: profile.NodeProfile.Accepted.Valid && profile.NodeProfile.Accepted.Bool,
+		NodeAccepted: profile.NodeProfile.NodeAccepted.Valid && profile.NodeProfile.NodeAccepted.Bool,
+		PoolAccepted: profile.NodeProfile.PoolAccepted.Valid && profile.NodeProfile.PoolAccepted.Bool,
 	}
 
 	ResponseHandler(w, r, "null", true, nil, response, nil)
