@@ -48,7 +48,7 @@ func NodeNewApplicationHandler(w http.ResponseWriter, r *http.Request) {
 
 	requestPayload.Wallet = address.String()
 
-	sendRequest(http.MethodPost, poolResponse.Data.URL + "application/new", requestPayload)
+	sendRequest(http.MethodPost, poolResponse.Data.URL + "applications/new", requestPayload)
 }
 
 func NodeViewApplicationHandler(w http.ResponseWriter, r *http.Request) {
@@ -67,7 +67,7 @@ func NodeViewApplicationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	applicationResponse, err := sendRequest(http.MethodGet, poolResponse.Data.URL + "application/view/" + address.String(), nil)
+	applicationResponse, err := sendRequest(http.MethodGet, poolResponse.Data.URL + "applications/view/" + address.String(), nil)
 	w.Write([]byte(applicationResponse))
 }
 
@@ -89,7 +89,7 @@ func NodeViewAllApplicationsHandler(w http.ResponseWriter, r *http.Request) {
 	for _, poolResponse := range poolArrayResponse.Pools {
 		//poolResponse.Data.URL
 		if poolResponse.Data.URL != "" {
-			applicationResponse, err := sendRequest(http.MethodGet, poolResponse.Data.URL + "application/view/" + address.String(), nil)
+			applicationResponse, err := sendRequest(http.MethodGet, poolResponse.Data.URL + "applications/view/" + address.String(), nil)
 
 			if err == nil {
 				var responseStruct response.DefaultResponse
