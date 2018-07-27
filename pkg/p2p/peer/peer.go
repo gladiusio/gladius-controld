@@ -4,201 +4,157 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"math/rand"
-	"net/rpc"
-	"strconv"
+	"os"
+	"sync"
 	"time"
-
-	"github.com/gladiusio/gladius-controld/pkg/blockchain"
-	"github.com/gladiusio/gladius-controld/pkg/p2p/message"
 
 	"github.com/gladiusio/gladius-controld/pkg/p2p/signature"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/state"
+	"github.com/hashicorp/memberlist"
+	uuid "github.com/satori/go.uuid"
 )
 
 // New returns a new peer type
 func New() *Peer {
-	peer := &Peer{peerState: &state.State{}, running: false, maxMessageAge: 5, client: &client{}}
-	peer.server = newServer(peer)
+	d := &delegate{}
+	hostname, _ := os.Hostname()
+
+	c := memberlist.DefaultWANConfig()
+	c.PushPullInterval = 15 * time.Second
+	c.GossipInterval = 300 * time.Millisecond
+	c.ProbeTimeout = 4 * time.Second
+	c.ProbeInterval = 8 * time.Second
+	c.GossipNodes = 3
+	c.Delegate = d
+	c.Name = hostname + "-" + uuid.NewV4().String()
+
+	m, err := memberlist.Create(c)
+	if err != nil {
+		panic(err)
+	}
+
+	queue := &memberlist.TransmitLimitedQueue{
+		RetransmitMult: 3,
+	}
+
+	peer := &Peer{peerState: &state.State{}, running: false, peerDelegate: d, member: m, PeerQueue: queue, challengeReceiveMap: make(map[string]chan *signature.SignedMessage)}
+
+	queue.NumNodes = func() int { return peer.member.NumMembers() }
+	d.peer = peer
 	return peer
 }
 
 // Peer is a type that represents a peer in the Gladius p2p network.
 type Peer struct {
-	peerState     *state.State
-	running       bool
-	server        *server
-	client        *client
-	maxMessageAge int64
+	peerDelegate        *delegate
+	PeerQueue           *memberlist.TransmitLimitedQueue
+	peerState           *state.State
+	member              *memberlist.Memberlist
+	running             bool
+	challengeReceiveMap map[string]chan *signature.SignedMessage // Map of challenge set ids to a receive channel of the responses from the questioned peers.
+	mux                 sync.Mutex
 }
 
-// Start starts the peer
-func (p *Peer) Start() {
-	p.server.Start()
+type broadcast struct {
+	msg    []byte
+	notify chan<- struct{}
 }
 
-// Stop stops the peer
-func (p *Peer) Stop() {
-
+type update struct {
+	Action string          // Can be "merge", "challenge_question", or "challenge_response"
+	Data   json.RawMessage // Usually a signed message, but can also be a challenge question
 }
 
-// PullState pulls the state from a peer and verifies it before loading it into
-// its own state
-func (p *Peer) PullState(ip, passphrase string) error {
-	// Create a signed challenge timestamp, the remote peer will only accept this
-	// if it was within the last few seconds. This prevents replay attacks from
-	// and arbitrary node.
-	currTime := strconv.FormatUint(uint64(time.Now().Unix()), 10)
-	m := message.New([]byte("{\"challenge_time\":" + currTime + "}"))
+// Used to send to a node through an "update"
+type challenge struct {
+	challengeID string
+	question    string
+}
 
-	// TODO: Switch to new direct signed message creation
-	smString, err := signature.CreateSignedMessageString(m, passphrase)
-	sm := &signature.SignedMessage{}
-	json.Unmarshal([]byte(smString), sm)
+func (b *broadcast) Invalidates(other memberlist.Broadcast) bool {
+	return false
+}
+
+func (b *broadcast) Message() []byte {
+	return b.msg
+}
+
+func (b *broadcast) Finished() {
+	if b.notify != nil {
+		close(b.notify)
+	}
+}
+
+// Join will request to join the network from a specific node
+func (p *Peer) Join(ipList []string) error {
+	_, err := p.member.Join(ipList)
 	if err != nil {
-		return errors.New("cannot make signed message: " + err.Error())
+		return err
 	}
 
-	// Dial the remote peer and ask it for it's state with the challenge
-	client, err := rpc.DialHTTP("tcp", ip+":4351")
+	node := p.member.LocalNode()
+	fmt.Printf("Local member %s:%d\n", node.Addr, node.Port)
+
+	return nil
+}
+
+// StopAndLeave will infomr the network of it leaving and shutdown
+func (p *Peer) StopAndLeave() error {
+	err := p.member.Leave(1 * time.Millisecond)
 	if err != nil {
-		return errors.New("can't dial host " + ip + ":4351: " + err.Error())
+		return err
 	}
-	var reply string
-	err = client.Call("State.Get", sm, &reply)
+
+	err = p.member.Shutdown()
 	if err != nil {
-		fmt.Println(reply)
-		return errors.New("can't call method: " + err.Error())
-	}
-	client.Close()
-	// Convert the incoming json to a State type
-	incomingState, err := state.ParseNetworkState([]byte(reply))
-	if err != nil {
-		fmt.Println(reply)
-		return errors.New("corrupted state: " + err.Error())
-	}
-	// Get the signatures and rebuild the state
-	sigList := incomingState.GetSignatureList()
-	for _, sig := range sigList {
-		p.GetState().UpdateState(sig)
+		return err
 	}
 
 	return nil
 }
 
-func (p *Peer) getPeerIPs() []string {
-	ipList := p.GetState().GetNodeFields("IPAddress")
-	ips := make([]string, 0)
-	ga := blockchain.NewGladiusAccountManager()
-	address, err := ga.GetAccountAddress()
-	myIP := ""
-	if err == nil {
-		myIP = p.GetState().GetNodeField(address.String(), "IPAddress").(state.SignedField).Data
-	}
-	// Go through all of the fields and get the string IP
-	for _, ip := range ipList {
-		if ip != myIP {
-			ips = append(ips, ip.(state.SignedField).Data)
-		}
-	}
+func (p *Peer) registerOutgoingChallenge(challengeID string) {
+	p.mux.Lock()
+	p.challengeReceiveMap[challengeID] = make(chan *signature.SignedMessage)
+	p.mux.Unlock()
+}
 
-	return ips
+func (p *Peer) getChallengeResponseChannel(challengeID string) (chan *signature.SignedMessage, error) {
+	p.mux.Lock()
+	defer p.mux.Unlock()
+	if challengeChan, ok := p.challengeReceiveMap[challengeID]; ok {
+		return challengeChan, nil
+	}
+	return nil, errors.New("Could not find channel")
 }
 
 // UpdateAndPushState updates the local state and pushes it to several other peers
 func (p *Peer) UpdateAndPushState(sm *signature.SignedMessage) error {
-	if sm.GetAgeInSeconds() < p.maxMessageAge {
-		updated, err := p.peerState.UpdateState(sm)
-		if err != nil {
-			return err
-		}
-		// Send to peers
-		err = p.pushStateMessage(sm, updated)
-		if err != nil {
-			return err
-		}
-		return nil
+	err := p.GetState().UpdateState(sm)
+	if err != nil {
+		return err
 	}
-	return errors.New("message signature too old: was " + strconv.Itoa(int(sm.GetAgeInSeconds())))
-}
 
-// SendUpdate forces a send to a specific peer while not updating local state
-func (p *Peer) SendUpdate(sm *signature.SignedMessage, ip string, reply *string) error {
-	client, err := rpc.DialHTTP("tcp", ip+":4351")
+	signedBytes, err := json.Marshal(sm)
 	if err != nil {
-		return errors.New("Error dialing peer " + ip + " " + err.Error())
+		return err
 	}
-	err = client.Call("State.Update", sm, reply)
+
+	b, err := json.Marshal(&update{
+		Action: "merge",
+		Data:   signedBytes,
+	})
+
 	if err != nil {
-		return errors.New("can't call method State.Update: " + err.Error())
+		return err
 	}
-	client.Close()
+
+	p.PeerQueue.QueueBroadcast(&broadcast{
+		msg:    b,
+		notify: nil,
+	})
+
 	return nil
-}
-
-// UpdateInternalState is a wrapper to update internal state if message is valid
-func (p Peer) UpdateInternalState(sm *signature.SignedMessage) (error, bool) {
-	if sm.GetAgeInSeconds() < p.maxMessageAge {
-		updated, err := p.peerState.UpdateState(sm)
-		if err != nil {
-			return err, false
-		}
-		return nil, updated
-	}
-
-	return nil, false
-}
-
-func (p Peer) pushStateMessage(sm *signature.SignedMessage, stateChanged bool) error {
-	ipList := p.getPeerIPs()
-	numOfPeers := len(ipList)
-
-	if numOfPeers > 0 {
-		// Calculate the frequency based on the number of peers to not overload
-		// small networks
-		go func() {
-			s := rand.NewSource(time.Now().Unix())
-			r := rand.New(s)               // initialize local pseudorandom generator
-			timestamp := sm.GetTimestamp() // get timestamp of the signed message
-			count := 0
-
-			for (time.Now().Unix() - timestamp) < p.maxMessageAge {
-				// Check for new peers
-				ipList := p.getPeerIPs()
-
-				// This is before so we don't end up with an instant growth of the
-				// message.
-				time.Sleep(300 * time.Millisecond)
-
-				index := r.Intn(len(ipList))
-				// Get the data from the signed field
-				ip := ipList[index]
-				var reply string
-				err := p.SendUpdate(sm, ip, &reply)
-				if err != nil {
-					fmt.Println(err)
-				}
-
-				count++
-			}
-
-		}()
-		return nil
-	}
-	// No data has been sent to peers because there are none
-	return errors.New("not enough peers, only updating local state")
-}
-
-func calcWaitTimeMillis(peers int) time.Duration {
-	if peers > 1000 {
-		return 200 * time.Millisecond
-	} else if peers > 200 {
-		return 200 * time.Millisecond
-	} else if peers > 10 {
-		return 200 * time.Millisecond
-	}
-	return 300 * time.Millisecond
-
 }
 
 // GetState returns the current local state

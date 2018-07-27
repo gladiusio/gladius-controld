@@ -88,42 +88,37 @@ func (s *State) GetSignatureList() []*signature.SignedMessage {
 }
 
 // UpdateState updates the local state with the signed message information
-func (s *State) UpdateState(sm *signature.SignedMessage) (bool, error) {
+func (s *State) UpdateState(sm *signature.SignedMessage) error {
 	if sm.IsInPoolAndVerified() {
 		jsonBytes, err := sm.Message.MarshalJSON()
 		if err != nil {
-			return false, errors.New("malformed state message")
+			return errors.New("malformed state message")
 		}
 
 		messageBytes, _, _, err := jsonparser.Get(jsonBytes, "content")
 		if err != nil {
-			return false, errors.New("can't find content in request")
+			return errors.New("can't find content in request")
 		}
 
 		timestamp := sm.GetTimestamp()
-		updated := false
 
 		handler := func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
 			switch string(key) {
 			case "node":
 				s.mux.Lock()
-				if s.nodeHandler(value, timestamp, sm) {
-					updated = true
-				}
+				s.nodeHandler(value, timestamp, sm)
 				s.mux.Unlock()
 			case "pool":
 				s.mux.Lock()
-				if s.poolHandler(value, timestamp, sm) {
-					updated = true
-				}
+				s.poolHandler(value, timestamp, sm)
 				s.mux.Unlock()
 			}
 			return nil
 		}
-		jsonparser.ObjectEach(messageBytes, handler)
-		return updated, nil
+		go jsonparser.ObjectEach(messageBytes, handler)
+		return nil
 	}
-	return false, errors.New("message is not verified")
+	return errors.New("message is not verified")
 }
 
 func (s *State) nodeHandler(nodeUpdate []byte, timestamp int64, sm *signature.SignedMessage) bool {

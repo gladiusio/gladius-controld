@@ -22,7 +22,7 @@ type SignedMessage struct {
 	Hash      []byte           `json:"hash"`
 	Signature []byte           `json:"signature"`
 	Address   string           `json:"address"`
-	verified  bool
+	verified  bool             // TODO: Make this useful
 }
 
 // ParseSignedMessage returns a signed message to be passed into the VerifySignedMessage method

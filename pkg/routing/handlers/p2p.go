@@ -181,29 +181,30 @@ func getIntroductionDataFromBody(w http.ResponseWriter, r *http.Request) (ip, pa
 	return ip, passphrase, signedMessage
 }
 
-// IntroductionHandler takes in an IP and a passhprase and pulls state from the
+// JoinHandler takes in an IP and a passhprase and pulls state from the
 // given node, and then introduces itself to it.
-func IntroductionHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
+func JoinHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ip, passphrase, signedMessage := getIntroductionDataFromBody(w, r)
+		ip, passphrase, _ := getIntroductionDataFromBody(w, r)
 		if ip != "" && passphrase != "" {
-			err := p.PullState(ip, passphrase)
+			err := p.Join([]string{ip})
 			if err != nil {
-				ErrorHandler(w, r, "Could not pull state from peer", err, http.StatusBadRequest)
+				ErrorHandler(w, r, "Couldn't join network", err, http.StatusBadRequest)
 				return
 			}
-			sm, err := parseSignedMessageFromBytes(signedMessage)
-			if err != nil {
-				ErrorHandler(w, r, "Could not parse signed message", err, http.StatusBadRequest)
-				return
-			}
-			// Update and send message
-			p.UpdateInternalState(sm)
-			var reply string
-			p.SendUpdate(sm, ip, &reply)
-
 			ResponseHandler(w, r, "Pulled state and sent introduction", true, nil, nil, nil)
 		}
+	}
+}
+
+func LeaveHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := p.StopAndLeave()
+		if err != nil {
+			ErrorHandler(w, r, "Couldn't leave network", err, http.StatusBadRequest)
+			return
+		}
+		ResponseHandler(w, r, "Pulled state and sent introduction", true, nil, nil, nil)
 	}
 }
 

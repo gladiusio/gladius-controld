@@ -34,7 +34,6 @@ func Start() {
 
 	// P2P setup
 	peer := peer.New()
-	peer.Start()
 	p2pRouter := apiRouter.PathPrefix("/p2p").Subrouter()
 
 	// P2P Message Routes
@@ -43,7 +42,10 @@ func Start() {
 	p2pRouter.HandleFunc("/message/verify", handlers.VerifySignedMessageHandler).
 		Methods("POST")
 
-	p2pRouter.HandleFunc("/discovery/introduce", handlers.IntroductionHandler(peer)).
+	p2pRouter.HandleFunc("/network/join", handlers.JoinHandler(peer)).
+		Methods("POST")
+
+	p2pRouter.HandleFunc("/network/leave", handlers.LeaveHandler(peer)).
 		Methods("POST")
 
 	// P2P State Routes
