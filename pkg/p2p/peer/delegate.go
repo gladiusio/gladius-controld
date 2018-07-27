@@ -38,6 +38,18 @@ func (d *delegate) NotifyMsg(b []byte) {
 			panic(err)
 		}
 
+		cBytes, err := sm.Message.MarshalJSON()
+		if err != nil {
+			panic(err)
+		}
+		var c *challenge
+
+		err = json.Unmarshal(cBytes, c)
+		if err != nil {
+			panic(err)
+		}
+
+		d.peer.getChallengeResponseChannel(c.challengeID) <- sm
 	case "challenge_question": // This is a node recieving a question
 
 	default:

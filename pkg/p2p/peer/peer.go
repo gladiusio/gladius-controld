@@ -36,7 +36,7 @@ func New() *Peer {
 		RetransmitMult: 3,
 	}
 
-	peer := &Peer{peerState: &state.State{}, running: false, peerDelegate: d, member: m, PeerQueue: queue, challengeReceiveMap: make(map[string]chan []byte)}
+	peer := &Peer{peerState: &state.State{}, running: false, peerDelegate: d, member: m, PeerQueue: queue, challengeReceiveMap: make(map[string]chan *signature.SignedMessage)}
 
 	queue.NumNodes = func() int { return peer.member.NumMembers() }
 	d.peer = peer
@@ -50,7 +50,7 @@ type Peer struct {
 	peerState           *state.State
 	member              *memberlist.Memberlist
 	running             bool
-	challengeReceiveMap map[string]chan []byte // Map of challenge set ids to a receive channel of the responses from the questioned peers.
+	challengeReceiveMap map[string]chan *signature.SignedMessage // Map of challenge set ids to a receive channel of the responses from the questioned peers.
 	mux                 sync.Mutex
 }
 
@@ -114,11 +114,11 @@ func (p *Peer) StopAndLeave() error {
 
 func (p *Peer) registerOutgoingChallenge(challengeID string) {
 	p.mux.Lock()
-	p.challengeReceiveMap[challengeID] = make(chan []byte)
+	p.challengeReceiveMap[challengeID] = make(chan *signature.SignedMessage)
 	p.mux.Unlock()
 }
 
-func (p *Peer) getChallengeResponseChannel(challengeID string) chan []byte {
+func (p *Peer) getChallengeResponseChannel(challengeID string) chan *signature.SignedMessage {
 	p.mux.Lock()
 	defer p.mux.Unlock()
 	return p.challengeReceiveMap[challengeID]

@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gladiusio/gladius-controld/pkg/p2p/signature"
 	"github.com/hashicorp/memberlist"
 	uuid "github.com/satori/go.uuid"
 )
@@ -60,12 +59,7 @@ func (md *mergeDelegate) NotifyMerge(peers []*memberlist.Node) error {
 	// Wait until timeout has completed or a new response has come in
 	for {
 		select {
-		case smIn := <-incomingResponses:
-			sm := &signature.SignedMessage{}
-			err := json.Unmarshal(smIn, sm)
-			if err != nil {
-				return errors.New("Couldn't parse signed message from peer challenge response")
-			}
+		case sm := <-incomingResponses:
 			if !sm.IsInPoolAndVerified() {
 				return errors.New("Challenge message from peer is not verified or not in pool")
 			}
