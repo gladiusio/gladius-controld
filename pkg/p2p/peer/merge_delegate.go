@@ -53,7 +53,10 @@ func (md *mergeDelegate) NotifyMerge(peers []*memberlist.Node) error {
 		timeout <- true
 	}()
 
-	incomingResponses := md.peer.getChallengeResponseChannel(challengeID)
+	incomingResponses, err := md.peer.getChallengeResponseChannel(challengeID)
+	if err != nil {
+		return errors.New("Node responded with unknown challenge ID")
+	}
 	successfulCount := 0
 
 	// Wait until timeout has completed or a new response has come in

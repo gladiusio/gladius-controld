@@ -49,7 +49,13 @@ func (d *delegate) NotifyMsg(b []byte) {
 			panic(err)
 		}
 
-		d.peer.getChallengeResponseChannel(c.challengeID) <- sm
+		// Queue up our incomming challenge
+		channel, err := d.peer.getChallengeResponseChannel(c.challengeID)
+		if err != nil {
+			return
+		}
+
+		channel <- sm
 	case "challenge_question": // This is a node recieving a question
 
 	default:

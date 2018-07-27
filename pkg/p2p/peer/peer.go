@@ -2,6 +2,7 @@ package peer
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"sync"
@@ -118,10 +119,13 @@ func (p *Peer) registerOutgoingChallenge(challengeID string) {
 	p.mux.Unlock()
 }
 
-func (p *Peer) getChallengeResponseChannel(challengeID string) chan *signature.SignedMessage {
+func (p *Peer) getChallengeResponseChannel(challengeID string) (chan *signature.SignedMessage, error) {
 	p.mux.Lock()
 	defer p.mux.Unlock()
-	return p.challengeReceiveMap[challengeID]
+	if challengeChan, ok := p.challengeReceiveMap[challengeID]; ok {
+		return challengeChan, nil
+	}
+	return nil, errors.New("Could not find channel")
 }
 
 // UpdateAndPushState updates the local state and pushes it to several other peers
