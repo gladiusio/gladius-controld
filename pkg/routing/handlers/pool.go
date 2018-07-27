@@ -6,11 +6,14 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 		"github.com/gorilla/mux"
-)
+	)
 
 func PoolPublicDataHandler(w http.ResponseWriter, r *http.Request) {
 	//vars := mux.Vars(r)
 	//poolAddress := vars["poolAddress"]
+	//
+	//
+	//controller.PoolInformation()
 	//
 	//if r.Method == http.MethodGet {
 	//	poolData, err := blockchain.PoolRetrievePublicData(poolAddress)

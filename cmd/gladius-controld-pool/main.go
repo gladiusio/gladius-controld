@@ -17,6 +17,6 @@ func main() {
 func initialize() {
 	// Run the function "run" in newtworkd as a service
 	router := PoolManagerRouter()
-	port := "3333"
+	port := "3000"
 	routing.Start(router, &port)
 }

@@ -11,7 +11,7 @@ import (
 	"time"
 	"bytes"
 	"io/ioutil"
-	)
+		)
 
 func poolResponseForAddress(poolAddress string) (blockchain.PoolResponse, error) {
 	poolData, err := blockchain.PoolRetrievePublicData(poolAddress)
@@ -38,7 +38,7 @@ func NodeNewApplicationHandler(w http.ResponseWriter, r *http.Request) {
 	var requestPayload models.NodeRequestPayload
 	err = decoder.Decode(&requestPayload)
 
-	requestPayload.IPAddress = r.RemoteAddr
+	requestPayload.IPAddress = ""
 
 	address, err := blockchain.NewGladiusAccountManager().GetAccountAddress()
 	if err != nil {
@@ -48,7 +48,11 @@ func NodeNewApplicationHandler(w http.ResponseWriter, r *http.Request) {
 
 	requestPayload.Wallet = address.String()
 
-	sendRequest(http.MethodPost, poolResponse.Data.URL + "applications/new", requestPayload)
+	application, err := sendRequest(http.MethodPost, poolResponse.Data.URL + "applications/new", requestPayload)
+
+	var defaultResponse response.DefaultResponse
+	json.Unmarshal([]byte(application), &defaultResponse)
+	ResponseHandler(w, r,"null", true, nil, defaultResponse.Response, nil)
 }
 
 func NodeViewApplicationHandler(w http.ResponseWriter, r *http.Request) {
@@ -68,7 +72,9 @@ func NodeViewApplicationHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	applicationResponse, err := sendRequest(http.MethodGet, poolResponse.Data.URL + "applications/view/" + address.String(), nil)
-	w.Write([]byte(applicationResponse))
+	var defaultResponse response.DefaultResponse
+	json.Unmarshal([]byte(applicationResponse), &defaultResponse)
+	ResponseHandler(w, r, "null", true, nil, defaultResponse.Response, nil)
 }
 
 func NodeViewAllApplicationsHandler(w http.ResponseWriter, r *http.Request) {
@@ -130,7 +136,7 @@ func sendRequest(requestType, url string, data interface{}) (string, error) {
 		return "", err
 	}
 
-	req.Header.Set("User-Agent", "gladius-cli")
+	req.Header.Set("User-Agent", "gladius-controld")
 	req.Header.Set("Content-Type", "application/json")
 
 	// Send the request via a client
