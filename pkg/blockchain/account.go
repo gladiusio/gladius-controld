@@ -6,13 +6,14 @@ import (
 	"strings"
 
 	"encoding/json"
+	"net/http"
+	"strconv"
+
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/viper"
-	"net/http"
-	"strconv"
 )
 
 // GladiusAccountManager is a type that allows the user to create a keystore file,

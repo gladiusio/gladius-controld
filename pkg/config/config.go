@@ -1,10 +1,12 @@
 package config
 
 import (
+	"log"
+
+	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"github.com/gladiusio/gladius-controld/pkg/routing"
 	"github.com/gladiusio/gladius-utils/config"
 	"github.com/gorilla/mux"
-	"log"
 )
 
 func Config() (Name, DisplayName, Description string) {
@@ -13,39 +15,48 @@ func Config() (Name, DisplayName, Description string) {
 	return "GladiusControlDaemon", "Gladius Control Daemon", "Gladius Control Daemon"
 }
 
-func NodeRouter() (*mux.Router) {
-	// Run the function "run" in newtworkd as a service
+func setupRouter() (*mux.Router, *blockchain.GladiusAccountManager) {
 	router, err := routing.InitializeRouter()
 	if err != nil {
 		println("Failed to initialized router")
 	}
 
-	router, err = routing.AppendP2PEndPoints(router)
+	// Create a new GladiusAccountManager for the routes, this is so we can have
+	// a shared account system between all endpoints
+	ga := blockchain.NewGladiusAccountManager()
+
+	return router, ga
+}
+
+func NodeRouter() *mux.Router {
+	router, ga := setupRouter()
+
+	err := routing.AppendP2PEndPoints(router, ga)
 	if err != nil {
 		log.Fatalln("Failed to append P2P Endpoints")
 	}
 
-	router, err = routing.AppendWalletManagementEndpoints(router)
+	err = routing.AppendWalletManagementEndpoints(router, ga)
 	if err != nil {
 		log.Fatalln("Failed to append Account Management Endpoints")
 	}
 
-	router, err = routing.AppendAccountManagementEndpoints(router)
+	err = routing.AppendAccountManagementEndpoints(router, ga)
 	if err != nil {
 		log.Fatalln("Failed to append Account Management Endpoints")
 	}
 
-	router, err = routing.AppendStatusEndpoints(router)
+	err = routing.AppendStatusEndpoints(router, ga)
 	if err != nil {
 		log.Fatalln("Failed to append Status Endpoints")
 	}
 
-	router, err = routing.AppendNodeManagerEndpoints(router)
+	err = routing.AppendNodeManagerEndpoints(router, ga)
 	if err != nil {
 		log.Fatalln("Failed to append Node Manager Endpoints")
 	}
 
-	router, err = routing.AppendMarketEndpoints(router)
+	err = routing.AppendMarketEndpoints(router, ga)
 	if err != nil {
 		log.Fatalln("Failed to append Market Endpoints")
 	}
@@ -53,39 +64,35 @@ func NodeRouter() (*mux.Router) {
 	return router
 }
 
-func PoolManagerRouter() (*mux.Router) {
-	// Run the function "run" in newtworkd as a service
-	router, err := routing.InitializeRouter()
-	if err != nil {
-		println("Failed to initialized router")
-	}
+func PoolManagerRouter() *mux.Router {
+	router, ga := setupRouter()
 
-	router, err = routing.AppendP2PEndPoints(router)
+	err := routing.AppendP2PEndPoints(router, ga)
 	if err != nil {
 		log.Fatalln("Failed to append P2P Endpoints")
 	}
 
-	router, err = routing.AppendWalletManagementEndpoints(router)
+	err = routing.AppendWalletManagementEndpoints(router, ga)
 	if err != nil {
 		log.Fatalln("Failed to append Account Management Endpoints")
 	}
 
-	router, err = routing.AppendAccountManagementEndpoints(router)
+	err = routing.AppendAccountManagementEndpoints(router, ga)
 	if err != nil {
 		log.Fatalln("Failed to append Account Management Endpoints")
 	}
 
-	router, err = routing.AppendStatusEndpoints(router)
+	err = routing.AppendStatusEndpoints(router, ga)
 	if err != nil {
 		log.Fatalln("Failed to append Status Endpoints")
 	}
 
-	router, err = routing.AppendMarketEndpoints(router)
+	err = routing.AppendMarketEndpoints(router, ga)
 	if err != nil {
 		log.Fatalln("Failed to append Market Endpoints")
 	}
 
-	router, err = routing.AppendPoolManagerEndpoints(router)
+	err = routing.AppendPoolManagerEndpoints(router, ga)
 	if err != nil {
 		println("Failed to append pool manager endpoints")
 	}
@@ -93,29 +100,25 @@ func PoolManagerRouter() (*mux.Router) {
 	return router
 }
 
-func ApplicationServerRouter() (*mux.Router) {
-	// Run the function "run" in newtworkd as a service
-	router, err := routing.InitializeRouter()
-	if err != nil {
-		println("Failed to initialized router")
-	}
+func ApplicationServerRouter() *mux.Router {
+	router, ga := setupRouter()
 
-	router, err = routing.AppendAccountManagementEndpoints(router)
+	err := routing.AppendAccountManagementEndpoints(router, ga)
 	if err != nil {
 		log.Fatalln("Failed to append Account Management Endpoints")
 	}
 
-	router, err = routing.AppendStatusEndpoints(router)
+	err = routing.AppendStatusEndpoints(router, ga)
 	if err != nil {
 		log.Fatalln("Failed to append Status Endpoints")
 	}
 
-	router, err = routing.AppendServerEndpoints(router)
+	err = routing.AppendServerEndpoints(router, ga)
 	if err != nil {
 		log.Fatalln("Failed to append Server Endpoints")
 	}
 
-	router, err = routing.AppendApplicationEndpoints(router)
+	err = routing.AppendApplicationEndpoints(router, ga)
 	if err != nil {
 		log.Fatalln("Failed to append Application Endpoints")
 	}

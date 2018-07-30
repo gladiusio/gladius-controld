@@ -1,21 +1,21 @@
 package handlers
 
 import (
-	"net/http"
-	"encoding/json"
-	"github.com/gladiusio/gladius-application-server/pkg/db/models"
-	"github.com/gladiusio/gladius-application-server/pkg/controller"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	"github.com/gorilla/mux"
-	"net"
 	"bytes"
+	"encoding/json"
+	"net"
+	"net/http"
 	"strings"
-)
 
+	"github.com/gladiusio/gladius-application-server/pkg/controller"
+	"github.com/gladiusio/gladius-application-server/pkg/db/models"
+	"github.com/gorilla/mux"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
+)
 
 type ipRange struct {
 	start net.IP
-	end net.IP
+	end   net.IP
 }
 
 var privateRanges = []ipRange{
@@ -45,7 +45,6 @@ var privateRanges = []ipRange{
 	},
 }
 
-
 // isPrivateSubnet - check to see if this ip is in a private subnet
 func isPrivateSubnet(ipAddress net.IP) bool {
 	// my use case is only concerned with ipv4 atm
@@ -53,7 +52,7 @@ func isPrivateSubnet(ipAddress net.IP) bool {
 		// iterate over all our ranges
 		for _, r := range privateRanges {
 			// check if this ip is in a private range
-			if inRange(r, ipAddress){
+			if inRange(r, ipAddress) {
 				return true
 			}
 		}
@@ -75,7 +74,7 @@ func getIPAdress(r *http.Request) string {
 		addresses := strings.Split(r.Header.Get(h), ",")
 		// march from right to left until we get a public address
 		// that will be the address right before our proxy.
-		for i := len(addresses) -1 ; i >= 0; i-- {
+		for i := len(addresses) - 1; i >= 0; i-- {
 			ip := strings.TrimSpace(addresses[i])
 			// header can contain spaces too, strip those out.
 			realIP := net.ParseIP(ip)
@@ -153,7 +152,7 @@ func getProfile(wallet string) (controller.FullProfile, error) {
 func viewApplication(w http.ResponseWriter, r *http.Request, wallet string) {
 	profile, err := getProfile(wallet)
 	if err != nil {
-		ErrorHandler(w, r, "Could not retrieve profile for wallet: " + wallet, err, http.StatusBadRequest)
+		ErrorHandler(w, r, "Could not retrieve profile for wallet: "+wallet, err, http.StatusBadRequest)
 		return
 	}
 
@@ -161,7 +160,7 @@ func viewApplication(w http.ResponseWriter, r *http.Request, wallet string) {
 }
 
 type statusResponse struct {
-	Accepted bool `json:"accepted"`
+	Accepted     bool `json:"accepted"`
 	NodeAccepted bool `json:"nodeAcceptance"`
 	PoolAccepted bool `json:"poolAcceptance"`
 }
@@ -172,12 +171,12 @@ func PoolStatusViewHandler(w http.ResponseWriter, r *http.Request) {
 
 	profile, err := getProfile(wallet)
 	if err != nil {
-		ErrorHandler(w, r, "Could not retrieve profile for wallet: " + wallet, err, http.StatusBadRequest)
+		ErrorHandler(w, r, "Could not retrieve profile for wallet: "+wallet, err, http.StatusBadRequest)
 		return
 	}
 
 	response := statusResponse{
-		Accepted: profile.NodeProfile.Accepted.Valid && profile.NodeProfile.Accepted.Bool,
+		Accepted:     profile.NodeProfile.Accepted.Valid && profile.NodeProfile.Accepted.Bool,
 		NodeAccepted: profile.NodeProfile.NodeAccepted.Valid && profile.NodeProfile.NodeAccepted.Bool,
 		PoolAccepted: profile.NodeProfile.PoolAccepted.Valid && profile.NodeProfile.PoolAccepted.Bool,
 	}

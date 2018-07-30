@@ -25,9 +25,9 @@ func ConnectPool(poolAddress common.Address) *generated.Pool {
 	return pool
 }
 
-func PoolRetrievePublicKey(poolAddress string) (string, error) {
+func PoolRetrievePublicKey(poolAddress string, ga *GladiusAccountManager) (string, error) {
 	pool := ConnectPool(common.HexToAddress(poolAddress))
-	ga := NewGladiusAccountManager()
+
 	address, err := ga.GetAccountAddress()
 	if err != nil {
 		return "", err
@@ -50,9 +50,8 @@ type PoolPublicData struct {
 	URL          string `json:"url"`
 }
 
-func PoolRetrievePublicData(poolAddress string) (*PoolPublicData, error) {
+func PoolRetrievePublicData(poolAddress string, ga *GladiusAccountManager) (*PoolPublicData, error) {
 	pool := ConnectPool(common.HexToAddress(poolAddress))
-	ga := NewGladiusAccountManager()
 	address, err := ga.GetAccountAddress()
 	if err != nil {
 		return nil, err
@@ -70,9 +69,8 @@ func PoolRetrievePublicData(poolAddress string) (*PoolPublicData, error) {
 	return &poolPublicData, nil
 }
 
-func PoolSetPublicData(passphrase, poolAddress, data string) (*types.Transaction, error) {
+func PoolSetPublicData(passphrase, poolAddress, data string, ga *GladiusAccountManager) (*types.Transaction, error) {
 	pool := ConnectPool(common.HexToAddress(poolAddress))
-	ga := NewGladiusAccountManager()
 
 	auth, err := ga.GetAuth(passphrase)
 	if err != nil {
@@ -88,9 +86,8 @@ func PoolSetPublicData(passphrase, poolAddress, data string) (*types.Transaction
 	return transaction, nil
 }
 
-func PoolNodes(poolAddress string) (*[]common.Address, error) {
+func PoolNodes(poolAddress string, ga *GladiusAccountManager) (*[]common.Address, error) {
 	pool := ConnectPool(common.HexToAddress(poolAddress))
-	ga := NewGladiusAccountManager()
 	address, err := ga.GetAccountAddress()
 	if err != nil {
 		return nil, err
@@ -103,7 +100,7 @@ func PoolNodes(poolAddress string) (*[]common.Address, error) {
 	return &nodeAddressList, nil
 }
 
-func PoolNodesWithData(poolAddress common.Address, nodeAddresses *[]common.Address, status int) (*[]NodeApplication, error) {
+func PoolNodesWithData(poolAddress common.Address, nodeAddresses *[]common.Address, status int, ga *GladiusAccountManager) (*[]NodeApplication, error) {
 	filter := status >= 0
 
 	var applications []NodeApplication
@@ -121,7 +118,7 @@ func PoolNodesWithData(poolAddress common.Address, nodeAddresses *[]common.Addre
 			// Fetch the application async
 			go func(address common.Address) {
 				defer wg.Done()
-				nodeApplication, err1 := NodeRetrieveApplication(&address, &poolAddress)
+				nodeApplication, err1 := NodeRetrieveApplication(&address, &poolAddress, ga)
 				if err1 != nil {
 					err = err1
 					running = false
@@ -144,10 +141,9 @@ func PoolNodesWithData(poolAddress common.Address, nodeAddresses *[]common.Addre
 	return &applications, err
 }
 
-func PoolUpdateNodeStatus(passphrase, poolAddress, nodeAddress string, status int) (*types.Transaction, error) {
+func PoolUpdateNodeStatus(passphrase, poolAddress, nodeAddress string, status int, ga *GladiusAccountManager) (*types.Transaction, error) {
 	pool := ConnectPool(common.HexToAddress(poolAddress))
 	var err error
-	ga := NewGladiusAccountManager()
 
 	auth, err := ga.GetAuth(passphrase)
 	if err != nil {
