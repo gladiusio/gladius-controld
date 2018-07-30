@@ -57,6 +57,11 @@ func (d *delegate) NotifyMsg(b []byte) {
 
 		channel <- sm
 	case "challenge_question": // This is a node recieving a question
+		var c challenge
+		err := json.Unmarshal([]byte(update.Data), &c)
+		if err != nil {
+			panic(err)
+		}
 
 	default:
 		panic("unsupported update action")

@@ -20,7 +20,7 @@ class SingleSwitchTopo(Topo):
             switch = self.addSwitch('s%s' % s)
             if (s > 0):
                 self.addLink("s%s" % (s - 1), "s%s" % s)
-            for h in range(10):
+            for h in range(1):
                 host = self.addHost('h%s' % (total_nodes + 1),
                                     privateDirs=['/gladius'])
                 self.addLink(host, switch)

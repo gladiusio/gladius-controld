@@ -17,6 +17,7 @@ import (
 // New returns a new peer type
 func New() *Peer {
 	d := &delegate{}
+	md := &mergeDelegate{}
 	hostname, _ := os.Hostname()
 
 	c := memberlist.DefaultWANConfig()
@@ -26,6 +27,7 @@ func New() *Peer {
 	c.ProbeInterval = 8 * time.Second
 	c.GossipNodes = 3
 	c.Delegate = d
+	c.Merge = md
 	c.Name = hostname + "-" + uuid.NewV4().String()
 
 	m, err := memberlist.Create(c)
@@ -41,6 +43,7 @@ func New() *Peer {
 
 	queue.NumNodes = func() int { return peer.member.NumMembers() }
 	d.peer = peer
+	md.peer = peer
 	return peer
 }
 

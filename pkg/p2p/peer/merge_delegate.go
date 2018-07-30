@@ -49,7 +49,7 @@ func (md *mergeDelegate) NotifyMerge(peers []*memberlist.Node) error {
 
 	timeout := make(chan bool, 1)
 	go func() {
-		time.Sleep(1 * time.Second)
+		time.Sleep(2 * time.Second)
 		timeout <- true
 	}()
 
