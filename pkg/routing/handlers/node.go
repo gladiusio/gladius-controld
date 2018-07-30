@@ -4,14 +4,14 @@ import (
 	"encoding/json"
 	"net/http"
 
-		"github.com/gladiusio/gladius-controld/pkg/blockchain"
+	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"github.com/gladiusio/gladius-controld/pkg/routing/response"
 	"github.com/gorilla/mux"
 	"github.com/gladiusio/gladius-application-server/pkg/db/models"
 	"time"
 	"bytes"
 	"io/ioutil"
-		)
+)
 
 func PoolResponseForAddress(poolAddress string) (blockchain.PoolResponse, error) {
 	poolData, err := blockchain.PoolRetrievePublicData(poolAddress)
@@ -30,7 +30,7 @@ func NodeNewApplicationHandler(w http.ResponseWriter, r *http.Request) {
 
 	poolResponse, err := PoolResponseForAddress(poolAddress)
 	if err != nil {
-		ErrorHandler(w, r, "Pool data could not be found for Pool: " + poolAddress, err, http.StatusBadRequest)
+		ErrorHandler(w, r, "Pool data could not be found for Pool: "+poolAddress, err, http.StatusBadRequest)
 		return
 	}
 
@@ -49,11 +49,11 @@ func NodeNewApplicationHandler(w http.ResponseWriter, r *http.Request) {
 
 	requestPayload.Wallet = address.String()
 
-	application, err := sendRequest(http.MethodPost, poolResponse.Data.URL + "applications/new", requestPayload)
+	application, err := sendRequest(http.MethodPost, poolResponse.Data.URL+"applications/new", requestPayload)
 
 	var defaultResponse response.DefaultResponse
 	json.Unmarshal([]byte(application), &defaultResponse)
-	ResponseHandler(w, r,"null", true, nil, defaultResponse.Response, nil)
+	ResponseHandler(w, r, "null", true, nil, defaultResponse.Response, nil)
 }
 
 func NodeViewApplicationHandler(w http.ResponseWriter, r *http.Request) {
@@ -62,7 +62,7 @@ func NodeViewApplicationHandler(w http.ResponseWriter, r *http.Request) {
 
 	poolResponse, err := PoolResponseForAddress(poolAddress)
 	if err != nil {
-		ErrorHandler(w, r, "Pool data could not be found for Pool: " + poolAddress, err, http.StatusBadRequest)
+		ErrorHandler(w, r, "Pool data could not be found for Pool: "+poolAddress, err, http.StatusBadRequest)
 		return
 	}
 
@@ -72,7 +72,7 @@ func NodeViewApplicationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	applicationResponse, err := sendRequest(http.MethodGet, poolResponse.Data.URL + "applications/view/" + address.String(), nil)
+	applicationResponse, err := sendRequest(http.MethodGet, poolResponse.Data.URL+"applications/view/"+address.String(), nil)
 	var defaultResponse response.DefaultResponse
 	json.Unmarshal([]byte(applicationResponse), &defaultResponse)
 	ResponseHandler(w, r, "null", true, nil, defaultResponse.Response, nil)
@@ -96,12 +96,12 @@ func NodeViewAllApplicationsHandler(w http.ResponseWriter, r *http.Request) {
 	for _, poolResponse := range poolArrayResponse.Pools {
 		//poolResponse.Data.URL
 		if poolResponse.Data.URL != "" {
-			applicationResponse, err := sendRequest(http.MethodGet, poolResponse.Data.URL + "applications/view/" + address.String(), nil)
+			applicationResponse, err := sendRequest(http.MethodGet, poolResponse.Data.URL+"applications/view/"+address.String(), nil)
 
 			if err == nil {
 				var responseStruct response.DefaultResponse
 				json.Unmarshal([]byte(applicationResponse), &responseStruct)
-				responses  = append(responses, responseStruct.Response)
+				responses = append(responses, responseStruct.Response)
 			}
 		}
 	}
@@ -157,4 +157,3 @@ func sendRequest(requestType, url string, data interface{}) (string, error) {
 
 	return string(body), nil //tx
 }
-

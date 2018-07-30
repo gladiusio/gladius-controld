@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"strings"
 
-		"github.com/gladiusio/gladius-controld/pkg/routing/handlers"
+	"github.com/gladiusio/gladius-controld/pkg/p2p/peer"
+	"github.com/gladiusio/gladius-controld/pkg/routing/handlers"
 	ghandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"github.com/gladiusio/gladius-controld/pkg/p2p/peer"
 )
 
 const (
@@ -19,10 +19,10 @@ const (
 
 var apiRouter *mux.Router
 
-func Start(router *mux.Router, port *string)  {
+func Start(router *mux.Router, port *string) {
 	if port != nil {
 		fmt.Println("Starting API at http://localhost:" + *port)
-		log.Fatal(http.ListenAndServe(":" + *port, ghandlers.CORS()(router)))
+		log.Fatal(http.ListenAndServe(":"+*port, ghandlers.CORS()(router)))
 	} else {
 		fmt.Println("Starting API at http://localhost:" + PORT)
 		log.Fatal(http.ListenAndServe(":"+PORT, ghandlers.CORS()(router)))

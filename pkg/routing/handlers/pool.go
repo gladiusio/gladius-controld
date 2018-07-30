@@ -1,13 +1,13 @@
 package handlers
 
 import (
-		"net/http"
+	"net/http"
 
+	"encoding/json"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
-		"github.com/gorilla/mux"
-	"encoding/json"
-		"github.com/gladiusio/gladius-controld/pkg/routing/response"
+	"github.com/gladiusio/gladius-controld/pkg/routing/response"
+	"github.com/gorilla/mux"
 )
 
 func PoolPublicDataHandler(w http.ResponseWriter, r *http.Request) {
@@ -17,11 +17,11 @@ func PoolPublicDataHandler(w http.ResponseWriter, r *http.Request) {
 	poolResponse, err := PoolResponseForAddress(poolAddress)
 
 	if err != nil {
-		ErrorHandler(w, r, "Pool data could not be found for Pool: " + poolAddress, err, http.StatusBadRequest)
+		ErrorHandler(w, r, "Pool data could not be found for Pool: "+poolAddress, err, http.StatusBadRequest)
 		return
 	}
 
-	poolInformationResponse, err := sendRequest(http.MethodGet, poolResponse.Data.URL + "server/info", nil)
+	poolInformationResponse, err := sendRequest(http.MethodGet, poolResponse.Data.URL+"server/info", nil)
 	var defaultResponse response.DefaultResponse
 	json.Unmarshal([]byte(poolInformationResponse), &defaultResponse)
 
