@@ -1,12 +1,12 @@
 package handlers
 
 import (
-		"net/http"
+	"net/http"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
-	"github.com/gorilla/mux"
 	"github.com/gladiusio/gladius-controld/pkg/routing/response"
+	"github.com/gorilla/mux"
 )
 
 // StatusHandler Main Status API route handler
@@ -63,7 +63,7 @@ func StatusTxHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 
-	txHashResponse := response.TxHash{Value:txHash, Status:status, Complete:complete, Transaction: transactionJSON, Receipt:receiptResponseJSON}
+	txHashResponse := response.TxHash{Value: txHash, Status: status, Complete: complete, Transaction: transactionJSON, Receipt: receiptResponseJSON}
 
 	ResponseHandler(w, r, "null", true, nil, txHashResponse, transaction)
 }
