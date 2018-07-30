@@ -13,7 +13,7 @@ import (
 	"io/ioutil"
 		)
 
-func poolResponseForAddress(poolAddress string) (blockchain.PoolResponse, error) {
+func PoolResponseForAddress(poolAddress string) (blockchain.PoolResponse, error) {
 	poolData, err := blockchain.PoolRetrievePublicData(poolAddress)
 	poolResponse := blockchain.PoolResponse{poolAddress, poolData}
 	if err != nil {
@@ -28,7 +28,7 @@ func NodeNewApplicationHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	poolAddress := vars["poolAddress"]
 
-	poolResponse, err := poolResponseForAddress(poolAddress)
+	poolResponse, err := PoolResponseForAddress(poolAddress)
 	if err != nil {
 		ErrorHandler(w, r, "Pool data could not be found for Pool: " + poolAddress, err, http.StatusBadRequest)
 		return
@@ -38,6 +38,7 @@ func NodeNewApplicationHandler(w http.ResponseWriter, r *http.Request) {
 	var requestPayload models.NodeRequestPayload
 	err = decoder.Decode(&requestPayload)
 
+	// IP Address is detected from the server
 	requestPayload.IPAddress = ""
 
 	address, err := blockchain.NewGladiusAccountManager().GetAccountAddress()
@@ -59,7 +60,7 @@ func NodeViewApplicationHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	poolAddress := vars["poolAddress"]
 
-	poolResponse, err := poolResponseForAddress(poolAddress)
+	poolResponse, err := PoolResponseForAddress(poolAddress)
 	if err != nil {
 		ErrorHandler(w, r, "Pool data could not be found for Pool: " + poolAddress, err, http.StatusBadRequest)
 		return

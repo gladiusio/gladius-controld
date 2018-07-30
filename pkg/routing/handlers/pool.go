@@ -6,46 +6,26 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 		"github.com/gorilla/mux"
-	)
+	"encoding/json"
+		"github.com/gladiusio/gladius-controld/pkg/routing/response"
+)
 
 func PoolPublicDataHandler(w http.ResponseWriter, r *http.Request) {
-	//vars := mux.Vars(r)
-	//poolAddress := vars["poolAddress"]
-	//
-	//
-	//controller.PoolInformation()
-	//
-	//if r.Method == http.MethodGet {
-	//	poolData, err := blockchain.PoolRetrievePublicData(poolAddress)
-	//
-	//	if err != nil {
-	//		ErrorHandler(w, r, "Could not retrieve Pool's public data", err, http.StatusNotFound)
-	//		return
-	//	}
-	//
-	//	ResponseHandler(w, r, "null", true, nil, poolData, nil)
-	//}
-	//
-	//if r.Method == http.MethodPost {
-	//	auth := r.Header.Get("X-Authorization")
-	//	decoder := json.NewDecoder(r.Body)
-	//	var data blockchain.PoolPublicData
-	//	err := decoder.Decode(&data)
-	//
-	//	jsonPayload, err := json.Marshal(data)
-	//	if err != nil {
-	//		ErrorHandler(w, r, "Could not decode request into JSON", err, http.StatusNotFound)
-	//		return
-	//	}
-	//
-	//	transaction, err := blockchain.PoolSetPublicData(auth, poolAddress, string(jsonPayload))
-	//	if err != nil {
-	//		ErrorHandler(w, r, "Could not set Pool's public data", err, http.StatusUnprocessableEntity)
-	//		return
-	//	}
-	//
-	//	ResponseHandler(w, r, "Public data set, pending transaction", true, nil, nil, transaction)
-	//}
+	vars := mux.Vars(r)
+	poolAddress := vars["poolAddress"]
+
+	poolResponse, err := PoolResponseForAddress(poolAddress)
+
+	if err != nil {
+		ErrorHandler(w, r, "Pool data could not be found for Pool: " + poolAddress, err, http.StatusBadRequest)
+		return
+	}
+
+	poolInformationResponse, err := sendRequest(http.MethodGet, poolResponse.Data.URL + "server/info", nil)
+	var defaultResponse response.DefaultResponse
+	json.Unmarshal([]byte(poolInformationResponse), &defaultResponse)
+
+	ResponseHandler(w, r, "null", true, nil, defaultResponse.Response, nil)
 }
 
 func PoolRetrieveNodesHandler(w http.ResponseWriter, r *http.Request) {

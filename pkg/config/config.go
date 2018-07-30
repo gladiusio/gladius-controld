@@ -110,6 +110,11 @@ func ApplicationServerRouter() (*mux.Router) {
 		log.Fatalln("Failed to append Status Endpoints")
 	}
 
+	router, err = routing.AppendServerEndpoints(router)
+	if err != nil {
+		log.Fatalln("Failed to append Server Endpoints")
+	}
+
 	router, err = routing.AppendApplicationEndpoints(router)
 	if err != nil {
 		log.Fatalln("Failed to append Application Endpoints")

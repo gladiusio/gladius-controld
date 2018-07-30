@@ -173,6 +173,17 @@ func AppendPoolManagerEndpoints(router *mux.Router) (*mux.Router, error) {
 	return router, nil
 }
 
+func AppendServerEndpoints(router *mux.Router) (*mux.Router, error) {
+	// Initialize Base API sub-route
+	InitializeAPISubRoutes(router)
+	// Applications
+	applicationRouter := apiRouter.PathPrefix("/server").Subrouter()
+	applicationRouter.HandleFunc("/info", handlers.PublicPoolInformationHandler).
+		Methods(http.MethodGet)
+
+	return router, nil
+}
+
 func AppendApplicationEndpoints(router *mux.Router) (*mux.Router, error) {
 	// Initialize Base API sub-route
 	InitializeAPISubRoutes(router)
