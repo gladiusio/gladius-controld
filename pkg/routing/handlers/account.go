@@ -1,12 +1,13 @@
 package handlers
 
 import (
-	"github.com/gladiusio/gladius-controld/pkg/blockchain"
-	"net/http"
-	"github.com/gorilla/mux"
-	"errors"
-	"github.com/ethereum/go-ethereum/common"
 	"encoding/json"
+	"errors"
+	"net/http"
+
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/gladiusio/gladius-controld/pkg/blockchain"
+	"github.com/gorilla/mux"
 )
 
 func AccountBalanceHandler(w http.ResponseWriter, r *http.Request) {
@@ -28,7 +29,7 @@ func AccountBalanceHandler(w http.ResponseWriter, r *http.Request) {
 	balance, err := blockchain.GetAccountBalance(common.HexToAddress(address), blockchain.BalanceType(symbolEnum))
 
 	if err != nil {
-		ErrorHandler(w, r, "Could not retrieve balance for " + address, err, http.StatusInternalServerError)
+		ErrorHandler(w, r, "Could not retrieve balance for "+address, err, http.StatusInternalServerError)
 		return
 	}
 
@@ -46,7 +47,7 @@ func AccountTransactionsHandler(w http.ResponseWriter, r *http.Request) {
 	transactions, err := blockchain.GetAccountTransactions(common.HexToAddress(address), options)
 
 	if err != nil {
-		ErrorHandler(w, r, "Could not retrieve transactions for " + address, err, http.StatusInternalServerError)
+		ErrorHandler(w, r, "Could not retrieve transactions for "+address, err, http.StatusInternalServerError)
 		return
 	}
 

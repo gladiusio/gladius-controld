@@ -44,19 +44,13 @@ func ParseSignedMessage(message, hash, signature, address string) (*SignedMessag
 }
 
 // CreateSignedMessage creates a signed state from the message where
-func CreateSignedMessage(message *message.Message, passphrase string) (string, error) {
-	ga := blockchain.NewGladiusAccountManager()
-	success, err := ga.UnlockAccount(passphrase)
-	if success == false || err != nil {
-		return "", errors.New("Error unlocking wallet")
-	}
-
+func CreateSignedMessage(message *message.Message, ga *blockchain.GladiusAccountManager) (string, error) {
 	// Create a serailized JSON string
 	messageBytes := message.Serialize()
 
 	m := minify.New()
 	m.AddFuncRegexp(regexp.MustCompile("[/+]json$"), mjson.Minify)
-	messageBytes, err = m.Bytes("text/json", messageBytes)
+	messageBytes, err := m.Bytes("text/json", messageBytes)
 	if err != nil {
 		panic(err)
 	}
@@ -70,7 +64,7 @@ func CreateSignedMessage(message *message.Message, passphrase string) (string, e
 
 	signature, err := ga.Keystore().SignHash(*account, hash)
 	if err != nil {
-		return "", errors.New("Error signing message")
+		return "", errors.New("Error signing message, wallet likely not unlocked")
 	}
 
 	address, err := ga.GetAccountAddress()

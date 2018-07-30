@@ -3,9 +3,10 @@ package handlers
 import (
 	"io/ioutil"
 	"net/http"
-		"github.com/buger/jsonparser"
 
-		"github.com/gladiusio/gladius-controld/pkg/p2p/peer"
+	"github.com/buger/jsonparser"
+
+	"github.com/gladiusio/gladius-controld/pkg/p2p/peer"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/signature"
 )
 
@@ -92,7 +93,7 @@ func CreateSignedMessageHandler(w http.ResponseWriter, r *http.Request) {
 	//	ErrorHandler(w, r, "Could not create sign message. Passphrase likely incorrect.", err, http.StatusBadRequest)
 	//	return
 	//}
-	ResponseHandler(w, r, "null", true, nil, nil, nil)
+
 	//ResponseHandler(w, r, "null", signed)
 }
 
