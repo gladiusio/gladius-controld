@@ -8,23 +8,27 @@ import (
 )
 
 // MarketPoolsHandler - Returns all Pools
-func MarketPoolsHandler(w http.ResponseWriter, r *http.Request) {
-	poolsWithData, err := blockchain.MarketPools(true)
-	if err != nil {
-		ErrorHandler(w, r, "Could not retrieve pools", err, http.StatusNotFound)
-		return
+func MarketPoolsHandler(ga *blockchain.GladiusAccountManager) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		poolsWithData, err := blockchain.MarketPools(true, ga)
+		if err != nil {
+			ErrorHandler(w, r, "Could not retrieve pools", err, http.StatusNotFound)
+			return
+		}
+		ResponseHandler(w, r, "null", true, nil, poolsWithData, nil)
 	}
-	ResponseHandler(w, r, "null", true, nil, poolsWithData, nil)
 }
 
-func MarketPoolsOwnedHandler(w http.ResponseWriter, r *http.Request) {
-	pools, err := blockchain.MarketPoolsOwnedByUser(true)
-	if err != nil {
-		ErrorHandler(w, r, "Could not retrieve pools", err, http.StatusNotFound)
-		return
-	}
+func MarketPoolsOwnedHandler(ga *blockchain.GladiusAccountManager) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		pools, err := blockchain.MarketPoolsOwnedByUser(true, ga)
+		if err != nil {
+			ErrorHandler(w, r, "Could not retrieve pools", err, http.StatusNotFound)
+			return
+		}
 
-	ResponseHandler(w, r, "null", true, nil, pools, nil)
+		ResponseHandler(w, r, "null", true, nil, pools, nil)
+	}
 }
 
 type poolData struct {
@@ -32,17 +36,19 @@ type poolData struct {
 }
 
 // MarketPoolsCreateHandler - Create a new Pool
-func MarketPoolsCreateHandler(w http.ResponseWriter, r *http.Request) {
-	auth := r.Header.Get("X-Authorization")
-	decoder := json.NewDecoder(r.Body)
-	var data poolData
-	err := decoder.Decode(&data)
+func MarketPoolsCreateHandler(ga *blockchain.GladiusAccountManager) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		auth := r.Header.Get("X-Authorization")
+		decoder := json.NewDecoder(r.Body)
+		var data poolData
+		err := decoder.Decode(&data)
 
-	transaction, err := blockchain.MarketCreatePool(auth, data.PublicKey)
-	if err != nil {
-		ErrorHandler(w, r, "Could not build pool creation transaction", err, http.StatusNotFound)
-		return
+		transaction, err := blockchain.MarketCreatePool(auth, data.PublicKey, ga)
+		if err != nil {
+			ErrorHandler(w, r, "Could not build pool creation transaction", err, http.StatusNotFound)
+			return
+		}
+
+		ResponseHandler(w, r, "null", true, nil, nil, transaction)
 	}
-
-	ResponseHandler(w, r, "null", true, nil, nil, transaction)
 }

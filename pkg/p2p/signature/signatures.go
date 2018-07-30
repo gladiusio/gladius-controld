@@ -96,19 +96,14 @@ func (sm SignedMessage) IsInPoolAndVerified() bool {
 	return addressInPool && sm.IsVerified()
 }
 
-func CreateSignedMessage(message *message.Message, passphrase string) (*SignedMessage, error) {
-	ga := blockchain.NewGladiusAccountManager()
-	success, err := ga.UnlockAccount(passphrase)
-	if success == false || err != nil {
-		return nil, errors.New("Error unlocking wallet")
-	}
+func CreateSignedMessage(message *message.Message, ga *blockchain.GladiusAccountManager) (*SignedMessage, error) {
 
 	// Create a serailized JSON string
 	messageBytes := message.Serialize()
 
 	m := minify.New()
 	m.AddFuncRegexp(regexp.MustCompile("[/+]json$"), mjson.Minify)
-	messageBytes, err = m.Bytes("text/json", messageBytes)
+	messageBytes, err := m.Bytes("text/json", messageBytes)
 	if err != nil {
 		panic(err)
 	}
@@ -122,7 +117,7 @@ func CreateSignedMessage(message *message.Message, passphrase string) (*SignedMe
 
 	signature, err := ga.Keystore().SignHash(*account, hash)
 	if err != nil {
-		return nil, errors.New("Error signing message")
+		return &SignedMessage{}, errors.New("Error signing message, wallet likely not unlocked")
 	}
 
 	address, err := ga.GetAccountAddress()
@@ -146,8 +141,8 @@ func CreateSignedMessage(message *message.Message, passphrase string) (*SignedMe
 }
 
 // CreateSignedMessageString creates a signed state from the message where
-func CreateSignedMessageString(message *message.Message, passphrase string) (string, error) {
-	signed, err := CreateSignedMessage(message, passphrase)
+func CreateSignedMessageString(message *message.Message, ga *blockchain.GladiusAccountManager) (string, error) {
+	signed, err := CreateSignedMessage(message, ga)
 	if err != nil {
 		return "", err
 	}
