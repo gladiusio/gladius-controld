@@ -151,47 +151,37 @@ func PushStateMessageHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.R
 	}
 }
 
-func getIntroductionDataFromBody(w http.ResponseWriter, r *http.Request) (ip, passphrase string, signedMessage []byte) {
+func getIntroductionDataFromBody(w http.ResponseWriter, r *http.Request) (ip string, signedMessage []byte) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		ErrorHandler(w, r, "Error decoding body", err, http.StatusBadRequest)
-		return "", "", []byte("")
+		return "", []byte("")
 	}
 
 	ip, err = jsonparser.GetString(body, "ip")
 	if err != nil {
 		ErrorHandler(w, r, "Could not find `ip` in body", err, http.StatusBadRequest)
-		return "", "", []byte("")
+		return "", []byte("")
 	}
 
-	passphrase, err = jsonparser.GetString(body, "passphrase")
-	if err != nil {
-		ErrorHandler(w, r, "Could not find `passphrase` in body", err, http.StatusBadRequest)
-		return "", "", []byte("")
-	}
-
-	signedMessage, _, _, err = jsonparser.Get(body, "signed_message")
-	if err != nil {
-		ErrorHandler(w, r, "Could not find `signed_message` in body", err, http.StatusBadRequest)
-		return "", "", []byte("")
-	}
-
-	return ip, passphrase, signedMessage
+	return ip, signedMessage
 }
 
-// JoinHandler takes in an IP and a passhprase and pulls state from the
-// given node, and then introduces itself to it.
+// JoinHandler takes in an IP and tries to join it's cluster
 func JoinHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ip, passphrase, _ := getIntroductionDataFromBody(w, r)
-		if ip != "" && passphrase != "" {
+		ip, _ := getIntroductionDataFromBody(w, r)
+		if ip != "" {
 			err := p.Join([]string{ip})
 			if err != nil {
 				ErrorHandler(w, r, "Couldn't join network", err, http.StatusBadRequest)
 				return
 			}
-			ResponseHandler(w, r, "Pulled state and sent introduction", true, nil, nil, nil)
+			ResponseHandler(w, r, "Requested to join pool", true, nil, nil, nil)
+			return
 		}
+		ErrorHandler(w, r, "IP can't be empty", nil, http.StatusBadRequest)
+
 	}
 }
 
