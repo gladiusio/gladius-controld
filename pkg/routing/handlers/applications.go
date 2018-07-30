@@ -1,15 +1,16 @@
 package handlers
 
 import (
-	"net/http"
-	"encoding/json"
-	"github.com/gladiusio/gladius-application-server/pkg/db/models"
-	"github.com/gladiusio/gladius-application-server/pkg/controller"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	"github.com/gorilla/mux"
-	"net"
 	"bytes"
+	"encoding/json"
+	"net"
+	"net/http"
 	"strings"
+
+	"github.com/gladiusio/gladius-application-server/pkg/controller"
+	"github.com/gladiusio/gladius-application-server/pkg/db/models"
+	"github.com/gorilla/mux"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
 type ipRange struct {

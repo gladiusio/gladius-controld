@@ -9,7 +9,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
-		"github.com/gladiusio/gladius-controld/pkg/blockchain/generated"
+	"github.com/gladiusio/gladius-controld/pkg/blockchain/generated"
 	"github.com/gladiusio/gladius-controld/pkg/crypto"
 )
 
@@ -45,8 +45,8 @@ type NodeData struct {
 	Status string `json:"status"`
 }
 
-func NodeRetrieveApplication(nodeAddress, poolAddress *common.Address) (*NodeApplication, error) {
-	nodeData, err := NodeRetrievePoolData(nodeAddress, poolAddress)
+func NodeRetrieveApplication(nodeAddress, poolAddress *common.Address, ga *GladiusAccountManager) (*NodeApplication, error) {
+	nodeData, err := NodeRetrievePoolData(nodeAddress, poolAddress, ga)
 	if err != nil {
 		return nil, err
 	}
@@ -70,9 +70,8 @@ func NodeRetrieveApplication(nodeAddress, poolAddress *common.Address) (*NodeApp
 	return nodeStruct, nil
 }
 
-func NodeRetrievePoolData(nodeAddress, poolAddress *common.Address) (*NodeData, error) {
+func NodeRetrievePoolData(nodeAddress, poolAddress *common.Address, ga *GladiusAccountManager) (*NodeData, error) {
 	node := ConnectNode(*nodeAddress)
-	ga := NewGladiusAccountManager()
 	address, err := ga.GetAccountAddress()
 	if err != nil {
 		return nil, err

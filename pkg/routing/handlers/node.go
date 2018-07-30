@@ -1,21 +1,21 @@
 package handlers
 
 import (
+	"bytes"
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 
+	"github.com/gladiusio/gladius-application-server/pkg/db/models"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"github.com/gladiusio/gladius-controld/pkg/routing/response"
 	"github.com/gorilla/mux"
-	"github.com/gladiusio/gladius-application-server/pkg/db/models"
 	"time"
-	"bytes"
-	"io/ioutil"
 )
 
-func PoolResponseForAddress(poolAddress string) (blockchain.PoolResponse, error) {
-	poolData, err := blockchain.PoolRetrievePublicData(poolAddress)
-	poolResponse := blockchain.PoolResponse{poolAddress, poolData}
+func PoolResponseForAddress(poolAddress string, ga *blockchain.GladiusAccountManager) (blockchain.PoolResponse, error) {
+	poolData, err := blockchain.PoolRetrievePublicData(poolAddress, ga)
+	poolResponse := blockchain.PoolResponse{Address: poolAddress, Data: poolData}
 	if err != nil {
 		return blockchain.PoolResponse{}, err
 	}
@@ -24,89 +24,95 @@ func PoolResponseForAddress(poolAddress string) (blockchain.PoolResponse, error)
 }
 
 // New Routes
-func NodeNewApplicationHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	poolAddress := vars["poolAddress"]
+func NodeNewApplicationHandler(ga *blockchain.GladiusAccountManager) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		poolAddress := vars["poolAddress"]
 
-	poolResponse, err := PoolResponseForAddress(poolAddress)
-	if err != nil {
-		ErrorHandler(w, r, "Pool data could not be found for Pool: "+poolAddress, err, http.StatusBadRequest)
-		return
+		poolResponse, err := PoolResponseForAddress(poolAddress, ga)
+		if err != nil {
+			ErrorHandler(w, r, "Pool data could not be found for Pool: "+poolAddress, err, http.StatusBadRequest)
+			return
+		}
+
+		decoder := json.NewDecoder(r.Body)
+		var requestPayload models.NodeRequestPayload
+		err = decoder.Decode(&requestPayload)
+
+		// IP Address is detected from the server
+		requestPayload.IPAddress = ""
+
+		address, err := ga.GetAccountAddress()
+		if err != nil {
+			ErrorHandler(w, r, "Could not retrieve account wallet address", err, http.StatusBadRequest)
+			return
+		}
+
+		requestPayload.Wallet = address.String()
+
+		application, err := sendRequest(http.MethodPost, poolResponse.Data.URL+"applications/new", requestPayload)
+
+		var defaultResponse response.DefaultResponse
+		json.Unmarshal([]byte(application), &defaultResponse)
+		ResponseHandler(w, r, "null", true, nil, defaultResponse.Response, nil)
 	}
-
-	decoder := json.NewDecoder(r.Body)
-	var requestPayload models.NodeRequestPayload
-	err = decoder.Decode(&requestPayload)
-
-	// IP Address is detected from the server
-	requestPayload.IPAddress = ""
-
-	address, err := blockchain.NewGladiusAccountManager().GetAccountAddress()
-	if err != nil {
-		ErrorHandler(w, r, "Could not retrieve account wallet address", err, http.StatusBadRequest)
-		return
-	}
-
-	requestPayload.Wallet = address.String()
-
-	application, err := sendRequest(http.MethodPost, poolResponse.Data.URL+"applications/new", requestPayload)
-
-	var defaultResponse response.DefaultResponse
-	json.Unmarshal([]byte(application), &defaultResponse)
-	ResponseHandler(w, r, "null", true, nil, defaultResponse.Response, nil)
 }
 
-func NodeViewApplicationHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	poolAddress := vars["poolAddress"]
+func NodeViewApplicationHandler(ga *blockchain.GladiusAccountManager) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		poolAddress := vars["poolAddress"]
 
-	poolResponse, err := PoolResponseForAddress(poolAddress)
-	if err != nil {
-		ErrorHandler(w, r, "Pool data could not be found for Pool: "+poolAddress, err, http.StatusBadRequest)
-		return
+		poolResponse, err := PoolResponseForAddress(poolAddress, ga)
+		if err != nil {
+			ErrorHandler(w, r, "Pool data could not be found for Pool: "+poolAddress, err, http.StatusBadRequest)
+			return
+		}
+
+		address, err := ga.GetAccountAddress()
+		if err != nil {
+			ErrorHandler(w, r, "Could not retrieve account wallet address", err, http.StatusBadRequest)
+			return
+		}
+
+		applicationResponse, err := sendRequest(http.MethodGet, poolResponse.Data.URL+"applications/view/"+address.String(), nil)
+		var defaultResponse response.DefaultResponse
+		json.Unmarshal([]byte(applicationResponse), &defaultResponse)
+		ResponseHandler(w, r, "null", true, nil, defaultResponse.Response, nil)
 	}
-
-	address, err := blockchain.NewGladiusAccountManager().GetAccountAddress()
-	if err != nil {
-		ErrorHandler(w, r, "Could not retrieve account wallet address", err, http.StatusBadRequest)
-		return
-	}
-
-	applicationResponse, err := sendRequest(http.MethodGet, poolResponse.Data.URL+"applications/view/"+address.String(), nil)
-	var defaultResponse response.DefaultResponse
-	json.Unmarshal([]byte(applicationResponse), &defaultResponse)
-	ResponseHandler(w, r, "null", true, nil, defaultResponse.Response, nil)
 }
 
-func NodeViewAllApplicationsHandler(w http.ResponseWriter, r *http.Request) {
-	poolArrayResponse, err := blockchain.MarketPools(true)
-	if err != nil {
-		ErrorHandler(w, r, "Could not retrieve pools", err, http.StatusBadRequest)
-		return
-	}
+func NodeViewAllApplicationsHandler(ga *blockchain.GladiusAccountManager) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		poolArrayResponse, err := blockchain.MarketPools(true, ga)
+		if err != nil {
+			ErrorHandler(w, r, "Could not retrieve pools", err, http.StatusBadRequest)
+			return
+		}
 
-	address, err := blockchain.NewGladiusAccountManager().GetAccountAddress()
-	if err != nil {
-		ErrorHandler(w, r, "Could not retrieve account wallet address", err, http.StatusBadRequest)
-		return
-	}
+		address, err := blockchain.NewGladiusAccountManager().GetAccountAddress()
+		if err != nil {
+			ErrorHandler(w, r, "Could not retrieve account wallet address", err, http.StatusBadRequest)
+			return
+		}
 
-	var responses []interface{}
+		var responses []interface{}
 
-	for _, poolResponse := range poolArrayResponse.Pools {
-		//poolResponse.Data.URL
-		if poolResponse.Data.URL != "" {
-			applicationResponse, err := sendRequest(http.MethodGet, poolResponse.Data.URL+"applications/view/"+address.String(), nil)
+		for _, poolResponse := range poolArrayResponse.Pools {
+			//poolResponse.Data.URL
+			if poolResponse.Data.URL != "" {
+				applicationResponse, err := sendRequest(http.MethodGet, poolResponse.Data.URL+"applications/view/"+address.String(), nil)
 
-			if err == nil {
-				var responseStruct response.DefaultResponse
-				json.Unmarshal([]byte(applicationResponse), &responseStruct)
-				responses = append(responses, responseStruct.Response)
+				if err == nil {
+					var responseStruct response.DefaultResponse
+					json.Unmarshal([]byte(applicationResponse), &responseStruct)
+					responses = append(responses, responseStruct.Response)
+				}
 			}
 		}
-	}
 
-	ResponseHandler(w, r, "null", true, nil, responses, nil)
+		ResponseHandler(w, r, "null", true, nil, responses, nil)
+	}
 }
 
 // For control over HTTP client headers,

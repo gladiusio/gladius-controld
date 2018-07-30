@@ -12,7 +12,7 @@ func (addressHashes AddressHashes) StringArray() []string {
 	response := make([]string, len(addressHashes))
 
 	for index, address := range addressHashes {
-		response[index] = address.Str()
+		response[index] = address.String()
 	}
 
 	return response[:]
