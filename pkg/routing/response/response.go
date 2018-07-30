@@ -35,12 +35,12 @@ type CreationResponse struct {
 }
 
 type DefaultResponse struct {
-	Message     string       `json:"message"`
-	Success     bool         `json:"success"`
-	Error       string       `json:"error"`
-	Response    *interface{} `json:"response"`
-	Transaction *TxHash      `json:"txHash"`
-	Endpoint    string       `json:"endpoint"`
+	Message     string      `json:"message"`
+	Success     bool        `json:"success"`
+	Error       string      `json:"error"`
+	Response    interface{} `json:"response"`
+	Transaction *TxHash     `json:"txHash"`
+	Endpoint    string      `json:"endpoint"`
 }
 
 type TxHash struct {

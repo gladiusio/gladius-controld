@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/gladiusio/gladius-controld/pkg/p2p/peer"
-	"github.com/gladiusio/gladius-controld/pkg/routing/handlers"
+		"github.com/gladiusio/gladius-controld/pkg/routing/handlers"
 	ghandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/gladiusio/gladius-controld/pkg/p2p/peer"
 )
 
 const (
@@ -17,111 +17,189 @@ const (
 	DEBUG = false
 )
 
-func Start() {
-	fmt.Println("Starting API at http://localhost:" + PORT)
+var apiRouter *mux.Router
 
+func Start(router *mux.Router, port *string)  {
+	if port != nil {
+		fmt.Println("Starting API at http://localhost:" + *port)
+		log.Fatal(http.ListenAndServe(":" + *port, ghandlers.CORS()(router)))
+	} else {
+		fmt.Println("Starting API at http://localhost:" + PORT)
+		log.Fatal(http.ListenAndServe(":"+PORT, ghandlers.CORS()(router)))
+	}
+}
+
+func InitializeRouter() (*mux.Router, error) {
 	// Main Router
 	router := mux.NewRouter()
 	if DEBUG {
 		router.Use(loggingMiddleware)
 	}
 
+	return router, nil
+}
+
+func InitializeAPISubRoutes(router *mux.Router) {
 	// Base API Sub-Routes
-	apiRouter := router.PathPrefix("/api").Subrouter()
-	apiRouter.Use(responseMiddleware)
-	apiRouter.HandleFunc("/manager", handlers.APIHandler)
-	apiRouter.NotFoundHandler = http.HandlerFunc(handlers.NotFoundHandler)
+	if apiRouter == nil {
+		apiRouter = router.PathPrefix("/api").Subrouter()
+		apiRouter.Use(responseMiddleware)
+		apiRouter.NotFoundHandler = http.HandlerFunc(handlers.NotFoundHandler)
+	}
+}
+
+func AppendP2PEndPoints(router *mux.Router) (*mux.Router, error) {
+	// Initialize Base API sub-route
+	InitializeAPISubRoutes(router)
 
 	// P2P setup
 	peerNetwork := peer.New()
 	p2pRouter := apiRouter.PathPrefix("/p2p").Subrouter()
-
 	// P2P Message Routes
 	p2pRouter.HandleFunc("/message/sign", handlers.CreateSignedMessageHandler).
-		Methods("POST")
+		Methods(http.MethodPost)
 	p2pRouter.HandleFunc("/message/verify", handlers.VerifySignedMessageHandler).
-		Methods("POST")
-
+		Methods(http.MethodPost)
 	// P2P State Routes
 	p2pRouter.HandleFunc("/state/push_message", handlers.PushStateMessageHandler(peerNetwork)).
-		Methods("POST")
+		Methods(http.MethodPost)
 	p2pRouter.HandleFunc("/state/", handlers.GetFullStateHandler(peerNetwork)).
-		Methods("GET")
+		Methods(http.MethodGet)
 	p2pRouter.HandleFunc("/state/", handlers.PushStateMessageHandler(peerNetwork)).
-		Methods("POST")
+		Methods(http.MethodPost)
+
+	return router, nil
+}
+
+func AppendWalletManagementEndpoints(router *mux.Router) (*mux.Router, error) {
+	// Initialize Base API sub-route
+	InitializeAPISubRoutes(router)
 
 	// Key Management
 	walletRouter := apiRouter.PathPrefix("/keystore").Subrouter()
 	walletRouter.HandleFunc("/account/create", handlers.KeystoreAccountCreationHandler).
-		Methods("POST")
+		Methods(http.MethodPost)
 	walletRouter.HandleFunc("/account", handlers.KeystoreAccountRetrievalHandler)
 	walletRouter.HandleFunc("/account/open", handlers.KeystoreAccountUnlockHandler).
-		Methods("POST")
-	walletRouter.HandleFunc("/pgp/view/public", handlers.KeystorePGPPublicKeyRetrievalHandler)
-	walletRouter.HandleFunc("/pgp/create", handlers.KeystorePGPCreationHandler).
-		Methods("POST")
+		Methods(http.MethodPost)
+
+	return router, nil
+}
+
+func AppendAccountManagementEndpoints(router *mux.Router) (*mux.Router, error) {
+	// Initialize Base API sub-route
+	InitializeAPISubRoutes(router)
 
 	// Account Management
 	accountRouter := apiRouter.PathPrefix("/account/{address:0[xX][0-9a-fA-F]{40}}").Subrouter()
 	accountRouter.HandleFunc("/balance/{symbol:[a-z]{3}}", handlers.AccountBalanceHandler)
 	accountRouter.HandleFunc("/transactions", handlers.AccountTransactionsHandler).
-		Methods("POST")
+		Methods(http.MethodPost)
 
-	// Status Sub-Routes
+	return router, nil
+}
+
+func AppendStatusEndpoints(router *mux.Router) (*mux.Router, error) {
+	// Initialize Base API sub-route
+	InitializeAPISubRoutes(router)
+
+	// TxHash Status Sub-Routes
 	statusRouter := apiRouter.PathPrefix("/status").Subrouter()
 	statusRouter.HandleFunc("/", handlers.StatusHandler).
-		Methods("GET", "PUT").
+		Methods(http.MethodGet, http.MethodPut).
 		Name("status")
 	statusRouter.HandleFunc("/tx/{tx:0[xX][0-9a-fA-F]{64}}", handlers.StatusTxHandler).
-		Methods("GET").
+		Methods(http.MethodGet).
 		Name("status-tx")
+
+	return router, nil
+}
+
+func AppendNodeManagerEndpoints(router *mux.Router) (*mux.Router, error) {
+	// Initialize Base API sub-route
+	InitializeAPISubRoutes(router)
 
 	// Node Sub-Routes
 	nodeRouter := apiRouter.PathPrefix("/node").Subrouter()
-	// Retrieve owned Node if available
-	nodeRouter.HandleFunc("/", handlers.NodeFactoryNodeAddressHandler)
-	// Node for address
-	nodeRouter.HandleFunc("/{nodeAddress:0[xX][0-9a-fA-F]{40}}", nil)
-	// Node Creation
-	nodeRouter.HandleFunc("/create", handlers.NodeFactoryCreateNodeHandler).
-		Methods("POST")
-	// Node Data
-	nodeRouter.HandleFunc("/{nodeAddress:0[xX][0-9a-fA-F]{40}}/data", handlers.NodeRetrieveDataHandler).
-		Methods("GET")
-	nodeRouter.HandleFunc("/{nodeAddress:0[xX][0-9a-fA-F]{40}}/data", handlers.NodeSetDataHandler).
-		Methods("POST")
-	// Node application to Pool
-	nodeRouter.HandleFunc("/{nodeAddress:0[xX][0-9a-fA-F]{40}}/apply/{poolAddress:0[xX][0-9a-fA-F]{40}}", handlers.NodeApplyToPoolHandler)
-	// Node application status
-	nodeRouter.HandleFunc("/{nodeAddress:0[xX][0-9a-fA-F]{40}}/application/{poolAddress:0[xX][0-9a-fA-F]{40}}", handlers.NodeApplicationStatusHandler)
 	// Node pool applications
-	nodeRouter.HandleFunc("/{nodeAddress:0[xX][0-9a-fA-F]{40}}/applications", handlers.NodePoolApplications)
+	nodeRouter.HandleFunc("/applications", handlers.NodeViewAllApplicationsHandler).
+		Methods(http.MethodGet)
+	// Node application to Pool
+	nodeRouter.HandleFunc("/applications/{poolAddress:0[xX][0-9a-fA-F]{40}}/new", handlers.NodeNewApplicationHandler).
+		Methods(http.MethodPost)
+	nodeRouter.HandleFunc("/applications/{poolAddress:0[xX][0-9a-fA-F]{40}}/view", handlers.NodeViewApplicationHandler).
+		Methods(http.MethodGet)
 
 	// Pool Sub-Routes
 	poolRouter := apiRouter.PathPrefix("/pool").Subrouter()
 	// Retrieve owned Pool if available
 	poolRouter.HandleFunc("/", nil)
-	// Pool object, data, public key, etc
-	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}", handlers.PoolRetrievePublicKeyHandler) // TODO temp to display public key
-	// Pool data, both public and private data can be set here
-	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/data", handlers.PoolPublicDataHandler).
-		Methods("GET", "POST")
-	// Retrieve nodes with query parameters for inc data, approved, pending, rejected
-	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/nodes/{status:.*}", handlers.PoolRetrieveNodesHandler)
-	// Retrieve node application
-	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/node/{nodeAddress:0[xX][0-9a-fA-F]{40}}/application", handlers.PoolRetrieveNodeApplicationHandler)
-	// Retrieve or update the status of a node's application
-	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/node/{nodeAddress:0[xX][0-9a-fA-F]{40}}/{status}", handlers.PoolUpdateNodeStatusHandler).
-		Methods("PUT")
+	// Pool Retrieve Data
+	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}", handlers.PoolPublicDataHandler).
+		Methods(http.MethodGet)
+
+	return router, nil
+}
+
+func AppendMarketEndpoints(router *mux.Router) (*mux.Router, error) {
+	// Initialize Base API sub-route
+	InitializeAPISubRoutes(router)
 
 	// Market Sub-Routes
 	marketRouter := apiRouter.PathPrefix("/market").Subrouter()
 	marketRouter.HandleFunc("/pools", handlers.MarketPoolsHandler)
+
+	return router, nil
+}
+
+func AppendPoolManagerEndpoints(router *mux.Router) (*mux.Router, error) {
+	// Initialize Base API sub-route
+	InitializeAPISubRoutes(router)
+
+	// Pool
+	poolRouter := apiRouter.PathPrefix("/pool").Subrouter()
+	// Pool data, both public and private data can be set here
+	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/data", handlers.PoolPublicDataHandler).
+		Methods(http.MethodPost)
+	// Retrieve nodes with query parameters for inc data, approved, pending, rejected
+	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/nodes/{status:.*}", handlers.PoolRetrieveNodesHandler)
+
+	// Market
+	marketRouter := apiRouter.PathPrefix("/market").Subrouter()
 	marketRouter.HandleFunc("/pools/owned", handlers.MarketPoolsOwnedHandler)
 	marketRouter.HandleFunc("/pools/create", handlers.MarketPoolsCreateHandler).
-		Methods("POST")
+		Methods(http.MethodPost)
 
-	log.Fatal(http.ListenAndServe(":"+PORT, ghandlers.CORS()(router)))
+	return router, nil
+}
+
+func AppendServerEndpoints(router *mux.Router) (*mux.Router, error) {
+	// Initialize Base API sub-route
+	InitializeAPISubRoutes(router)
+	// Applications
+	applicationRouter := apiRouter.PathPrefix("/server").Subrouter()
+	applicationRouter.HandleFunc("/info", handlers.PublicPoolInformationHandler).
+		Methods(http.MethodGet)
+
+	return router, nil
+}
+
+func AppendApplicationEndpoints(router *mux.Router) (*mux.Router, error) {
+	// Initialize Base API sub-route
+	InitializeAPISubRoutes(router)
+
+	// Applications
+	applicationRouter := apiRouter.PathPrefix("/applications").Subrouter()
+	applicationRouter.HandleFunc("/new", handlers.PoolNewApplicationHandler).
+		Methods(http.MethodPost)
+	applicationRouter.HandleFunc("/edit", handlers.PoolEditApplicationHandler).
+		Methods(http.MethodPost)
+	applicationRouter.HandleFunc("/view/{wallet:0[xX][0-9a-fA-F]{40}}", handlers.PoolViewApplicationHandler).
+		Methods(http.MethodGet)
+	applicationRouter.HandleFunc("/status/{wallet:0[xX][0-9a-fA-F]{40}}", handlers.PoolStatusViewHandler)
+	applicationRouter.HandleFunc("/status/{status:.*}", nil)
+
+	return router, nil
 }
 
 func responseMiddleware(next http.Handler) http.Handler {
@@ -161,7 +239,7 @@ func formatRequest(r *http.Request) string {
 	}
 
 	// If this is a POST, add post data
-	if r.Method == "POST" {
+	if r.Method == http.MethodPost {
 		r.ParseForm()
 		request = append(request, "\n")
 		request = append(request, r.Form.Encode())

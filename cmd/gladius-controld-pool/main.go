@@ -4,7 +4,7 @@ import (
 	"github.com/gladiusio/gladius-controld/pkg/routing"
 	"github.com/gladiusio/gladius-utils/init/manager"
 	. "github.com/gladiusio/gladius-controld/pkg/config"
-	)
+)
 
 func main() {
 	// Define some variables
@@ -15,6 +15,8 @@ func main() {
 }
 
 func initialize() {
-	router := NodeRouter()
-	routing.Start(router, nil)
+	// Run the function "run" in newtworkd as a service
+	router := PoolManagerRouter()
+	port := "3000"
+	routing.Start(router, &port)
 }

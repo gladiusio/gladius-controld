@@ -5,8 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
-	"github.com/gladiusio/gladius-controld/pkg/crypto"
-	"github.com/gladiusio/gladius-controld/pkg/routing/response"
+		"github.com/gladiusio/gladius-controld/pkg/routing/response"
 			)
 
 type accountBody struct {
@@ -89,45 +88,4 @@ func KeystoreAccountUnlockHandler(w http.ResponseWriter, r *http.Request) {
 	addressResponse := response.AddressResponse{Address: *address}
 
 	ResponseHandler(w, r, "null", true, nil, addressResponse, nil)
-}
-
-func KeystorePGPPublicKeyRetrievalHandler(w http.ResponseWriter, r *http.Request) {
-	publicKey, err := blockchain.GetPGPPublicKey()
-	if err != nil {
-		ErrorHandler(w, r, "Public key not found or cannot be read", err, http.StatusNotFound)
-		return
-	}
-
-	publicKeyResponse := response.PublicKeyResponse{PublicKey: publicKey}
-
-	ResponseHandler(w, r, "null", true, nil, publicKeyResponse, nil)
-}
-
-type pgpStruct struct {
-	Name    string `json:"name"`
-	Comment string `json:"comment"`
-	Email   string `json:"email"`
-}
-
-func KeystorePGPCreationHandler(w http.ResponseWriter, r *http.Request) {
-	decoder := json.NewDecoder(r.Body)
-	var ps pgpStruct
-	err := decoder.Decode(&ps)
-
-	if err != nil {
-		ErrorHandler(w, r, "Request invalid, body is missing either `name`, `comment`, and/or `email`", err, http.StatusBadRequest)
-		return
-	}
-
-	path, err := crypto.CreateKeyPair(ps.Name, ps.Comment, ps.Email)
-	println(path)
-
-	if err != nil {
-		ErrorHandler(w, r, "PGP key pair could not be created", err, http.StatusInternalServerError)
-		return
-	}
-
-	creationResponse := response.CreationResponse{Created: true}
-
-	ResponseHandler(w, r, "null", true, nil, creationResponse, nil)
 }
