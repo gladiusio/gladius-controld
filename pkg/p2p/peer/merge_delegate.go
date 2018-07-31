@@ -25,6 +25,11 @@ func (md *mergeDelegate) NotifyMerge(peers []*memberlist.Node) error {
 
 	challengeMap := make(map[string]bool)
 
+	// Some saftey concerns
+	if len(peers) > 1 {
+		return errors.New("Max size of joining cluster is 1, you have %s" % len(peers))
+	}
+
 	// Go through all nodes in the cluster requesting to join
 	for _, peer := range peers {
 		// Make a token
