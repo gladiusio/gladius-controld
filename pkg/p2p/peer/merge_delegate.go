@@ -27,7 +27,7 @@ func (md *mergeDelegate) NotifyMerge(peers []*memberlist.Node) error {
 
 	// Some saftey concerns
 	if len(peers) > 1 {
-		return errors.New("Max size of joining cluster is 1, you have %s" % len(peers))
+		return fmt.Errorf("Max size of joining cluster is 1, you have %d", len(peers))
 	}
 
 	// Go through all nodes in the cluster requesting to join
