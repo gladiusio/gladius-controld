@@ -1,16 +1,13 @@
 package blockchain
 
 import (
-	"encoding/json"
-	"errors"
-	"log"
-	"strings"
-	"sync"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/gladiusio/gladius-controld/pkg/blockchain/generated"
+"encoding/json"
+"github.com/ethereum/go-ethereum/accounts/abi/bind"
+"github.com/ethereum/go-ethereum/common"
+"github.com/gladiusio/gladius-controld/pkg/blockchain/generated"
+"log"
+"strings"
 )
 
 // ConnectNode - Connect and grab node
@@ -23,22 +20,6 @@ func ConnectPool(poolAddress common.Address) *generated.Pool {
 	}
 
 	return pool
-}
-
-func PoolRetrievePublicKey(poolAddress string, ga *GladiusAccountManager) (string, error) {
-	pool := ConnectPool(common.HexToAddress(poolAddress))
-
-	address, err := ga.GetAccountAddress()
-	if err != nil {
-		return "", err
-	}
-
-	publicKey, err := pool.PublicKey(&bind.CallOpts{From: *address})
-	if err != nil {
-		return "null", nil
-	}
-
-	return publicKey, nil
 }
 
 type PoolPublicData struct {
@@ -67,109 +48,4 @@ func PoolRetrievePublicData(poolAddress string, ga *GladiusAccountManager) (*Poo
 	var poolPublicData PoolPublicData
 	decoder.Decode(&poolPublicData)
 	return &poolPublicData, nil
-}
-
-func PoolSetPublicData(passphrase, poolAddress, data string, ga *GladiusAccountManager) (*types.Transaction, error) {
-	pool := ConnectPool(common.HexToAddress(poolAddress))
-
-	auth, err := ga.GetAuth(passphrase)
-	if err != nil {
-		return nil, err
-	}
-
-	transaction, err := pool.SetPublicData(auth, data)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return transaction, nil
-}
-
-func PoolNodes(poolAddress string, ga *GladiusAccountManager) (*[]common.Address, error) {
-	pool := ConnectPool(common.HexToAddress(poolAddress))
-	address, err := ga.GetAccountAddress()
-	if err != nil {
-		return nil, err
-	}
-
-	nodeAddressList, err := pool.GetNodeList(&bind.CallOpts{From: *address})
-	if err != nil {
-		return nil, err
-	}
-	return &nodeAddressList, nil
-}
-
-func PoolNodesWithData(poolAddress common.Address, nodeAddresses *[]common.Address, status int, ga *GladiusAccountManager) (*[]NodeApplication, error) {
-	filter := status >= 0
-
-	var applications []NodeApplication
-	appChan := make(chan NodeApplication)
-	var err error
-	go func() {
-		var wg sync.WaitGroup
-		running := true
-		// Go through all of the application addresses
-		for _, nodeAddress := range *nodeAddresses {
-			if !running {
-				break
-			}
-			wg.Add(1)
-			// Fetch the application async
-			go func(address common.Address) {
-				defer wg.Done()
-				nodeApplication, err1 := NodeRetrieveApplication(&address, &poolAddress, ga)
-				if err1 != nil {
-					err = err1
-					running = false
-					return
-				}
-				if filter && nodeApplication.Status == status {
-					appChan <- *nodeApplication
-				}
-			}(nodeAddress)
-		}
-		// Wait until all goroutines are done
-		wg.Wait()
-		// We close this so the the for loop below knows we're done sending data
-		close(appChan)
-	}()
-
-	for value := range appChan {
-		applications = append(applications, value)
-	}
-	return &applications, err
-}
-
-func PoolUpdateNodeStatus(passphrase, poolAddress, nodeAddress string, status int, ga *GladiusAccountManager) (*types.Transaction, error) {
-	pool := ConnectPool(common.HexToAddress(poolAddress))
-	var err error
-
-	auth, err := ga.GetAuth(passphrase)
-	if err != nil {
-		return nil, err
-	}
-
-	var transaction *types.Transaction
-
-	switch status {
-	case 0:
-		// Unavailable
-		err = errors.New("PoolUpdateNodeStatus - Node cannot change status to `Unavailable`")
-	case 1:
-		// Approved
-		transaction, err = pool.AcceptNode(auth, common.HexToAddress(nodeAddress))
-	case 2:
-		// Rejected
-		transaction, err = pool.RejectNode(auth, common.HexToAddress(nodeAddress))
-	case 3:
-		// Pending
-		err = errors.New("PoolUpdateNodeStatus - Node cannot change status to `Pending`")
-	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	return transaction, nil
 }

@@ -69,7 +69,7 @@
     "pkg/controller",
     "pkg/db/models"
   ]
-  revision = "d13066103b18b21690ed33acd03cd3550dfd9edb"
+  revision = "63738a95a0f736f5515de6ebbe72e08229510036"
 
 [[projects]]
   name = "github.com/gladiusio/gladius-utils"
@@ -233,6 +233,12 @@
   version = "v1.2.0"
 
 [[projects]]
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
+
+[[projects]]
   name = "github.com/rjeczalik/notify"
   packages = ["."]
   revision = "52ae50d8490436622a8941bd70c3dbe0acdd4bbf"
@@ -332,15 +338,8 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = [
-    "cast5",
     "ed25519",
     "ed25519/internal/edwards25519",
-    "openpgp",
-    "openpgp/armor",
-    "openpgp/elgamal",
-    "openpgp/errors",
-    "openpgp/packet",
-    "openpgp/s2k",
     "pbkdf2",
     "scrypt"
   ]
@@ -422,6 +421,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e63b2f02f197a3f0a69a3932cad80379b81dc71d2fb96dcc78e787fafa5f54c8"
+  inputs-digest = "02e875712d0c9b5b0d99e1c5aa8e3b25ed9cf0575c46f88bd94b5d2aeba73a0f"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -3,13 +3,15 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"github.com/gladiusio/gladius-controld/pkg/p2p/message"
+	"github.com/gladiusio/gladius-controld/pkg/p2p/signature"
 	"net/http"
 
 	"github.com/gladiusio/gladius-application-server/pkg/db/models"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"github.com/gladiusio/gladius-controld/pkg/routing/response"
 	"github.com/gorilla/mux"
+	"io/ioutil"
 	"time"
 )
 
@@ -44,17 +46,34 @@ func NodeNewApplicationHandler(ga *blockchain.GladiusAccountManager) func(w http
 
 		address, err := ga.GetAccountAddress()
 		if err != nil {
-			ErrorHandler(w, r, "Could not retrieve account wallet address", err, http.StatusBadRequest)
+			ErrorHandler(w, r, "Could not retrieve account wallet address", err, http.StatusForbidden)
 			return
 		}
 
 		requestPayload.Wallet = address.String()
+		payload, err := json.Marshal(requestPayload)
+		if err != nil {
+			ErrorHandler(w, r, "Could not create payload string", err, http.StatusInternalServerError)
+			return
+		}
 
-		application, err := sendRequest(http.MethodPost, poolResponse.Data.URL+"applications/new", requestPayload)
+		unsignedMessage := message.New(payload)
+		signedMessage, err := signature.CreateSignedMessage(unsignedMessage, ga)
+		if err != nil {
+			ErrorHandler(w, r, "Could not create signed message, account could be locked", err, http.StatusForbidden)
+			return
+		}
+
+		//application, err := sendRequest(http.MethodPost, poolResponse.Data.URL+"applications/new", signedMessage)
+		application, err := sendRequest(http.MethodPost, "http://localhost:3333/api/applications/new", signedMessage)
+		if err != nil {
+			ErrorHandler(w, r, "Could not submit application to " + poolResponse.Address, err, http.StatusBadGateway)
+			return
+		}
 
 		var defaultResponse response.DefaultResponse
 		json.Unmarshal([]byte(application), &defaultResponse)
-		ResponseHandler(w, r, "null", true, nil, defaultResponse.Response, nil)
+		ResponseHandler(w, r, defaultResponse.Message, defaultResponse.Success, &defaultResponse.Error, defaultResponse.Response, nil)
 	}
 }
 
@@ -63,22 +82,30 @@ func NodeViewApplicationHandler(ga *blockchain.GladiusAccountManager) func(w htt
 		vars := mux.Vars(r)
 		poolAddress := vars["poolAddress"]
 
-		poolResponse, err := PoolResponseForAddress(poolAddress, ga)
+		//poolResponse, err := PoolResponseForAddress(poolAddress, ga)
+		_, err := PoolResponseForAddress(poolAddress, ga)
 		if err != nil {
 			ErrorHandler(w, r, "Pool data could not be found for Pool: "+poolAddress, err, http.StatusBadRequest)
 			return
 		}
 
-		address, err := ga.GetAccountAddress()
+		unsignedMessage := message.Message{}
+		signedMessage, err := signature.CreateSignedMessage(&unsignedMessage, ga)
 		if err != nil {
-			ErrorHandler(w, r, "Could not retrieve account wallet address", err, http.StatusBadRequest)
+			ErrorHandler(w, r, "Could not create signed message, account could be locked", err, http.StatusForbidden)
 			return
 		}
 
-		applicationResponse, err := sendRequest(http.MethodGet, poolResponse.Data.URL+"applications/view/"+address.String(), nil)
+		//applicationResponse, err := sendRequest(http.MethodGet, poolResponse.Data.URL+"applications/view/"+address.String(), nil)
+		applicationResponse, err := sendRequest(http.MethodPost, "http://localhost:3333/api/applications/view", signedMessage)
+		if err != nil {
+			ErrorHandler(w, r, "Could not view application", err, http.StatusForbidden)
+			return
+		}
+
 		var defaultResponse response.DefaultResponse
 		json.Unmarshal([]byte(applicationResponse), &defaultResponse)
-		ResponseHandler(w, r, "null", true, nil, defaultResponse.Response, nil)
+		ResponseHandler(w, r, defaultResponse.Message, defaultResponse.Success, &defaultResponse.Error, defaultResponse.Response, nil)
 	}
 }
 
@@ -90,9 +117,10 @@ func NodeViewAllApplicationsHandler(ga *blockchain.GladiusAccountManager) func(w
 			return
 		}
 
-		address, err := blockchain.NewGladiusAccountManager().GetAccountAddress()
+		unsignedMessage := message.Message{}
+		signedMessage, err := signature.CreateSignedMessage(&unsignedMessage, ga)
 		if err != nil {
-			ErrorHandler(w, r, "Could not retrieve account wallet address", err, http.StatusBadRequest)
+			ErrorHandler(w, r, "Could not create signed message, account could be locked", err, http.StatusForbidden)
 			return
 		}
 
@@ -101,7 +129,8 @@ func NodeViewAllApplicationsHandler(ga *blockchain.GladiusAccountManager) func(w
 		for _, poolResponse := range poolArrayResponse.Pools {
 			//poolResponse.Data.URL
 			if poolResponse.Data.URL != "" {
-				applicationResponse, err := sendRequest(http.MethodGet, poolResponse.Data.URL+"applications/view/"+address.String(), nil)
+				//applicationResponse, err := sendRequest(http.MethodGet, poolResponse.Data.URL+"applications/view/"+address.String(), nil)
+				applicationResponse, err := sendRequest(http.MethodPost, "http://localhost:3333/api/applications/view", signedMessage)
 
 				if err == nil {
 					var responseStruct response.DefaultResponse
