@@ -124,7 +124,7 @@ func NodeViewAllApplicationsHandler(ga *blockchain.GladiusAccountManager) func(w
 			return
 		}
 
-		var responses []interface{}
+		var responses = make([]interface{}, 0)
 
 		for _, poolResponse := range poolArrayResponse.Pools {
 			//poolResponse.Data.URL
@@ -135,7 +135,9 @@ func NodeViewAllApplicationsHandler(ga *blockchain.GladiusAccountManager) func(w
 				if err == nil {
 					var responseStruct response.DefaultResponse
 					json.Unmarshal([]byte(applicationResponse), &responseStruct)
-					responses = append(responses, responseStruct.Response)
+					if responseStruct.Success {
+						responses = append(responses, responseStruct.Response)
+					}
 				}
 			}
 		}
