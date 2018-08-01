@@ -89,8 +89,8 @@ func NodeViewApplicationHandler(ga *blockchain.GladiusAccountManager) func(w htt
 			return
 		}
 
-		unsignedMessage := message.Message{}
-		signedMessage, err := signature.CreateSignedMessage(&unsignedMessage, ga)
+		unsignedMessage := message.NewBlankMessage()
+		signedMessage, err := signature.CreateSignedMessage(unsignedMessage, ga)
 		if err != nil {
 			ErrorHandler(w, r, "Could not create signed message, account could be locked", err, http.StatusForbidden)
 			return
@@ -117,8 +117,8 @@ func NodeViewAllApplicationsHandler(ga *blockchain.GladiusAccountManager) func(w
 			return
 		}
 
-		unsignedMessage := message.Message{}
-		signedMessage, err := signature.CreateSignedMessage(&unsignedMessage, ga)
+		unsignedMessage := message.NewBlankMessage()
+		signedMessage, err := signature.CreateSignedMessage(unsignedMessage, ga)
 		if err != nil {
 			ErrorHandler(w, r, "Could not create signed message, account could be locked", err, http.StatusForbidden)
 			return

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/memberlist"
-	uuid "github.com/satori/go.uuid"
+	"github.com/satori/go.uuid"
 )
 
 type mergeDelegate struct {
