@@ -169,8 +169,9 @@ func AppendPoolManagerEndpoints(router *mux.Router, ga *blockchain.GladiusAccoun
 	poolRouter := apiRouter.PathPrefix("/pool").Subrouter()
 	// Pool data, both public and private data can be set here
 	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/data", handlers.PoolPublicDataHandler(ga)).
+		Methods(http.MethodGet)
+	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/data", handlers.PoolSetBlockchainDataHandler()).
 		Methods(http.MethodPost)
-
 	// Market
 	marketRouter := apiRouter.PathPrefix("/market").Subrouter()
 	marketRouter.HandleFunc("/pools/owned", handlers.MarketPoolsOwnedHandler(ga))

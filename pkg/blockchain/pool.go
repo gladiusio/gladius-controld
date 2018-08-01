@@ -5,7 +5,8 @@ import (
 "encoding/json"
 "github.com/ethereum/go-ethereum/accounts/abi/bind"
 "github.com/ethereum/go-ethereum/common"
-"github.com/gladiusio/gladius-controld/pkg/blockchain/generated"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/gladiusio/gladius-controld/pkg/blockchain/generated"
 "log"
 "strings"
 )
@@ -48,4 +49,22 @@ func PoolRetrievePublicData(poolAddress string, ga *GladiusAccountManager) (*Poo
 	var poolPublicData PoolPublicData
 	decoder.Decode(&poolPublicData)
 	return &poolPublicData, nil
+}
+
+func PoolSetPublicData(passphrase, poolAddress, data string) (*types.Transaction, error) {
+	pool := ConnectPool(common.HexToAddress(poolAddress))
+	ga := NewGladiusAccountManager()
+
+	auth, err := ga.GetAuth(passphrase)
+	if err != nil {
+		return nil, err
+	}
+
+	transaction, err := pool.SetPublicData(auth, data)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return transaction, nil
 }

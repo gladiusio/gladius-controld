@@ -64,8 +64,8 @@ func NodeNewApplicationHandler(ga *blockchain.GladiusAccountManager) func(w http
 			return
 		}
 
-		//application, err := sendRequest(http.MethodPost, poolResponse.Data.URL+"applications/new", signedMessage)
-		application, err := sendRequest(http.MethodPost, "http://localhost:3333/api/applications/new", signedMessage)
+		application, err := sendRequest(http.MethodPost, poolResponse.Data.URL+"applications/new", signedMessage)
+		//application, err := sendRequest(http.MethodPost, "http://localhost:3333/api/applications/new", signedMessage)
 		if err != nil {
 			ErrorHandler(w, r, "Could not submit application to " + poolResponse.Address, err, http.StatusBadGateway)
 			return
@@ -82,8 +82,8 @@ func NodeViewApplicationHandler(ga *blockchain.GladiusAccountManager) func(w htt
 		vars := mux.Vars(r)
 		poolAddress := vars["poolAddress"]
 
-		//poolResponse, err := PoolResponseForAddress(poolAddress, ga)
-		_, err := PoolResponseForAddress(poolAddress, ga)
+		poolResponse, err := PoolResponseForAddress(poolAddress, ga)
+		//_, err := PoolResponseForAddress(poolAddress, ga)
 		if err != nil {
 			ErrorHandler(w, r, "Pool data could not be found for Pool: "+poolAddress, err, http.StatusBadRequest)
 			return
@@ -96,8 +96,8 @@ func NodeViewApplicationHandler(ga *blockchain.GladiusAccountManager) func(w htt
 			return
 		}
 
-		//applicationResponse, err := sendRequest(http.MethodGet, poolResponse.Data.URL+"applications/view/"+address.String(), nil)
-		applicationResponse, err := sendRequest(http.MethodPost, "http://localhost:3333/api/applications/view", signedMessage)
+		applicationResponse, err := sendRequest(http.MethodPost, poolResponse.Data.URL+"applications/view", signedMessage)
+		//applicationResponse, err := sendRequest(http.MethodPost, "http://localhost:3333/api/applications/view", signedMessage)
 		if err != nil {
 			ErrorHandler(w, r, "Could not view application", err, http.StatusForbidden)
 			return
@@ -129,8 +129,8 @@ func NodeViewAllApplicationsHandler(ga *blockchain.GladiusAccountManager) func(w
 		for _, poolResponse := range poolArrayResponse.Pools {
 			//poolResponse.Data.URL
 			if poolResponse.Data.URL != "" {
-				//applicationResponse, err := sendRequest(http.MethodGet, poolResponse.Data.URL+"applications/view/"+address.String(), nil)
-				applicationResponse, err := sendRequest(http.MethodPost, "http://localhost:3333/api/applications/view", signedMessage)
+				applicationResponse, err := sendRequest(http.MethodPost, poolResponse.Data.URL+"applications/view", signedMessage)
+				//applicationResponse, err := sendRequest(http.MethodPost, "http://localhost:3333/api/applications/view", signedMessage)
 
 				if err == nil {
 					var responseStruct response.DefaultResponse
