@@ -67,12 +67,7 @@ func NodeRouter() *mux.Router {
 func PoolManagerRouter() *mux.Router {
 	router, ga := setupRouter()
 
-	err := routing.AppendP2PEndPoints(router, ga)
-	if err != nil {
-		log.Fatalln("Failed to append P2P Endpoints")
-	}
-
-	err = routing.AppendWalletManagementEndpoints(router, ga)
+	err := routing.AppendWalletManagementEndpoints(router, ga)
 	if err != nil {
 		log.Fatalln("Failed to append Account Management Endpoints")
 	}

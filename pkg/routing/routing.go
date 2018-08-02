@@ -172,6 +172,15 @@ func AppendPoolManagerEndpoints(router *mux.Router, ga *blockchain.GladiusAccoun
 		Methods(http.MethodGet)
 	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/data", handlers.PoolSetBlockchainDataHandler()).
 		Methods(http.MethodPost)
+	poolRouter.HandleFunc("/applications/pending/pool", handlers.PoolRetrievePendingPoolConfirmationApplicationsHandler()).
+		Methods(http.MethodGet)
+	poolRouter.HandleFunc("/applications/pending/node", handlers.PoolRetrievePendingNodeConfirmationApplicationsHandler()).
+		Methods(http.MethodGet)
+	poolRouter.HandleFunc("/applications/rejected", handlers.PoolRetrieveRejectedApplicationsHandler()).
+		Methods(http.MethodGet)
+	poolRouter.HandleFunc("/applications/approved", handlers.PoolRetrieveApprovedApplicationsHandler()).
+		Methods(http.MethodGet)
+
 	// Market
 	marketRouter := apiRouter.PathPrefix("/market").Subrouter()
 	marketRouter.HandleFunc("/pools/owned", handlers.MarketPoolsOwnedHandler(ga))

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"github.com/gladiusio/gladius-application-server/pkg/controller"
 	"net/http"
 
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
@@ -52,5 +53,81 @@ func PoolSetBlockchainDataHandler() func(w http.ResponseWriter, r *http.Request)
 		}
 
 		ResponseHandler(w, r, "Public data set, pending transaction", true, nil, nil, transaction)
+	}
+}
+
+func PoolRetrievePendingPoolConfirmationApplicationsHandler() func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		db, err := controller.Initialize(nil)
+		if err != nil {
+			ErrorHandler(w, r, "Could not establish database connection", err, http.StatusInternalServerError)
+			return
+		}
+
+		profiles, err := controller.NodesPendingPoolConfirmation(db)
+
+		if err != nil {
+			ErrorHandler(w, r, "Could not retrieve applications", err, http.StatusNotFound)
+			return
+		}
+
+		ResponseHandler(w, r, "null", true, nil, profiles, nil)
+	}
+}
+
+func PoolRetrievePendingNodeConfirmationApplicationsHandler() func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		db, err := controller.Initialize(nil)
+		if err != nil {
+			ErrorHandler(w, r, "Could not establish database connection", err, http.StatusInternalServerError)
+			return
+		}
+
+		profiles, err := controller.NodesPendingNodeConfirmation(db)
+
+		if err != nil {
+			ErrorHandler(w, r, "Could not retrieve applications", err, http.StatusNotFound)
+			return
+		}
+
+		ResponseHandler(w, r, "null", true, nil, profiles, nil)
+	}
+}
+
+func PoolRetrieveApprovedApplicationsHandler() func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		db, err := controller.Initialize(nil)
+		if err != nil {
+			ErrorHandler(w, r, "Could not establish database connection", err, http.StatusInternalServerError)
+			return
+		}
+
+		profiles, err := controller.NodesAccepted(db)
+
+		if err != nil {
+			ErrorHandler(w, r, "Could not retrieve applications", err, http.StatusNotFound)
+			return
+		}
+
+		ResponseHandler(w, r, "null", true, nil, profiles, nil)
+	}
+}
+
+func PoolRetrieveRejectedApplicationsHandler() func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		db, err := controller.Initialize(nil)
+		if err != nil {
+			ErrorHandler(w, r, "Could not establish database connection", err, http.StatusInternalServerError)
+			return
+		}
+
+		profiles, err := controller.NodesRejected(db)
+
+		if err != nil {
+			ErrorHandler(w, r, "Could not retrieve applications", err, http.StatusNotFound)
+			return
+		}
+
+		ResponseHandler(w, r, "null", true, nil, profiles, nil)
 	}
 }
