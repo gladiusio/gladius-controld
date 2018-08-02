@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/signature"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/state"
 	"github.com/hashicorp/memberlist"
@@ -15,7 +16,7 @@ import (
 )
 
 // New returns a new peer type
-func New() *Peer {
+func New(ga *blockchain.GladiusAccountManager) *Peer {
 	d := &delegate{}
 	md := &mergeDelegate{}
 	hostname, _ := os.Hostname()
@@ -39,7 +40,15 @@ func New() *Peer {
 		RetransmitMult: 3,
 	}
 
-	peer := &Peer{peerState: &state.State{}, running: false, peerDelegate: d, member: m, PeerQueue: queue, challengeReceiveMap: make(map[string]chan *signature.SignedMessage)}
+	peer := &Peer{
+		peerState:           &state.State{},
+		running:             false,
+		peerDelegate:        d,
+		member:              m,
+		PeerQueue:           queue,
+		challengeReceiveMap: make(map[string]chan *signature.SignedMessage),
+		ga:                  ga,
+	}
 
 	queue.NumNodes = func() int { return peer.member.NumMembers() }
 	d.peer = peer
@@ -49,6 +58,7 @@ func New() *Peer {
 
 // Peer is a type that represents a peer in the Gladius p2p network.
 type Peer struct {
+	ga                  *blockchain.GladiusAccountManager
 	peerDelegate        *delegate
 	PeerQueue           *memberlist.TransmitLimitedQueue
 	peerState           *state.State
@@ -64,14 +74,15 @@ type broadcast struct {
 }
 
 type update struct {
+	From   memberlist.Node
 	Action string          // Can be "merge", "challenge_question", or "challenge_response"
 	Data   json.RawMessage // Usually a signed message, but can also be a challenge question
 }
 
 // Used to send to a node through an "update"
 type challenge struct {
-	challengeID string
-	question    string
+	ChallengeID string
+	Question    string
 }
 
 func (b *broadcast) Invalidates(other memberlist.Broadcast) bool {
@@ -146,6 +157,7 @@ func (p *Peer) UpdateAndPushState(sm *signature.SignedMessage) error {
 	b, err := json.Marshal(&update{
 		Action: "merge",
 		Data:   signedBytes,
+		From:   *p.member.LocalNode(),
 	})
 
 	if err != nil {

@@ -21,12 +21,13 @@ type mergeDelegate struct {
 // into the network by sending them a challenge that they must sign with their
 // Ethereum key.
 func (md *mergeDelegate) NotifyMerge(peers []*memberlist.Node) error {
-	challengeID := uuid.NewV4().String()
-	md.peer.registerOutgoingChallenge(challengeID)
+	cID := uuid.NewV4().String()
+	md.peer.registerOutgoingChallenge(cID)
 
 	challengeMap := make(map[string]bool)
 
-	// Some saftey concerns
+	// Some saftey concerns for now (may change this in the future as the
+	// code below supports n sized clusters)
 	if len(peers) > 1 {
 		return fmt.Errorf("Max size of joining cluster is 1, you have %d", len(peers))
 	}
@@ -42,11 +43,14 @@ func (md *mergeDelegate) NotifyMerge(peers []*memberlist.Node) error {
 		challengeMap[questionString] = false
 
 		// Create a challenge from the token
-		challenge := &challenge{question: questionString}
-		challengeBytes, _ := json.Marshal(challenge)
+		c := challenge{Question: questionString, ChallengeID: cID}
+		challengeBytes, err := json.Marshal(c)
+		if err != nil {
+			panic(err)
+		}
 
 		// Create an action for the remote peer to process
-		action := &update{Action: "challenge_question", Data: challengeBytes}
+		action := &update{Action: "challenge_question", Data: challengeBytes, From: *md.peer.member.LocalNode()}
 		actionBytes, _ := json.Marshal(action)
 
 		// Send the message to the remote peer
@@ -59,7 +63,7 @@ func (md *mergeDelegate) NotifyMerge(peers []*memberlist.Node) error {
 		timeout <- true
 	}()
 
-	incomingResponses, err := md.peer.getChallengeResponseChannel(challengeID)
+	incomingResponses, err := md.peer.getChallengeResponseChannel(cID)
 	if err != nil {
 		return errors.New("Node responded with unknown challenge ID")
 	}
@@ -96,11 +100,11 @@ func (md *mergeDelegate) NotifyMerge(peers []*memberlist.Node) error {
 			}
 
 			// If the value exists
-			if val, ok := challengeMap[c.question]; ok {
+			if val, ok := challengeMap[c.Question]; ok {
 				if val {
 					return errors.New("Challenged has already been used")
 				}
-				challengeMap[c.question] = true
+				challengeMap[c.Question] = true
 				successfulCount++
 			}
 
