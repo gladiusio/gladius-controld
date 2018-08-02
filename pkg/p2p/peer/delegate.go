@@ -55,13 +55,15 @@ func (d *delegate) NotifyMsg(b []byte) {
 			return
 		}
 
-		channel <- sm
+		go func() { channel <- sm }()
 	case "challenge_question": // This is a node recieving a question
 		var c challenge
 		err := json.Unmarshal([]byte(update.Data), &c)
 		if err != nil {
 			panic(err)
 		}
+
+		// d.peer.member.SendReliable(to, msg)
 
 	default:
 		panic("unsupported update action")

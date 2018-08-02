@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/gladiusio/gladius-controld/pkg/p2p/message"
 	"github.com/hashicorp/memberlist"
 	uuid "github.com/satori/go.uuid"
 )
@@ -67,10 +68,22 @@ func (md *mergeDelegate) NotifyMerge(peers []*memberlist.Node) error {
 				return errors.New("Challenge message from peer is not verified or not in pool")
 			}
 			// Get the challenge response message
-			cbytes, err := sm.Message.MarshalJSON()
+			mbytes, err := sm.Message.MarshalJSON()
 			if err != nil {
 				return errors.New("Can't parse challenge from signed message")
 			}
+
+			m := &message.Message{}
+			err = json.Unmarshal(mbytes, m)
+			if err != nil {
+				return errors.New("Challenge sent back is corrupted")
+			}
+
+			cbytes, err := m.Content.MarshalJSON()
+			if err != nil {
+				return errors.New("Challenge sent back is corrupted")
+			}
+
 			c := &challenge{}
 			err = json.Unmarshal(cbytes, c)
 			if err != nil {
