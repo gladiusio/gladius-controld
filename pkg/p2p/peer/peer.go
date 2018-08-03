@@ -206,5 +206,6 @@ func (p *Peer) CompareContent(contentList []interface{}) []interface{} {
 // GetContentLinks get's a link for each item in the contentList from a random
 // node in the network that has that content
 func (p *Peer) GetContentLinks(contentList []interface{}) []string {
+	p.GetState().GetNodeFieldsMap("DiskContent")
 	return []string{}
 }

@@ -67,6 +67,18 @@ func (s *State) GetNodeFields(key string) []interface{} {
 	return toReturn
 }
 
+// GetNodeFieldsMap gets a map of node address to that field
+func (s *State) GetNodeFieldsMap(key string) map[string]interface{} {
+	toReturn := make(map[string]interface{})
+	s.mux.Lock()
+	for node, value := range s.NodeDataMap {
+		v := reflect.ValueOf(*value)
+		toReturn[node] = v.FieldByName(key).Interface()
+	}
+	s.mux.Unlock()
+	return toReturn
+}
+
 func (s *State) GetNodeField(address, key string) interface{} {
 	s.mux.Lock()
 	defer s.mux.Unlock()
