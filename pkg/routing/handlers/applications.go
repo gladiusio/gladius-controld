@@ -12,7 +12,7 @@ import (
 
 	"github.com/gladiusio/gladius-application-server/pkg/controller"
 	"github.com/gladiusio/gladius-application-server/pkg/db/models"
-		_ "github.com/jinzhu/gorm/dialects/sqlite"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
 type statusResponse struct {
@@ -35,14 +35,13 @@ func PoolStatusViewHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := statusResponse{
-		Accepted:     profile.NodeProfile.Accepted.Valid && profile.NodeProfile.Accepted.Bool,
-		NodeAccepted: profile.NodeProfile.NodeAccepted.Valid && profile.NodeProfile.NodeAccepted.Bool,
-		PoolAccepted: profile.NodeProfile.PoolAccepted.Valid && profile.NodeProfile.PoolAccepted.Bool,
+		Accepted:     profile.NodeProfile.Approved && !profile.NodeProfile.Pending,
+		NodeAccepted: profile.NodeProfile.NodeAccepted,
+		PoolAccepted: profile.NodeProfile.PoolAccepted,
 	}
 
 	ResponseHandler(w, r, "null", true, nil, response, nil)
 }
-
 
 func PoolNewApplicationHandler(w http.ResponseWriter, r *http.Request) {
 	requestPayload, err := getRequestPayload(r)
@@ -171,7 +170,6 @@ func viewApplication(w http.ResponseWriter, r *http.Request) {
 
 	ResponseHandler(w, r, "null", true, nil, profile, nil)
 }
-
 
 type ipRange struct {
 	start net.IP
