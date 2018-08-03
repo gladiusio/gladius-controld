@@ -79,7 +79,7 @@ func getContentListFromBody(w http.ResponseWriter, r *http.Request) []string {
 		ErrorHandler(w, r, "Error decoding body", err, http.StatusBadRequest)
 		return nil
 	}
-	s := make([]string, 5)
+	s := make([]string, 0)
 	// Get all content file names passed in
 	jsonparser.ArrayEach(body, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		s = append(s, string(value))
@@ -218,7 +218,14 @@ func GetSignatureListHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.R
 // so the node can verify it before serving.
 func GetContentHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		c := getContentListFromBody(w, r)
+		ResponseHandler(w, r, "Got needed content", true, nil, p.CompareContent(c), nil)
+	}
+}
+
+func GetContentLinksHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
 		list := getContentListFromBody(w, r)
-		ResponseHandler(w, r, "Got needed content", true, nil, p.CompareContent(list), nil)
+		ResponseHandler(w, r, "Got needed content links", true, nil, p.GetContentLinks(list), nil)
 	}
 }

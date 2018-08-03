@@ -178,8 +178,16 @@ func (p *Peer) GetState() *state.State {
 }
 
 // CompareContent compares the content provided with the content in the state
-// and returns a list of links for where the missing content can be found along
-// with their hash
-func (p *Peer) CompareContent(contentList []string) []string {
+// and returns a list of the missing files names in the format of:
+// website/<"asset" or "route">/filename
+func (p *Peer) CompareContent(contentList []interface{}) []string {
+	//contentWeHaveSet := mapset.NewSetFromSlice(contentList)
+
+	return []string{}
+}
+
+// GetContentLinks get's a link for each item in the contentList from a random
+// node in the network that has that content
+func (p *Peer) GetContentLinks(contentList []string) []string {
 	return []string{}
 }

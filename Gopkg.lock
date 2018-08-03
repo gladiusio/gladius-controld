@@ -5,7 +5,7 @@
   branch = "master"
   name = "github.com/aristanetworks/goarista"
   packages = ["monotime"]
-  revision = "12d26871e3c44933da47b09cd3730a49422bc1fe"
+  revision = "b2d71c282dc706f4b4f6c15b65810e1202ecd53f"
 
 [[projects]]
   branch = "master"
@@ -17,13 +17,19 @@
   branch = "master"
   name = "github.com/btcsuite/btcd"
   packages = ["btcec"]
-  revision = "9a2f9524024889e129a5422aca2cff73cb3eabf6"
+  revision = "cf05f92c3f815bbd5091ed6c73eff51f7b1945e8"
 
 [[projects]]
   branch = "master"
   name = "github.com/buger/jsonparser"
   packages = ["."]
   revision = "2cac668e8456b4284edb0715e17e2af02d3ec993"
+
+[[projects]]
+  name = "github.com/deckarep/golang-set"
+  packages = ["."]
+  revision = "1d4478f51bed434f1dadf96dcd9b43aabac66795"
+  version = "v1.7"
 
 [[projects]]
   name = "github.com/ethereum/go-ethereum"
@@ -39,7 +45,6 @@
     "common/mclock",
     "core/types",
     "crypto",
-    "crypto/randentropy",
     "crypto/secp256k1",
     "crypto/sha3",
     "ethclient",
@@ -53,8 +58,8 @@
     "rpc",
     "trie"
   ]
-  revision = "37685930d953bcbe023f9bc65b135a8d8b8f1488"
-  version = "v1.8.12"
+  revision = "225171a4bfcc16bd12a1906b1e0d43d0b18c353b"
+  version = "v1.8.13"
 
 [[projects]]
   name = "github.com/fsnotify/fsnotify"
@@ -69,7 +74,7 @@
     "pkg/controller",
     "pkg/db/models"
   ]
-  revision = "d13066103b18b21690ed33acd03cd3550dfd9edb"
+  revision = "67e52717d802a58e86ecd8d9903025485a77cdc6"
 
 [[projects]]
   name = "github.com/gladiusio/gladius-utils"
@@ -344,7 +349,7 @@
     "pbkdf2",
     "scrypt"
   ]
-  revision = "c126467f60eb25f8f27e5a981f32a87e3965053f"
+  revision = "56440b844dfe139a8ac053f4ecac0b20b79058f4"
 
 [[projects]]
   branch = "master"
@@ -357,7 +362,7 @@
     "ipv6",
     "websocket"
   ]
-  revision = "c4299a1a0d8524c11563db160fbf9bddbceadb21"
+  revision = "f4c29de78a2a91c00474a2e689954305c350adf9"
 
 [[projects]]
   branch = "master"
@@ -370,7 +375,7 @@
     "windows/svc/eventlog",
     "windows/svc/mgr"
   ]
-  revision = "bd9dbc187b6e1dacfdd2722a87e83093c2d7bd6e"
+  revision = "0ffbfd41fbef8ffcf9b62b0b0aa3a5873ed7a4fe"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -393,13 +398,7 @@
     "imports",
     "internal/fastwalk"
   ]
-  revision = "8cc4e8a6f4841aa92a8683fca47bc5d64b58875b"
-
-[[projects]]
-  name = "gopkg.in/fatih/set.v0"
-  packages = ["."]
-  revision = "57907de300222151a123d29255ed17f5ed43fad3"
-  version = "v0.1.0"
+  revision = "3c07937fe18c27668fd78bbaed3d6b8b39e202ea"
 
 [[projects]]
   branch = "v2"
@@ -422,6 +421,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e63b2f02f197a3f0a69a3932cad80379b81dc71d2fb96dcc78e787fafa5f54c8"
+  inputs-digest = "41fdef6bfda9059a3dbc1462579cc49e59eda40bc686681c63e2da7ef31c16ce"
   solver-name = "gps-cdcl"
   solver-version = 1
