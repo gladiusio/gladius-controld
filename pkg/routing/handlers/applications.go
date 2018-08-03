@@ -176,9 +176,9 @@ func PoolStatusViewHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := statusResponse{
-		Accepted:     profile.NodeProfile.Accepted.Valid && profile.NodeProfile.Accepted.Bool,
-		NodeAccepted: profile.NodeProfile.NodeAccepted.Valid && profile.NodeProfile.NodeAccepted.Bool,
-		PoolAccepted: profile.NodeProfile.PoolAccepted.Valid && profile.NodeProfile.PoolAccepted.Bool,
+		Accepted:     profile.NodeProfile.Approved,
+		NodeAccepted: profile.NodeProfile.NodeAccepted,
+		PoolAccepted: profile.NodeProfile.PoolAccepted,
 	}
 
 	ResponseHandler(w, r, "null", true, nil, response, nil)

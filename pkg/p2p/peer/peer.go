@@ -188,6 +188,6 @@ func (p *Peer) CompareContent(contentList []interface{}) []string {
 
 // GetContentLinks get's a link for each item in the contentList from a random
 // node in the network that has that content
-func (p *Peer) GetContentLinks(contentList []string) []string {
+func (p *Peer) GetContentLinks(contentList []interface{}) []string {
 	return []string{}
 }

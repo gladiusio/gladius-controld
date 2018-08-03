@@ -73,13 +73,13 @@ func verifyBody(w http.ResponseWriter, r *http.Request) (bool, *signature.Signed
 }
 
 // Gets a content list from an incoming comparison request
-func getContentListFromBody(w http.ResponseWriter, r *http.Request) []string {
+func getContentListFromBody(w http.ResponseWriter, r *http.Request) []interface{} {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		ErrorHandler(w, r, "Error decoding body", err, http.StatusBadRequest)
 		return nil
 	}
-	s := make([]string, 0)
+	s := make([]interface{}, 0)
 	// Get all content file names passed in
 	jsonparser.ArrayEach(body, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		s = append(s, string(value))
@@ -225,7 +225,7 @@ func GetContentHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request
 
 func GetContentLinksHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		list := getContentListFromBody(w, r)
-		ResponseHandler(w, r, "Got needed content links", true, nil, p.GetContentLinks(list), nil)
+		c := getContentListFromBody(w, r)
+		ResponseHandler(w, r, "Got needed content links", true, nil, p.GetContentLinks(c), nil)
 	}
 }
