@@ -169,6 +169,11 @@ func (s *State) poolHandler(poolUpdate []byte, timestamp int64, sm *signature.Si
 		s.PoolData = &PoolData{}
 	}
 
+	// Don't update the state
+	if !sm.IsPoolManagerAndVerified() {
+		return false
+	}
+
 	// Keep track of if we update the state or not
 	updated := false
 	handler := func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
