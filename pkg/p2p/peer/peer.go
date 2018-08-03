@@ -184,7 +184,11 @@ func (p *Peer) GetState() *state.State {
 func (p *Peer) CompareContent(contentList []interface{}) []interface{} {
 	contentWeHaveSet := mapset.NewSetFromSlice(contentList)
 
-	contentFromPool := p.GetState().GetPoolField("RequiredContent").(state.SignedList).Data
+	contentField := p.GetState().GetPoolField("RequiredContent")
+	if contentField == nil {
+		return make([]interface{}, 0)
+	}
+	contentFromPool := contentField.(state.SignedList).Data
 
 	// Convert to an interface array
 	s := make([]interface{}, len(contentFromPool))

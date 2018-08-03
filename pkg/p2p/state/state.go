@@ -45,9 +45,13 @@ func (s *sigList) GetList() (values []*signature.SignedMessage) {
 func (s *State) GetPoolField(key string) interface{} {
 	s.mux.Lock()
 	defer s.mux.Unlock()
-
-	v := reflect.ValueOf(*s.PoolData)
-	toReturn := v.FieldByName(key).Interface()
+	var toReturn interface{}
+	if s.PoolData != nil {
+		v := reflect.ValueOf(*s.PoolData)
+		toReturn = v.FieldByName(key).Interface()
+	} else {
+		toReturn = nil
+	}
 	return toReturn
 }
 
