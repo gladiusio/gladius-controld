@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/deckarep/golang-set"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/signature"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/state"
@@ -180,10 +181,22 @@ func (p *Peer) GetState() *state.State {
 // CompareContent compares the content provided with the content in the state
 // and returns a list of the missing files names in the format of:
 // website/<"asset" or "route">/filename
-func (p *Peer) CompareContent(contentList []interface{}) []string {
-	//contentWeHaveSet := mapset.NewSetFromSlice(contentList)
+func (p *Peer) CompareContent(contentList []interface{}) []interface{} {
+	contentWeHaveSet := mapset.NewSetFromSlice(contentList)
 
-	return []string{}
+	contentFromPool := p.GetState().GetPoolField("RequiredContent").(state.SignedList).Data
+
+	// Convert to an interface array
+	s := make([]interface{}, len(contentFromPool))
+	for i, v := range contentFromPool {
+		s[i] = v
+	}
+
+	// Create a set
+	contentWeNeed := mapset.NewSetFromSlice(s)
+
+	// Return the difference of the two
+	return contentWeNeed.Difference(contentWeHaveSet).ToSlice()
 }
 
 // GetContentLinks get's a link for each item in the contentList from a random

@@ -212,17 +212,17 @@ func GetSignatureListHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.R
 	}
 }
 
-// GetContentHandler will compare the content list provided with the
-// current state and return a list of links to download content from a peer that
-// has the same set as the network state. It also includes a hash of that file
-// so the node can verify it before serving.
-func GetContentHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
+// GetContentNeededHandler compares the content provided with what is required by the
+// pool and returns the deltas in the format website/<asset or route/filename
+func GetContentNeededHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		c := getContentListFromBody(w, r)
 		ResponseHandler(w, r, "Got needed content", true, nil, p.CompareContent(c), nil)
 	}
 }
 
+// GetContentLinksHandler gets the links to the given list of files from random
+// nodes in the network
 func GetContentLinksHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		c := getContentListFromBody(w, r)

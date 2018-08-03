@@ -41,6 +41,16 @@ func (s *sigList) GetList() (values []*signature.SignedMessage) {
 	return values
 }
 
+// GetPoolField gets the field name from the pool
+func (s *State) GetPoolField(key string) interface{} {
+	s.mux.Lock()
+	defer s.mux.Unlock()
+
+	v := reflect.ValueOf(*s.PoolData)
+	toReturn := v.FieldByName(key).Interface()
+	return toReturn
+}
+
 // GetNodeFields gets the same field from all nodes
 func (s *State) GetNodeFields(key string) []interface{} {
 	toReturn := make([]interface{}, 0)
