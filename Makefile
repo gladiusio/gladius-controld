@@ -23,6 +23,8 @@ SRC_DIR=./cmd
 DST_DIR=./build
 
 CTL_SRC=$(SRC_DIR)/gladius-controld
+CTL_SRC_PROF=$(SRC_DIR)/gladius-controld-profiler
+
 CTL_DEST=$(DST_DIR)/gladius-controld$(BINARY_SUFFIX)
 
 # commands for go
@@ -34,6 +36,8 @@ GOTEST=go test
 
 # general make targets
 all: controld
+
+profile-enabled: controld-profile
 
 clean:
 	rm -rf ./build/*
@@ -56,3 +60,6 @@ test: $(CTL_SRC)
 
 controld: test
 	$(GOBUILD) -o $(CTL_DEST) $(CTL_SRC)
+
+controld-profile: test
+	$(GOBUILD) -o $(CTL_DEST) $(CTL_SRC_PROF)

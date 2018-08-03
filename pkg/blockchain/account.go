@@ -6,13 +6,14 @@ import (
 	"strings"
 
 	"encoding/json"
+	"net/http"
+	"strconv"
+
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/viper"
-	"net/http"
-	"strconv"
 )
 
 // GladiusAccountManager is a type that allows the user to create a keystore file,
@@ -225,17 +226,4 @@ func (ga GladiusAccountManager) GetAuth(passphrase string) (*bind.TransactOpts, 
 	}
 
 	return auth, nil
-}
-
-// TODO: Move somewhere more logical...
-func GetPGPPublicKey() (string, error) {
-	var pathTemp = viper.GetString("DirKeys")
-	keyringFileBuffer, err := ioutil.ReadFile(pathTemp + "/public.asc")
-	if err != nil {
-		return "", err
-	}
-
-	publicKey := string(keyringFileBuffer)
-
-	return publicKey, nil
 }

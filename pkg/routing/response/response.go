@@ -12,7 +12,7 @@ func (addressHashes AddressHashes) StringArray() []string {
 	response := make([]string, len(addressHashes))
 
 	for index, address := range addressHashes {
-		response[index] = address.Str()
+		response[index] = address.String()
 	}
 
 	return response[:]
@@ -35,12 +35,12 @@ type CreationResponse struct {
 }
 
 type DefaultResponse struct {
-	Message     string       `json:"message"`
-	Success     bool         `json:"success"`
-	Error       string       `json:"error"`
-	Response    *interface{} `json:"response"`
-	Transaction *TxHash      `json:"txHash"`
-	Endpoint    string       `json:"endpoint"`
+	Message     string      `json:"message"`
+	Success     bool        `json:"success"`
+	Error       string      `json:"error"`
+	Response    interface{} `json:"response"`
+	Transaction *TxHash     `json:"txHash"`
+	Endpoint    string      `json:"endpoint"`
 }
 
 type TxHash struct {

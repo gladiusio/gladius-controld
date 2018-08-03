@@ -1,11 +1,12 @@
 package handlers
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
-	"github.com/gladiusio/gladius-controld/pkg/routing/response"
-	"encoding/json"
+
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/gladiusio/gladius-controld/pkg/routing/response"
 )
 
 // ResponseHandler - Default Response Handler
@@ -17,12 +18,12 @@ func ResponseHandler(w http.ResponseWriter, r *http.Request, m string, success b
 	}
 
 	responseStruct := response.DefaultResponse{
-		Message:m,
-		Success: success,
-		Error: errorString,
-		Response: &res,
+		Message:     m,
+		Success:     success,
+		Error:       errorString,
+		Response:    &res,
 		Transaction: nil,
-		Endpoint: r.URL.String(),
+		Endpoint:    r.URL.String(),
 	}
 
 	if transaction != nil {
@@ -50,7 +51,12 @@ func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
 func ErrorHandler(w http.ResponseWriter, r *http.Request, m string, e error, statusCode int) {
 	w.WriteHeader(statusCode)
 
-	err := e.Error()
+	var err string
+	if e != nil {
+		err = e.Error()
+	} else {
+		err = "Error message could not be parsed"
+	}
 
 	ResponseHandler(w, r, m, false, &err, nil, nil)
 

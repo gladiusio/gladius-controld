@@ -6,7 +6,9 @@ import (
 	"encoding/json"
 	"errors"
 	"regexp"
+	"time"
 
+	"github.com/buger/jsonparser"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/message"
@@ -20,6 +22,7 @@ type SignedMessage struct {
 	Hash      []byte           `json:"hash"`
 	Signature []byte           `json:"signature"`
 	Address   string           `json:"address"`
+	verified  bool             // TODO: Make this useful
 }
 
 // ParseSignedMessage returns a signed message to be passed into the VerifySignedMessage method
@@ -40,23 +43,67 @@ func ParseSignedMessage(message, hash, signature, address string) (*SignedMessag
 	if err != nil {
 		return nil, errors.New("error decoding signature")
 	}
-	return &SignedMessage{Message: &h, Hash: dHash, Signature: dSignature, Address: address}, nil
+
+	return &SignedMessage{Message: &h, Hash: dHash, Signature: dSignature, Address: address, verified: false}, nil
 }
 
-// CreateSignedMessage creates a signed state from the message where
-func CreateSignedMessage(message *message.Message, passphrase string) (string, error) {
-	ga := blockchain.NewGladiusAccountManager()
-	success, err := ga.UnlockAccount(passphrase)
-	if success == false || err != nil {
-		return "", errors.New("Error unlocking wallet")
+// GetTimestamp gets the verified timestamp from the message
+func (sm SignedMessage) GetTimestamp() int64 {
+	jsonBytes, _ := sm.Message.MarshalJSON()
+	timestamp, _ := jsonparser.GetInt(jsonBytes, "timestamp")
+	return timestamp
+}
+
+func (sm SignedMessage) GetAgeInSeconds() int64 {
+	jsonBytes, _ := sm.Message.MarshalJSON()
+	timestamp, _ := jsonparser.GetInt(jsonBytes, "timestamp")
+
+	now := time.Now().Unix()
+
+	return now - timestamp
+}
+
+// IsVerified checks the internal status of the message and returns true if the
+// message is verified
+func (sm SignedMessage) IsVerified() bool {
+	// Check if hash matches the message
+	m, _ := sm.Message.MarshalJSON()
+	hashMatches := bytes.Equal(sm.Hash, crypto.Keccak256(m))
+
+	pub, err := crypto.SigToPub(sm.Hash, sm.Signature)
+	if err != nil {
+		return false
 	}
+
+	// Check if the signature is valid
+	signatureValid := crypto.VerifySignature(crypto.CompressPubkey(pub), sm.Hash, sm.Signature[:64])
+
+	// Check if the address matches
+	addressMatches := crypto.PubkeyToAddress(*pub).String() == sm.Address
+
+	if addressMatches && hashMatches && signatureValid {
+		return true
+	}
+
+	return false
+
+}
+
+func (sm SignedMessage) IsInPoolAndVerified() bool {
+	// Check if address is part of pool
+	// TODO: Check real address against pool
+	addressInPool := true
+	return addressInPool && sm.IsVerified()
+}
+
+func CreateSignedMessage(message *message.Message, ga *blockchain.GladiusAccountManager) (*SignedMessage, error) {
 
 	// Create a serailized JSON string
 	messageBytes := message.Serialize()
 
 	m := minify.New()
 	m.AddFuncRegexp(regexp.MustCompile("[/+]json$"), mjson.Minify)
-	messageBytes, err = m.Bytes("text/json", messageBytes)
+	messageBytes, err := m.Bytes("text/json", messageBytes)
 	if err != nil {
 		panic(err)
 	}
@@ -65,17 +112,17 @@ func CreateSignedMessage(message *message.Message, passphrase string) (string, e
 	account, err := ga.GetAccount()
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	signature, err := ga.Keystore().SignHash(*account, hash)
 	if err != nil {
-		return "", errors.New("Error signing message")
+		return &SignedMessage{}, errors.New("Error signing message, wallet likely not unlocked")
 	}
 
 	address, err := ga.GetAccountAddress()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	addressString := address.String()
@@ -90,38 +137,20 @@ func CreateSignedMessage(message *message.Message, passphrase string) (string, e
 		Address:   addressString,
 	}
 
+	return signed, nil
+}
+
+// CreateSignedMessageString creates a signed state from the message where
+func CreateSignedMessageString(message *message.Message, ga *blockchain.GladiusAccountManager) (string, error) {
+	signed, err := CreateSignedMessage(message, ga)
+	if err != nil {
+		return "", err
+	}
 	// Encode the struct as a json
 	bytes, err := json.Marshal(signed)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
-	return string(bytes), err
-}
-
-// VerifySignedMessage Verifies that a signed message is valid
-func VerifySignedMessage(sm *SignedMessage) (bool, error) {
-	// Check if address is part of pool
-	// TODO: Check real address against pool
-	addressInPool := true
-	// Check if hash matches the message
-	m, _ := sm.Message.MarshalJSON()
-	hashMatches := bytes.Equal(sm.Hash, crypto.Keccak256(m))
-
-	pub, err := crypto.SigToPub(sm.Hash, sm.Signature)
-	if err != nil {
-		return false, errors.New("Error signing message")
-	}
-
-	// Check if the signature is valid
-	signatureValid := crypto.VerifySignature(crypto.CompressPubkey(pub), sm.Hash, sm.Signature[:64])
-
-	// Check if the address matches
-	addressMatches := crypto.PubkeyToAddress(*pub).String() == sm.Address
-
-	if addressInPool && addressMatches && hashMatches && signatureValid {
-		return true, nil
-	}
-
-	return false, nil
+	return string(bytes), nil
 }

@@ -15,6 +15,8 @@ func main() {
 }
 
 func initialize() {
-	router := NodeRouter()
-	routing.Start(router, nil)
+	// Run the function "run" in newtworkd as a service
+	router := ApplicationServerRouter()
+	port := "3333"
+	routing.Start(router, &port)
 }
