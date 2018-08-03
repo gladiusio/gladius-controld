@@ -51,7 +51,12 @@ func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
 func ErrorHandler(w http.ResponseWriter, r *http.Request, m string, e error, statusCode int) {
 	w.WriteHeader(statusCode)
 
-	err := e.Error()
+	var err string
+	if e != nil {
+		err = e.Error()
+	} else {
+		err = "Error message could not be parsed"
+	}
 
 	ResponseHandler(w, r, m, false, &err, nil, nil)
 

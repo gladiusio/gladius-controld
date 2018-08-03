@@ -52,12 +52,12 @@ type PoolResponse struct {
 }
 
 func (d *PoolResponse) String() string {
-	json, err := json.Marshal(d)
+	jsonResponse, err := json.Marshal(d)
 	if err != nil {
 		return "{}"
 	}
 
-	return string(json)
+	return string(jsonResponse)
 }
 
 func MarketPools(includeData bool, ga *GladiusAccountManager) (PoolArrayResponse, error) {

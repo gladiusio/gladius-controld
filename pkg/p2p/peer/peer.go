@@ -11,7 +11,7 @@ import (
 	"github.com/gladiusio/gladius-controld/pkg/p2p/signature"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/state"
 	"github.com/hashicorp/memberlist"
-	uuid "github.com/satori/go.uuid"
+	"github.com/satori/go.uuid"
 )
 
 // New returns a new peer type

@@ -53,7 +53,7 @@ func AppendP2PEndPoints(router *mux.Router, ga *blockchain.GladiusAccountManager
 	InitializeAPISubRoutes(router)
 
 	// P2P setup
-	peer := peer.New()
+	peerStruct := peer.New()
 	p2pRouter := apiRouter.PathPrefix("/p2p").Subrouter()
 	// P2P Message Routes
 	p2pRouter.HandleFunc("/message/sign", handlers.CreateSignedMessageHandler(ga)).
@@ -61,34 +61,26 @@ func AppendP2PEndPoints(router *mux.Router, ga *blockchain.GladiusAccountManager
 	p2pRouter.HandleFunc("/message/verify", handlers.VerifySignedMessageHandler).
 		Methods("POST")
 
-	p2pRouter.HandleFunc("/network/join", handlers.JoinHandler(peer)).
+	p2pRouter.HandleFunc("/network/join", handlers.JoinHandler(peerStruct)).
 		Methods("POST")
 
-	p2pRouter.HandleFunc("/network/leave", handlers.LeaveHandler(peer)).
+	p2pRouter.HandleFunc("/network/leave", handlers.LeaveHandler(peerStruct)).
 		Methods("POST")
 
 	// P2P State Routes
-	p2pRouter.HandleFunc("/state/push_message", handlers.PushStateMessageHandler(peer)).
+	p2pRouter.HandleFunc("/state/push_message", handlers.PushStateMessageHandler(peerStruct)).
 		Methods("POST")
-	p2pRouter.HandleFunc("/state/", handlers.GetFullStateHandler(peer)).
+	p2pRouter.HandleFunc("/state/", handlers.GetFullStateHandler(peerStruct)).
 		Methods("GET")
-	p2pRouter.HandleFunc("/state/signatures", handlers.GetSignatureListHandler(peer)).
+	p2pRouter.HandleFunc("/state/signatures", handlers.GetSignatureListHandler(peerStruct)).
 		Methods("GET")
-	p2pRouter.HandleFunc("/state/content_diff", handlers.GetContentHandler(peer)).
+	p2pRouter.HandleFunc("/state/content_diff", handlers.GetContentHandler(peerStruct)).
 		Methods("POST")
-
-	// Key Management
-	walletRouter := apiRouter.PathPrefix("/keystore").Subrouter()
-	walletRouter.HandleFunc("/account/create", handlers.KeystoreAccountCreationHandler(ga)).
-		Methods(http.MethodPost)
-	walletRouter.HandleFunc("/account", handlers.KeystoreAccountRetrievalHandler(ga))
-	walletRouter.HandleFunc("/account/open", handlers.KeystoreAccountUnlockHandler(ga)).
-		Methods(http.MethodPost)
 
 	return nil
 }
 
-func AppendAccountManagementEndpoints(router *mux.Router, ga *blockchain.GladiusAccountManager) error {
+func AppendAccountManagementEndpoints(router *mux.Router) error {
 	// Initialize Base API sub-route
 	InitializeAPISubRoutes(router)
 
@@ -116,7 +108,7 @@ func AppendWalletManagementEndpoints(router *mux.Router, ga *blockchain.GladiusA
 	return nil
 }
 
-func AppendStatusEndpoints(router *mux.Router, ga *blockchain.GladiusAccountManager) error {
+func AppendStatusEndpoints(router *mux.Router) error {
 	// Initialize Base API sub-route
 	InitializeAPISubRoutes(router)
 
@@ -177,9 +169,17 @@ func AppendPoolManagerEndpoints(router *mux.Router, ga *blockchain.GladiusAccoun
 	poolRouter := apiRouter.PathPrefix("/pool").Subrouter()
 	// Pool data, both public and private data can be set here
 	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/data", handlers.PoolPublicDataHandler(ga)).
+		Methods(http.MethodGet)
+	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/data", handlers.PoolSetBlockchainDataHandler()).
 		Methods(http.MethodPost)
-	// Retrieve nodes with query parameters for inc data, approved, pending, rejected
-	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/nodes/{status:.*}", handlers.PoolRetrieveNodesHandler(ga))
+	poolRouter.HandleFunc("/applications/pending/pool", handlers.PoolRetrievePendingPoolConfirmationApplicationsHandler()).
+		Methods(http.MethodGet)
+	poolRouter.HandleFunc("/applications/pending/node", handlers.PoolRetrievePendingNodeConfirmationApplicationsHandler()).
+		Methods(http.MethodGet)
+	poolRouter.HandleFunc("/applications/rejected", handlers.PoolRetrieveRejectedApplicationsHandler()).
+		Methods(http.MethodGet)
+	poolRouter.HandleFunc("/applications/approved", handlers.PoolRetrieveApprovedApplicationsHandler()).
+		Methods(http.MethodGet)
 
 	// Market
 	marketRouter := apiRouter.PathPrefix("/market").Subrouter()
@@ -190,7 +190,7 @@ func AppendPoolManagerEndpoints(router *mux.Router, ga *blockchain.GladiusAccoun
 	return nil
 }
 
-func AppendServerEndpoints(router *mux.Router, ga *blockchain.GladiusAccountManager) error {
+func AppendServerEndpoints(router *mux.Router) error {
 	// Initialize Base API sub-route
 	InitializeAPISubRoutes(router)
 	// Applications
@@ -201,7 +201,7 @@ func AppendServerEndpoints(router *mux.Router, ga *blockchain.GladiusAccountMana
 	return nil
 }
 
-func AppendApplicationEndpoints(router *mux.Router, ga *blockchain.GladiusAccountManager) error {
+func AppendApplicationEndpoints(router *mux.Router) error {
 	// Initialize Base API sub-route
 	InitializeAPISubRoutes(router)
 
@@ -211,10 +211,10 @@ func AppendApplicationEndpoints(router *mux.Router, ga *blockchain.GladiusAccoun
 		Methods(http.MethodPost)
 	applicationRouter.HandleFunc("/edit", handlers.PoolEditApplicationHandler).
 		Methods(http.MethodPost)
-	applicationRouter.HandleFunc("/view/{wallet:0[xX][0-9a-fA-F]{40}}", handlers.PoolViewApplicationHandler).
-		Methods(http.MethodGet)
-	applicationRouter.HandleFunc("/status/{wallet:0[xX][0-9a-fA-F]{40}}", handlers.PoolStatusViewHandler)
-	applicationRouter.HandleFunc("/status/{status:.*}", nil)
+	applicationRouter.HandleFunc("/view", handlers.PoolViewApplicationHandler).
+		Methods(http.MethodPost)
+	applicationRouter.HandleFunc("/status", handlers.PoolStatusViewHandler).
+		Methods(http.MethodPost)
 
 	return nil
 }
