@@ -16,15 +16,12 @@ class SingleSwitchTopo(Topo):
 
     def build(self, n=2, bw=100, lat=10):
         total_nodes = 0
-        for s in range(4):
-            switch = self.addSwitch('s%s' % s)
-            if (s > 0):
-                self.addLink("s%s" % (s - 1), "s%s" % s)
-            for h in range(1):
-                host = self.addHost('h%s' % (total_nodes + 1),
-                                    privateDirs=['/gladius'])
-                self.addLink(host, switch)
-                total_nodes += 1
+        switch = self.addSwitch('s0')
+        for h in range(n):
+            host = self.addHost('h%s' % (total_nodes + 1),
+                                privateDirs=['/gladius'])
+            self.addLink(host, switch)
+            total_nodes += 1
 
         query = self.addHost('qnode')
         self.addLink("s0", "qnode")

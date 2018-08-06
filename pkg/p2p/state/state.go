@@ -41,6 +41,20 @@ func (s *sigList) GetList() (values []*signature.SignedMessage) {
 	return values
 }
 
+// GetPoolField gets the field name from the pool
+func (s *State) GetPoolField(key string) interface{} {
+	s.mux.Lock()
+	defer s.mux.Unlock()
+	var toReturn interface{}
+	if s.PoolData != nil {
+		v := reflect.ValueOf(*s.PoolData)
+		toReturn = v.FieldByName(key).Interface()
+	} else {
+		toReturn = nil
+	}
+	return toReturn
+}
+
 // GetNodeFields gets the same field from all nodes
 func (s *State) GetNodeFields(key string) []interface{} {
 	toReturn := make([]interface{}, 0)
@@ -48,6 +62,18 @@ func (s *State) GetNodeFields(key string) []interface{} {
 	for _, value := range s.NodeDataMap {
 		v := reflect.ValueOf(*value)
 		toReturn = append(toReturn, v.FieldByName(key).Interface())
+	}
+	s.mux.Unlock()
+	return toReturn
+}
+
+// GetNodeFieldsMap gets a map of node address to that field
+func (s *State) GetNodeFieldsMap(key string) map[string]interface{} {
+	toReturn := make(map[string]interface{})
+	s.mux.Lock()
+	for node, value := range s.NodeDataMap {
+		v := reflect.ValueOf(*value)
+		toReturn[node] = v.FieldByName(key).Interface()
 	}
 	s.mux.Unlock()
 	return toReturn
@@ -70,11 +96,6 @@ func (s *State) GetSignatureList() []*signature.SignedMessage {
 
 	if s.PoolData != nil {
 		// Get all of the pool signatures
-		if s.PoolData.FirewallRules != nil {
-			for _, field := range s.PoolData.FirewallRules {
-				sigs.Add(field.SignedMessage)
-			}
-		}
 		sigs.Add(s.PoolData.RequiredContent.SignedMessage)
 	}
 	// Get all of the node signatures
@@ -170,13 +191,44 @@ func (s *State) nodeHandler(nodeUpdate []byte, timestamp int64, sm *signature.Si
 }
 
 func (s *State) poolHandler(poolUpdate []byte, timestamp int64, sm *signature.SignedMessage) bool {
-	return false
+	if s.PoolData == nil {
+		s.PoolData = &PoolData{}
+	}
+
+	// Don't update the state
+	if !sm.IsPoolManagerAndVerified() {
+		return false
+	}
+
+	// Keep track of if we update the state or not
+	updated := false
+	handler := func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
+		switch string(key) {
+		case "required_content":
+			// Verify that the timestamp is newer on the incoming signed message
+			if s.PoolData.RequiredContent.SignedMessage == nil ||
+				s.PoolData.RequiredContent.SignedMessage.GetTimestamp() < timestamp {
+				contentList := make([]string, 0)
+				// Get all file names passed in
+				jsonparser.ArrayEach(value, func(v []byte, dataType jsonparser.ValueType, offset int, err error) {
+					contentList = append(contentList, string(v))
+				})
+
+				updated = true
+
+				s.PoolData.RequiredContent = SignedList{Data: contentList, SignedMessage: sm}
+			}
+
+		}
+		return nil
+	}
+	jsonparser.ObjectEach(poolUpdate, handler)
+	return updated
 }
 
 // PoolData is a type that stores information about the pool
 type PoolData struct {
-	FirewallRules   []SignedField `json:"firewall_rules"`
-	RequiredContent SignedField   `json:"required_content"`
+	RequiredContent SignedList `json:"required_content"`
 }
 
 // NodeData is a type that stores infomration about an indiviudal node

@@ -12,6 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/message"
+	"github.com/gladiusio/gladius-utils/config"
 	"github.com/tdewolff/minify"
 	mjson "github.com/tdewolff/minify/json"
 )
@@ -87,6 +88,10 @@ func (sm SignedMessage) IsVerified() bool {
 
 	return false
 
+}
+
+func (sm SignedMessage) IsPoolManagerAndVerified() bool {
+	return sm.IsVerified() && sm.Address == config.GetString("PoolManagerAddress")
 }
 
 func (sm SignedMessage) IsInPoolAndVerified() bool {

@@ -34,6 +34,14 @@
   revision = "2cac668e8456b4284edb0715e17e2af02d3ec993"
 
 [[projects]]
+  digest = "1:c166378e8ab0f794f293dfb941d250dd70b035b05dec58879f717621d0fe1714"
+  name = "github.com/deckarep/golang-set"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "1d4478f51bed434f1dadf96dcd9b43aabac66795"
+  version = "v1.7"
+
+[[projects]]
   digest = "1:c53fb5966eed7785f6159e00011e4275e528efe2ae5bced5b3450c94b127add1"
   name = "github.com/ethereum/go-ethereum"
   packages = [
@@ -529,6 +537,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/buger/jsonparser",
+    "github.com/deckarep/golang-set",
     "github.com/ethereum/go-ethereum/accounts",
     "github.com/ethereum/go-ethereum/accounts/abi",
     "github.com/ethereum/go-ethereum/accounts/abi/bind",
@@ -544,6 +553,7 @@
     "github.com/gorilla/handlers",
     "github.com/gorilla/mux",
     "github.com/hashicorp/memberlist",
+    "github.com/jinzhu/gorm",
     "github.com/jinzhu/gorm/dialects/sqlite",
     "github.com/pkg/errors",
     "github.com/satori/go.uuid",
