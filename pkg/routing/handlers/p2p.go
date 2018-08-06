@@ -151,26 +151,26 @@ func PushStateMessageHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.R
 	}
 }
 
-func getIntroductionDataFromBody(w http.ResponseWriter, r *http.Request) (ip string, signedMessage []byte) {
+func getIntroductionDataFromBody(w http.ResponseWriter, r *http.Request) (ip string) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		ErrorHandler(w, r, "Error decoding body", err, http.StatusBadRequest)
-		return "", []byte("")
+		return ""
 	}
 
 	ip, err = jsonparser.GetString(body, "ip")
 	if err != nil {
 		ErrorHandler(w, r, "Could not find `ip` in body", err, http.StatusBadRequest)
-		return "", []byte("")
+		return ""
 	}
 
-	return ip, signedMessage
+	return ip
 }
 
 // JoinHandler takes in an IP and tries to join it's cluster
 func JoinHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ip, _ := getIntroductionDataFromBody(w, r)
+		ip := getIntroductionDataFromBody(w, r)
 		if ip != "" {
 			err := p.Join([]string{ip})
 			if err != nil {
