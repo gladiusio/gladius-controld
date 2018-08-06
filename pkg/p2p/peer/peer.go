@@ -238,6 +238,7 @@ func (p *Peer) GetContentLinks(contentList []string) map[string][]string {
 	return toReturn
 }
 
+// Builds a URL to a node
 func (p *Peer) createContentLink(nodeAddress, contentFileName string) string {
 	nodeIP := p.GetState().GetNodeField(nodeAddress, "IPAddress").(state.SignedField).Data
 	contentData := strings.Split(contentFileName, "/")
