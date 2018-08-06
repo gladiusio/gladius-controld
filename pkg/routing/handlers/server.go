@@ -9,6 +9,8 @@ import (
 // Retrieve Pool Information
 func PublicPoolInformationHandler(w http.ResponseWriter, r *http.Request) {
 	db, err := controller.Initialize(nil)
+	defer db.Close()
+
 	if err != nil {
 		ErrorHandler(w, r, "Could retrieve Public Information", err, http.StatusBadRequest)
 		return

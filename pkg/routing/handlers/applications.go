@@ -51,10 +51,13 @@ func PoolNewApplicationHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	db, err := controller.Initialize(nil)
+
 	if err != nil {
 		ErrorHandler(w, r, "Could not apply to pool", err, http.StatusBadRequest)
 		return
 	}
+
+	defer db.Close()
 
 	profile, err := controller.NodeApplyToPool(db, requestPayload)
 	if err != nil {
@@ -73,10 +76,13 @@ func PoolEditApplicationHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	db, err := controller.Initialize(nil)
+
 	if err != nil {
 		ErrorHandler(w, r, "Could not apply to pool", err, http.StatusBadRequest)
 		return
 	}
+
+	defer db.Close()
 
 	controller.NodeUpdateProfile(db, requestPayload)
 	viewApplication(w, r)
@@ -88,6 +94,7 @@ func PoolViewApplicationHandler(w http.ResponseWriter, r *http.Request) {
 
 func getSignedMessage(r *http.Request) (signature.SignedMessage, error) {
 	decoder := json.NewDecoder(r.Body)
+	defer r.Body.Close()
 
 	var signedMessage signature.SignedMessage
 	err := decoder.Decode(&signedMessage)
@@ -146,6 +153,8 @@ func getProfile(signedMessage signature.SignedMessage) (controller.FullProfile, 
 	if err != nil {
 		return controller.FullProfile{}, err
 	}
+
+	defer db.Close()
 
 	profile, err := controller.NodePoolApplication(db, signedMessage.Address)
 	if err != nil {

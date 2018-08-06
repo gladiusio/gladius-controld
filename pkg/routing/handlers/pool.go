@@ -37,6 +37,8 @@ func PoolSetBlockchainDataHandler() func(w http.ResponseWriter, r *http.Request)
 
 		auth := r.Header.Get("X-Authorization")
 		decoder := json.NewDecoder(r.Body)
+		defer r.Body.Close()
+
 		var data blockchain.PoolPublicData
 		err := decoder.Decode(&data)
 
@@ -64,6 +66,8 @@ func PoolRetrievePendingPoolConfirmationApplicationsHandler() func(w http.Respon
 			return
 		}
 
+		defer db.Close()
+
 		profiles, err := controller.NodesPendingPoolConfirmation(db)
 
 		if err != nil {
@@ -82,6 +86,8 @@ func PoolRetrievePendingNodeConfirmationApplicationsHandler() func(w http.Respon
 			ErrorHandler(w, r, "Could not establish database connection", err, http.StatusInternalServerError)
 			return
 		}
+
+		defer db.Close()
 
 		profiles, err := controller.NodesPendingNodeConfirmation(db)
 
@@ -102,6 +108,8 @@ func PoolRetrieveApprovedApplicationsHandler() func(w http.ResponseWriter, r *ht
 			return
 		}
 
+		defer db.Close()
+
 		profiles, err := controller.NodesAccepted(db)
 
 		if err != nil {
@@ -120,6 +128,8 @@ func PoolRetrieveRejectedApplicationsHandler() func(w http.ResponseWriter, r *ht
 			ErrorHandler(w, r, "Could not establish database connection", err, http.StatusInternalServerError)
 			return
 		}
+		
+		defer db.Close()
 
 		profiles, err := controller.NodesRejected(db)
 

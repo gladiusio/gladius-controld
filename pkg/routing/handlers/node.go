@@ -38,6 +38,8 @@ func NodeNewApplicationHandler(ga *blockchain.GladiusAccountManager) func(w http
 		}
 
 		decoder := json.NewDecoder(r.Body)
+		defer r.Body.Close()
+
 		var requestPayload models.NodeRequestPayload
 		err = decoder.Decode(&requestPayload)
 
