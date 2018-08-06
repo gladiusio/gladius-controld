@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -181,8 +183,13 @@ func (p *Peer) GetState() *state.State {
 // CompareContent compares the content provided with the content in the state
 // and returns a list of the missing files names in the format of:
 // website/<"asset" or "route">/filename
-func (p *Peer) CompareContent(contentList []interface{}) []interface{} {
-	contentWeHaveSet := mapset.NewSetFromSlice(contentList)
+func (p *Peer) CompareContent(contentList []string) []interface{} {
+	// Convert to an interface array
+	cl := make([]interface{}, len(contentList))
+	for i, v := range contentList {
+		cl[i] = v
+	}
+	contentWeHaveSet := mapset.NewSetFromSlice(cl)
 
 	contentField := p.GetState().GetPoolField("RequiredContent")
 	if contentField == nil {
@@ -203,9 +210,47 @@ func (p *Peer) CompareContent(contentList []interface{}) []interface{} {
 	return contentWeNeed.Difference(contentWeHaveSet).ToSlice()
 }
 
-// GetContentLinks get's a link for each item in the contentList from a random
-// node in the network that has that content
-func (p *Peer) GetContentLinks(contentList []interface{}) []string {
-	p.GetState().GetNodeFieldsMap("DiskContent")
-	return []string{}
+// GetContentLinks returns a map mapping a file name to all the places it can
+// be found on the network
+func (p *Peer) GetContentLinks(contentList []string) map[string][]string {
+	allContent := p.GetState().GetNodeFieldsMap("DiskContent")
+	toReturn := make(map[string][]string)
+	for nodeAddress, diskContent := range allContent {
+		ourContent := diskContent.(state.SignedList).Data
+		// Convert to an interface array
+		s := make([]interface{}, len(ourContent))
+		for i, v := range ourContent {
+			s[i] = v
+		}
+		ourContentSet := mapset.NewSetFromSlice(s)
+		// Check to see if the current node we're iterating over has any of the
+		// content we want
+		for _, contentWanted := range contentList {
+			if ourContentSet.Contains(contentWanted) {
+				if toReturn[contentWanted] == nil {
+					toReturn[contentWanted] = make([]string, 0)
+				}
+				// Add the URL to the map
+				toReturn[contentWanted] = append(toReturn[contentWanted], p.createContentLink(nodeAddress, contentWanted))
+			}
+		}
+	}
+	return toReturn
+}
+
+func (p *Peer) createContentLink(nodeAddress, contentFileName string) string {
+	nodeIP := p.GetState().GetNodeField(nodeAddress, "IPAddress").(state.SignedField).Data
+	contentData := strings.Split(contentFileName, "/")
+	u := url.URL{}
+	u.Host = nodeIP + ":8080"
+	u.Scheme = "http"
+
+	if len(contentData) == 3 {
+		q := u.Query()
+		q.Set("website", contentData[0])      // website name
+		q.Set(contentData[1], contentData[2]) // "asset" or "route" to name of file
+		u.RawQuery = q.Encode()
+		return u.String()
+	}
+	return ""
 }

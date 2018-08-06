@@ -73,13 +73,13 @@ func verifyBody(w http.ResponseWriter, r *http.Request) (bool, *signature.Signed
 }
 
 // Gets a content list from an incoming comparison request
-func getContentListFromBody(w http.ResponseWriter, r *http.Request) []interface{} {
+func getContentListFromBody(w http.ResponseWriter, r *http.Request) []string {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		ErrorHandler(w, r, "Error decoding body", err, http.StatusBadRequest)
 		return nil
 	}
-	s := make([]interface{}, 0)
+	s := make([]string, 0)
 	// Get all content file names passed in
 	jsonparser.ArrayEach(body, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		s = append(s, string(value))
