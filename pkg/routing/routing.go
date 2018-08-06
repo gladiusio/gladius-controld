@@ -74,7 +74,9 @@ func AppendP2PEndPoints(router *mux.Router, ga *blockchain.GladiusAccountManager
 		Methods("GET")
 	p2pRouter.HandleFunc("/state/signatures", handlers.GetSignatureListHandler(peerStruct)).
 		Methods("GET")
-	p2pRouter.HandleFunc("/state/content_diff", handlers.GetContentHandler(peerStruct)).
+	p2pRouter.HandleFunc("/state/content_diff", handlers.GetContentNeededHandler(peerStruct)).
+		Methods("POST")
+	p2pRouter.HandleFunc("/state/content_links", handlers.GetContentLinksHandler(peerStruct)).
 		Methods("POST")
 
 	return nil

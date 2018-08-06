@@ -3,12 +3,13 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/gladiusio/gladius-controld/pkg/p2p/message"
-	"github.com/gladiusio/gladius-controld/pkg/p2p/signature"
-	"github.com/pkg/errors"
 	"net"
 	"net/http"
 	"strings"
+
+	"github.com/gladiusio/gladius-controld/pkg/p2p/message"
+	"github.com/gladiusio/gladius-controld/pkg/p2p/signature"
+	"github.com/pkg/errors"
 
 	"github.com/gladiusio/gladius-application-server/pkg/controller"
 	"github.com/gladiusio/gladius-application-server/pkg/db/models"

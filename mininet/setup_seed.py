@@ -22,6 +22,11 @@ def setup_peer(node_name):
 
     print "account: " + response
 
+    url = "http://localhost:3001/api/keystore/account/open"
+    data = '''{"passphrase":"password"}'''
+    response = requests.post(url, data=data).text
+    print "unlock repsonse: " + response
+
     # Sign the initial message
     url = "http://localhost:3001/api/p2p/message/sign"
     # Get our local IP address

@@ -79,7 +79,7 @@ func getContentListFromBody(w http.ResponseWriter, r *http.Request) []string {
 		ErrorHandler(w, r, "Error decoding body", err, http.StatusBadRequest)
 		return nil
 	}
-	s := make([]string, 5)
+	s := make([]string, 0)
 	// Get all content file names passed in
 	jsonparser.ArrayEach(body, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		s = append(s, string(value))
@@ -151,26 +151,26 @@ func PushStateMessageHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.R
 	}
 }
 
-func getIntroductionDataFromBody(w http.ResponseWriter, r *http.Request) (ip string, signedMessage []byte) {
+func getIntroductionDataFromBody(w http.ResponseWriter, r *http.Request) (ip string) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		ErrorHandler(w, r, "Error decoding body", err, http.StatusBadRequest)
-		return "", []byte("")
+		return ""
 	}
 
 	ip, err = jsonparser.GetString(body, "ip")
 	if err != nil {
 		ErrorHandler(w, r, "Could not find `ip` in body", err, http.StatusBadRequest)
-		return "", []byte("")
+		return ""
 	}
 
-	return ip, signedMessage
+	return ip
 }
 
 // JoinHandler takes in an IP and tries to join it's cluster
 func JoinHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ip, _ := getIntroductionDataFromBody(w, r)
+		ip := getIntroductionDataFromBody(w, r)
 		if ip != "" {
 			err := p.Join([]string{ip})
 			if err != nil {
@@ -212,13 +212,20 @@ func GetSignatureListHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.R
 	}
 }
 
-// GetContentHandler will compare the content list provided with the
-// current state and return a list of links to download content from a peer that
-// has the same set as the network state. It also includes a hash of that file
-// so the node can verify it before serving.
-func GetContentHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
+// GetContentNeededHandler compares the content provided with what is required by the
+// pool and returns the deltas in the format website/<asset or route/filename
+func GetContentNeededHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		list := getContentListFromBody(w, r)
-		ResponseHandler(w, r, "Got needed content", true, nil, p.CompareContent(list), nil)
+		c := getContentListFromBody(w, r)
+		ResponseHandler(w, r, "Got needed content", true, nil, p.CompareContent(c), nil)
+	}
+}
+
+// GetContentLinksHandler gets the links to the given list of files from random
+// nodes in the network
+func GetContentLinksHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		c := getContentListFromBody(w, r)
+		ResponseHandler(w, r, "Got needed content links", true, nil, p.GetContentLinks(c), nil)
 	}
 }
