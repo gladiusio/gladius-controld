@@ -40,6 +40,7 @@ func MarketPoolsCreateHandler(ga *blockchain.GladiusAccountManager) func(w http.
 	return func(w http.ResponseWriter, r *http.Request) {
 		auth := r.Header.Get("X-Authorization")
 		decoder := json.NewDecoder(r.Body)
+		defer r.Body.Close()
 		var data poolData
 		err := decoder.Decode(&data)
 
