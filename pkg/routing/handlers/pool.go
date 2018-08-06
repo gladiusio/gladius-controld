@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"github.com/gladiusio/gladius-application-server/pkg/controller"
+	"github.com/jinzhu/gorm"
 	"net/http"
 
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
@@ -58,16 +59,8 @@ func PoolSetBlockchainDataHandler() func(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-func PoolRetrievePendingPoolConfirmationApplicationsHandler() func(w http.ResponseWriter, r *http.Request) {
+func PoolRetrievePendingPoolConfirmationApplicationsHandler(db *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		db, err := controller.Initialize(nil)
-		if err != nil {
-			ErrorHandler(w, r, "Could not establish database connection", err, http.StatusInternalServerError)
-			return
-		}
-
-		defer db.Close()
-
 		profiles, err := controller.NodesPendingPoolConfirmation(db)
 
 		if err != nil {
@@ -79,16 +72,8 @@ func PoolRetrievePendingPoolConfirmationApplicationsHandler() func(w http.Respon
 	}
 }
 
-func PoolRetrievePendingNodeConfirmationApplicationsHandler() func(w http.ResponseWriter, r *http.Request) {
+func PoolRetrievePendingNodeConfirmationApplicationsHandler(db *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		db, err := controller.Initialize(nil)
-		if err != nil {
-			ErrorHandler(w, r, "Could not establish database connection", err, http.StatusInternalServerError)
-			return
-		}
-
-		defer db.Close()
-
 		profiles, err := controller.NodesPendingNodeConfirmation(db)
 
 		if err != nil {
@@ -100,16 +85,8 @@ func PoolRetrievePendingNodeConfirmationApplicationsHandler() func(w http.Respon
 	}
 }
 
-func PoolRetrieveApprovedApplicationsHandler() func(w http.ResponseWriter, r *http.Request) {
+func PoolRetrieveApprovedApplicationsHandler(db *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		db, err := controller.Initialize(nil)
-		if err != nil {
-			ErrorHandler(w, r, "Could not establish database connection", err, http.StatusInternalServerError)
-			return
-		}
-
-		defer db.Close()
-
 		profiles, err := controller.NodesAccepted(db)
 
 		if err != nil {
@@ -121,16 +98,8 @@ func PoolRetrieveApprovedApplicationsHandler() func(w http.ResponseWriter, r *ht
 	}
 }
 
-func PoolRetrieveRejectedApplicationsHandler() func(w http.ResponseWriter, r *http.Request) {
+func PoolRetrieveRejectedApplicationsHandler(db *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		db, err := controller.Initialize(nil)
-		if err != nil {
-			ErrorHandler(w, r, "Could not establish database connection", err, http.StatusInternalServerError)
-			return
-		}
-		
-		defer db.Close()
-
 		profiles, err := controller.NodesRejected(db)
 
 		if err != nil {

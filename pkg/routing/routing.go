@@ -2,6 +2,7 @@ package routing
 
 import (
 	"fmt"
+	"github.com/jinzhu/gorm"
 	"log"
 	"net/http"
 	"strings"
@@ -19,6 +20,7 @@ const (
 )
 
 var apiRouter *mux.Router
+var Database *gorm.DB
 
 func Start(router *mux.Router, port *string) {
 	if port != nil {
@@ -161,7 +163,7 @@ func AppendMarketEndpoints(router *mux.Router, ga *blockchain.GladiusAccountMana
 	return nil
 }
 
-func AppendPoolManagerEndpoints(router *mux.Router, ga *blockchain.GladiusAccountManager) error {
+func AppendPoolManagerEndpoints(router *mux.Router, ga *blockchain.GladiusAccountManager, db *gorm.DB) error {
 	// Initialize Base API sub-route
 	InitializeAPISubRoutes(router)
 
@@ -172,13 +174,13 @@ func AppendPoolManagerEndpoints(router *mux.Router, ga *blockchain.GladiusAccoun
 		Methods(http.MethodGet)
 	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/data", handlers.PoolSetBlockchainDataHandler()).
 		Methods(http.MethodPost)
-	poolRouter.HandleFunc("/applications/pending/pool", handlers.PoolRetrievePendingPoolConfirmationApplicationsHandler()).
+	poolRouter.HandleFunc("/applications/pending/pool", handlers.PoolRetrievePendingPoolConfirmationApplicationsHandler(db)).
 		Methods(http.MethodGet)
-	poolRouter.HandleFunc("/applications/pending/node", handlers.PoolRetrievePendingNodeConfirmationApplicationsHandler()).
+	poolRouter.HandleFunc("/applications/pending/node", handlers.PoolRetrievePendingNodeConfirmationApplicationsHandler(db)).
 		Methods(http.MethodGet)
-	poolRouter.HandleFunc("/applications/rejected", handlers.PoolRetrieveRejectedApplicationsHandler()).
+	poolRouter.HandleFunc("/applications/rejected", handlers.PoolRetrieveRejectedApplicationsHandler(db)).
 		Methods(http.MethodGet)
-	poolRouter.HandleFunc("/applications/approved", handlers.PoolRetrieveApprovedApplicationsHandler()).
+	poolRouter.HandleFunc("/applications/approved", handlers.PoolRetrieveApprovedApplicationsHandler(db)).
 		Methods(http.MethodGet)
 
 	// Market
@@ -190,30 +192,30 @@ func AppendPoolManagerEndpoints(router *mux.Router, ga *blockchain.GladiusAccoun
 	return nil
 }
 
-func AppendServerEndpoints(router *mux.Router) error {
+func AppendServerEndpoints(router *mux.Router, db *gorm.DB) error {
 	// Initialize Base API sub-route
 	InitializeAPISubRoutes(router)
 	// Applications
 	applicationRouter := apiRouter.PathPrefix("/server").Subrouter()
-	applicationRouter.HandleFunc("/info", handlers.PublicPoolInformationHandler).
+	applicationRouter.HandleFunc("/info", handlers.PublicPoolInformationHandler(db)).
 		Methods(http.MethodGet)
 
 	return nil
 }
 
-func AppendApplicationEndpoints(router *mux.Router) error {
+func AppendApplicationEndpoints(router *mux.Router, db *gorm.DB) error {
 	// Initialize Base API sub-route
 	InitializeAPISubRoutes(router)
 
 	// Applications
 	applicationRouter := apiRouter.PathPrefix("/applications").Subrouter()
-	applicationRouter.HandleFunc("/new", handlers.PoolNewApplicationHandler).
+	applicationRouter.HandleFunc("/new", handlers.PoolNewApplicationHandler(db)).
 		Methods(http.MethodPost)
-	applicationRouter.HandleFunc("/edit", handlers.PoolEditApplicationHandler).
+	applicationRouter.HandleFunc("/edit", handlers.PoolEditApplicationHandler(db)).
 		Methods(http.MethodPost)
-	applicationRouter.HandleFunc("/view", handlers.PoolViewApplicationHandler).
+	applicationRouter.HandleFunc("/view", handlers.PoolViewApplicationHandler(db)).
 		Methods(http.MethodPost)
-	applicationRouter.HandleFunc("/status", handlers.PoolStatusViewHandler).
+	applicationRouter.HandleFunc("/status", handlers.PoolStatusViewHandler(db)).
 		Methods(http.MethodPost)
 
 	return nil
