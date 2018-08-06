@@ -18,6 +18,10 @@ func New(jsonMessage []byte) *Message {
 	return &Message{Content: &h, Timestamp: time.Now().Unix()}
 }
 
+func NewBlankMessage() *Message {
+	return &Message{Content: nil, Timestamp: time.Now().Unix()}
+}
+
 // Serialize returns a serialized JSON string that includes the current timestamp
 func (m Message) Serialize() []byte {
 	bytes, err := json.Marshal(m)

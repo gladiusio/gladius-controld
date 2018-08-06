@@ -9,7 +9,7 @@ import (
 
 	"github.com/gladiusio/gladius-controld/pkg/p2p/message"
 	"github.com/hashicorp/memberlist"
-	uuid "github.com/satori/go.uuid"
+	"github.com/satori/go.uuid"
 )
 
 type mergeDelegate struct {

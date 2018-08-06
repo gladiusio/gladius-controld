@@ -41,12 +41,12 @@ func NodeRouter() *mux.Router {
 		log.Fatalln("Failed to append Account Management Endpoints")
 	}
 
-	err = routing.AppendAccountManagementEndpoints(router, ga)
+	err = routing.AppendAccountManagementEndpoints(router)
 	if err != nil {
 		log.Fatalln("Failed to append Account Management Endpoints")
 	}
 
-	err = routing.AppendStatusEndpoints(router, ga)
+	err = routing.AppendStatusEndpoints(router)
 	if err != nil {
 		log.Fatalln("Failed to append Status Endpoints")
 	}
@@ -67,22 +67,17 @@ func NodeRouter() *mux.Router {
 func PoolManagerRouter() *mux.Router {
 	router, ga := setupRouter()
 
-	err := routing.AppendP2PEndPoints(router, ga)
-	if err != nil {
-		log.Fatalln("Failed to append P2P Endpoints")
-	}
-
-	err = routing.AppendWalletManagementEndpoints(router, ga)
+	err := routing.AppendWalletManagementEndpoints(router, ga)
 	if err != nil {
 		log.Fatalln("Failed to append Account Management Endpoints")
 	}
 
-	err = routing.AppendAccountManagementEndpoints(router, ga)
+	err = routing.AppendAccountManagementEndpoints(router)
 	if err != nil {
 		log.Fatalln("Failed to append Account Management Endpoints")
 	}
 
-	err = routing.AppendStatusEndpoints(router, ga)
+	err = routing.AppendStatusEndpoints(router)
 	if err != nil {
 		log.Fatalln("Failed to append Status Endpoints")
 	}
@@ -101,24 +96,24 @@ func PoolManagerRouter() *mux.Router {
 }
 
 func ApplicationServerRouter() *mux.Router {
-	router, ga := setupRouter()
+	router, _ := setupRouter()
 
-	err := routing.AppendAccountManagementEndpoints(router, ga)
+	err := routing.AppendAccountManagementEndpoints(router)
 	if err != nil {
 		log.Fatalln("Failed to append Account Management Endpoints")
 	}
 
-	err = routing.AppendStatusEndpoints(router, ga)
+	err = routing.AppendStatusEndpoints(router)
 	if err != nil {
 		log.Fatalln("Failed to append Status Endpoints")
 	}
 
-	err = routing.AppendServerEndpoints(router, ga)
+	err = routing.AppendServerEndpoints(router)
 	if err != nil {
 		log.Fatalln("Failed to append Server Endpoints")
 	}
 
-	err = routing.AppendApplicationEndpoints(router, ga)
+	err = routing.AppendApplicationEndpoints(router)
 	if err != nil {
 		log.Fatalln("Failed to append Application Endpoints")
 	}

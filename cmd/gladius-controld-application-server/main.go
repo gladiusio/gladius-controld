@@ -1,9 +1,9 @@
 package main
 
 import (
-"github.com/gladiusio/gladius-controld/pkg/routing"
-"github.com/gladiusio/gladius-utils/init/manager"
-. "github.com/gladiusio/gladius-controld/pkg/config"
+	. "github.com/gladiusio/gladius-controld/pkg/config"
+	"github.com/gladiusio/gladius-controld/pkg/routing"
+	"github.com/gladiusio/gladius-utils/init/manager"
 )
 
 func main() {

@@ -227,16 +227,3 @@ func (ga GladiusAccountManager) GetAuth(passphrase string) (*bind.TransactOpts, 
 
 	return auth, nil
 }
-
-// TODO: Move somewhere more logical...
-func GetPGPPublicKey() (string, error) {
-	var pathTemp = viper.GetString("DirKeys")
-	keyringFileBuffer, err := ioutil.ReadFile(pathTemp + "/public.asc")
-	if err != nil {
-		return "", err
-	}
-
-	publicKey := string(keyringFileBuffer)
-
-	return publicKey, nil
-}
