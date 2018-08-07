@@ -94,15 +94,15 @@
   revision = "f033d782cd083dbb9d8f9ca52460c58cbfb31025"
 
 [[projects]]
-  digest = "1:f323b83da33542b5ebf8eb19f9347cf84c14824c6372757fdae05ede5d60987b"
+  digest = "1:fb370addcb89ac4d917363b2a18b4e0a6fe8af3c09f360369e027db162d052d4"
   name = "github.com/gladiusio/gladius-utils"
   packages = [
     "config",
     "init/manager",
   ]
   pruneopts = "UT"
-  revision = "486e8052c24340c8b461ef7e407eaaf6b496d708"
-  version = "0.2.5"
+  revision = "bc04992f9da9f1b318352e5e449a185a5a3eb7fd"
+  version = "0.3.3"
 
 [[projects]]
   digest = "1:c4a2528ccbcabf90f9f3c464a5fc9e302d592861bbfd0b7135a7de8a943d0406"
