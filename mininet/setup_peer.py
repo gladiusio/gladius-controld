@@ -19,8 +19,13 @@ def setup_peer(node_name):
     url = "http://localhost:3001/api/keystore/account/create"
     data = '''{"passphrase":"password"}'''
     response = requests.post(url, data=data).text
+    print "account response: " + response
 
-    print "account: " + response
+    url = "http://localhost:3001/api/keystore/account/open"
+    data = '''{"passphrase":"password"}'''
+    response = requests.post(url, data=data).text
+    print "unlock repsonse: " + response
+
 
 
 if __name__ == "__main__":

@@ -34,6 +34,14 @@
   revision = "2cac668e8456b4284edb0715e17e2af02d3ec993"
 
 [[projects]]
+  digest = "1:c166378e8ab0f794f293dfb941d250dd70b035b05dec58879f717621d0fe1714"
+  name = "github.com/deckarep/golang-set"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "1d4478f51bed434f1dadf96dcd9b43aabac66795"
+  version = "v1.7"
+
+[[projects]]
   digest = "1:c53fb5966eed7785f6159e00011e4275e528efe2ae5bced5b3450c94b127add1"
   name = "github.com/ethereum/go-ethereum"
   packages = [
@@ -76,14 +84,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:b6a235104fa085d0e0925954ac0c9e594ca75fc880acb435bc660ed9e50de927"
+  digest = "1:63fddeee88a891c563a0bf19a64b84150493b843a007587f9be206984fe1e0b5"
   name = "github.com/gladiusio/gladius-application-server"
   packages = [
     "pkg/controller",
     "pkg/db/models",
   ]
   pruneopts = "UT"
-  revision = "67e52717d802a58e86ecd8d9903025485a77cdc6"
+  revision = "670df022cb82a72ea0f3cf2f2cd319d422119dc9"
 
 [[projects]]
   digest = "1:f323b83da33542b5ebf8eb19f9347cf84c14824c6372757fdae05ede5d60987b"
@@ -529,6 +537,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/buger/jsonparser",
+    "github.com/deckarep/golang-set",
     "github.com/ethereum/go-ethereum/accounts",
     "github.com/ethereum/go-ethereum/accounts/abi",
     "github.com/ethereum/go-ethereum/accounts/abi/bind",
@@ -544,6 +553,7 @@
     "github.com/gorilla/handlers",
     "github.com/gorilla/mux",
     "github.com/hashicorp/memberlist",
+    "github.com/jinzhu/gorm",
     "github.com/jinzhu/gorm/dialects/sqlite",
     "github.com/pkg/errors",
     "github.com/satori/go.uuid",

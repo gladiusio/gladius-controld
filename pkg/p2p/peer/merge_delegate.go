@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/gladiusio/gladius-controld/pkg/p2p/message"
 	"github.com/hashicorp/memberlist"
 	"github.com/satori/go.uuid"
 )
@@ -20,10 +21,16 @@ type mergeDelegate struct {
 // into the network by sending them a challenge that they must sign with their
 // Ethereum key.
 func (md *mergeDelegate) NotifyMerge(peers []*memberlist.Node) error {
-	challengeID := uuid.NewV4().String()
-	md.peer.registerOutgoingChallenge(challengeID)
+	cID := uuid.NewV4().String()
+	md.peer.registerOutgoingChallenge(cID)
 
 	challengeMap := make(map[string]bool)
+
+	// Some saftey concerns for now (may change this in the future as the
+	// code below supports n sized clusters)
+	if len(peers) > 1 {
+		return fmt.Errorf("Max size of joining cluster is 1, you have %d", len(peers))
+	}
 
 	// Go through all nodes in the cluster requesting to join
 	for _, peer := range peers {
@@ -36,11 +43,14 @@ func (md *mergeDelegate) NotifyMerge(peers []*memberlist.Node) error {
 		challengeMap[questionString] = false
 
 		// Create a challenge from the token
-		challenge := &challenge{question: questionString}
-		challengeBytes, _ := json.Marshal(challenge)
+		c := challenge{Question: questionString, ChallengeID: cID}
+		challengeBytes, err := json.Marshal(c)
+		if err != nil {
+			panic(err)
+		}
 
 		// Create an action for the remote peer to process
-		action := &update{Action: "challenge_question", Data: challengeBytes}
+		action := &update{Action: "challenge_question", Data: challengeBytes, From: *md.peer.member.LocalNode()}
 		actionBytes, _ := json.Marshal(action)
 
 		// Send the message to the remote peer
@@ -53,7 +63,7 @@ func (md *mergeDelegate) NotifyMerge(peers []*memberlist.Node) error {
 		timeout <- true
 	}()
 
-	incomingResponses, err := md.peer.getChallengeResponseChannel(challengeID)
+	incomingResponses, err := md.peer.getChallengeResponseChannel(cID)
 	if err != nil {
 		return errors.New("Node responded with unknown challenge ID")
 	}
@@ -67,10 +77,22 @@ func (md *mergeDelegate) NotifyMerge(peers []*memberlist.Node) error {
 				return errors.New("Challenge message from peer is not verified or not in pool")
 			}
 			// Get the challenge response message
-			cbytes, err := sm.Message.MarshalJSON()
+			mbytes, err := sm.Message.MarshalJSON()
 			if err != nil {
 				return errors.New("Can't parse challenge from signed message")
 			}
+
+			m := &message.Message{}
+			err = json.Unmarshal(mbytes, m)
+			if err != nil {
+				return errors.New("Challenge sent back is corrupted")
+			}
+
+			cbytes, err := m.Content.MarshalJSON()
+			if err != nil {
+				return errors.New("Challenge sent back is corrupted")
+			}
+
 			c := &challenge{}
 			err = json.Unmarshal(cbytes, c)
 			if err != nil {
@@ -78,11 +100,11 @@ func (md *mergeDelegate) NotifyMerge(peers []*memberlist.Node) error {
 			}
 
 			// If the value exists
-			if val, ok := challengeMap[c.question]; ok {
+			if val, ok := challengeMap[c.Question]; ok {
 				if val {
 					return errors.New("Challenged has already been used")
 				}
-				challengeMap[c.question] = true
+				challengeMap[c.Question] = true
 				successfulCount++
 			}
 
