@@ -22,14 +22,14 @@ const (
 var apiRouter *mux.Router
 var Database *gorm.DB
 
-func Start(router *mux.Router, port *string) {
-	if port != nil {
-		fmt.Println("Starting API at http://localhost:" + *port)
-		log.Fatal(http.ListenAndServe(":"+*port, ghandlers.CORS()(router)))
-	} else {
-		fmt.Println("Starting API at http://localhost:" + PORT)
-		log.Fatal(http.ListenAndServe(":"+PORT, ghandlers.CORS()(router)))
-	}
+type ControlRouter struct {
+	Router *mux.Router
+	Port   string
+}
+
+func (cRouter *ControlRouter) Start() {
+	fmt.Println("Starting API at http://localhost:" + cRouter.Port)
+	log.Fatal(http.ListenAndServe(":"+cRouter.Port, ghandlers.CORS()(cRouter.Router)))
 }
 
 func InitializeRouter() (*mux.Router, error) {

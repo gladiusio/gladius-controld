@@ -10,11 +10,13 @@ func main() {
 	// Define some variables
 	name, displayName, description := Config()
 
-	// Run the function "run" in newtworkd as a service
-	manager.RunService(name, displayName, description, initialize)
-}
-
-func initialize() {
 	router := NodeRouter()
-	routing.Start(router, nil)
+
+	cRouter := routing.ControlRouter{
+		Router:router,
+		Port: "3001",
+	}
+
+	// Run the function "run" in newtworkd as a service
+	manager.RunService(name, displayName, description, cRouter.Start)
 }

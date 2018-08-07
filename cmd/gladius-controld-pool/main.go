@@ -22,12 +22,13 @@ func main() {
 	}
 
 	// Run the function "run" in newtworkd as a service
-	manager.RunService(name, displayName, description, initialize)
-}
-
-func initialize() {
-	// Run the function "run" in newtworkd as a service
 	router := PoolManagerRouter(Database)
-	port := "3000"
-	routing.Start(router, &port)
+
+	cRouter := routing.ControlRouter{
+		Router:router,
+		Port: "3000",
+	}
+
+	// Run the function "run" in newtworkd as a service
+	manager.RunService(name, displayName, description, cRouter.Start)
 }
