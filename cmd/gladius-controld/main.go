@@ -1,16 +1,16 @@
 package main
 
 import (
-	. "github.com/gladiusio/gladius-controld/pkg/config"
+	"github.com/gladiusio/gladius-controld/pkg/config"
 	"github.com/gladiusio/gladius-controld/pkg/routing"
 	"github.com/gladiusio/gladius-utils/init/manager"
 )
 
 func main() {
 	// Define some variables
-	name, displayName, description := Config()
+	name, displayName, description := config.Config()
 
-	router := NodeRouter()
+	router := config.NodeRouter()
 
 	cRouter := routing.ControlRouter{
 		Router:router,
