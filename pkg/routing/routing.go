@@ -53,7 +53,7 @@ func AppendP2PEndPoints(router *mux.Router, ga *blockchain.GladiusAccountManager
 	InitializeAPISubRoutes(router)
 
 	// P2P setup
-	peerStruct := peer.New()
+	peerStruct := peer.New(ga)
 	p2pRouter := apiRouter.PathPrefix("/p2p").Subrouter()
 	// P2P Message Routes
 	p2pRouter.HandleFunc("/message/sign", handlers.CreateSignedMessageHandler(ga)).
