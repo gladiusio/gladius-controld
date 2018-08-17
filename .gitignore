@@ -21,6 +21,9 @@ vendor/
 
 build/
 
+# config
+config.toml
+
 ################
 # IntelliJ IDE #
 ################

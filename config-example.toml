@@ -1,0 +1,16 @@
+# Default Gladius Control Daemon Config
+# Copy and rename to config.toml
+title = "Gladius Control Daemon"
+
+[applicationServer]
+  [applicationServer.config]
+    # Suggested default port
+    port        = "3333"
+  [applicationServer.database]
+    type        = "postgres"
+    host        = "127.0.0.1"
+    port        = "5432"
+    user        = "username"
+    name        = "datebase-name"
+    password    = "secure-password"
+    ssl         = false # true / false

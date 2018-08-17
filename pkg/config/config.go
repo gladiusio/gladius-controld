@@ -1,13 +1,76 @@
 package config
 
 import (
+	"fmt"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"github.com/gladiusio/gladius-controld/pkg/routing"
 	"github.com/gladiusio/gladius-utils/config"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
+	"github.com/spf13/viper"
 	"log"
 )
+
+type ConfigurationOptions struct {
+	Port string
+}
+
+type ApplicationServerConfig struct {
+	Database DatabaseConfig
+	Config ConfigurationOptions
+}
+
+func (databaseConfig *DatabaseConfig) GormConnectionString() string {
+	sslMode := "disable"
+
+	if databaseConfig.SSL {
+		sslMode = "require"
+	}
+
+	connection := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
+		databaseConfig.Host,
+		databaseConfig.Port,
+		databaseConfig.User,
+		databaseConfig.Name,
+		databaseConfig.Password,
+		sslMode,
+	)
+
+	return connection
+}
+
+type DatabaseConfig struct {
+	Type	 string
+	Host     string
+	Port     string
+	User     string
+	Name     string
+	Password string
+	SSL      bool
+}
+
+type Configuration struct {
+	Title             string
+	ApplicationServer ApplicationServerConfig
+}
+
+func DefaultConfiguration() (Configuration, error) {
+	var configuration Configuration
+
+	viper.SetConfigName("config")
+	viper.AddConfigPath(".")
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Fatalf("\n\nUnable to find config.toml in project root, or default directories below.\n\nError: \n%v", err)
+	}
+
+	err = viper.Unmarshal(&configuration)
+	if err != nil {
+		log.Fatalf("unable to decode into struct, %v", err)
+	}
+
+	return configuration, nil
+}
 
 func Config() (Name, DisplayName, Description string) {
 	// Setup config handling
