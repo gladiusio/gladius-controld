@@ -1,22 +1,34 @@
 package main
 
 import (
+	"github.com/gladiusio/gladius-application-server/pkg/controller"
 	. "github.com/gladiusio/gladius-controld/pkg/config"
 	"github.com/gladiusio/gladius-controld/pkg/routing"
 	"github.com/gladiusio/gladius-utils/init/manager"
+	"github.com/jinzhu/gorm"
+	"log"
 )
+
+var Database *gorm.DB
 
 func main() {
 	// Define some variables
 	name, displayName, description := Config()
 
-	// Run the function "run" in newtworkd as a service
-	manager.RunService(name, displayName, description, initialize)
-}
+	var err error
+	Database, err = controller.Initialize(nil)
+	if err != nil {
+		log.Fatal("Could not open database")
+	}
 
-func initialize() {
 	// Run the function "run" in newtworkd as a service
-	router := ApplicationServerRouter()
-	port := "3333"
-	routing.Start(router, &port)
+	router := ApplicationServerRouter(Database)
+
+	cRouter := routing.ControlRouter{
+		Router:router,
+		Port: "3333",
+	}
+
+	// Run the function "run" in newtworkd as a service
+	manager.RunService(name, displayName, description, cRouter.Start)
 }

@@ -5,7 +5,7 @@
   branch = "master"
   name = "github.com/aristanetworks/goarista"
   packages = ["monotime"]
-  revision = "12d26871e3c44933da47b09cd3730a49422bc1fe"
+  revision = "18b896026201d8e1758468d9c5d5a558c69c5e9b"
 
 [[projects]]
   branch = "master"
@@ -17,13 +17,13 @@
   branch = "master"
   name = "github.com/btcsuite/btcd"
   packages = ["btcec"]
-  revision = "9a2f9524024889e129a5422aca2cff73cb3eabf6"
+  revision = "f899737d7f2764dc13e4d01ff00108ec58f766a9"
 
 [[projects]]
   branch = "master"
   name = "github.com/buger/jsonparser"
   packages = ["."]
-  revision = "2cac668e8456b4284edb0715e17e2af02d3ec993"
+  revision = "f4dd9f5a6b441265aefc1d44872a6f8c10f42b37"
 
 [[projects]]
   name = "github.com/deckarep/golang-set"
@@ -45,7 +45,6 @@
     "common/mclock",
     "core/types",
     "crypto",
-    "crypto/randentropy",
     "crypto/secp256k1",
     "crypto/sha3",
     "ethclient",
@@ -59,8 +58,8 @@
     "rpc",
     "trie"
   ]
-  revision = "37685930d953bcbe023f9bc65b135a8d8b8f1488"
-  version = "v1.8.12"
+  revision = "225171a4bfcc16bd12a1906b1e0d43d0b18c353b"
+  version = "v1.8.13"
 
 [[projects]]
   name = "github.com/fsnotify/fsnotify"
@@ -75,7 +74,7 @@
     "pkg/controller",
     "pkg/db/models"
   ]
-  revision = "67e52717d802a58e86ecd8d9903025485a77cdc6"
+  revision = "e4aeae9f23b473714cfac98f1978ba55f7f1de16"
 
 [[projects]]
   name = "github.com/gladiusio/gladius-utils"
@@ -83,8 +82,8 @@
     "config",
     "init/manager"
   ]
-  revision = "486e8052c24340c8b461ef7e407eaaf6b496d708"
-  version = "0.2.5"
+  revision = "563c83e7e92bcdd1322616a70d139865ba1efb78"
+  version = "0.3.5"
 
 [[projects]]
   name = "github.com/go-stack/stack"
@@ -287,19 +286,19 @@
   branch = "master"
   name = "github.com/spf13/jwalterweatherman"
   packages = ["."]
-  revision = "7c0cea34c8ece3fbeb2b27ab9b59511d360fb394"
+  revision = "14d3d4c518341bea657dd8a226f5121c0ff8c9f2"
 
 [[projects]]
   name = "github.com/spf13/pflag"
   packages = ["."]
-  revision = "583c0c0531f06d5278b7d917446061adc344b5cd"
-  version = "v1.0.1"
+  revision = "9a97c102cda95a86cec2345a6f09f55a939babf5"
+  version = "v1.0.2"
 
 [[projects]]
   name = "github.com/spf13/viper"
   packages = ["."]
-  revision = "b5e8006cbee93ec955a89ab31e0e3ce3204f3736"
-  version = "v1.0.2"
+  revision = "907c19d40d9a6c9bb55f040ff4ae45271a4754b9"
+  version = "v1.1.0"
 
 [[projects]]
   branch = "master"
@@ -318,7 +317,7 @@
     "leveldb/table",
     "leveldb/util"
   ]
-  revision = "c4c61651e9e37fa117f53c5a906d3b63090d8445"
+  revision = "ae2bd5eed72d46b28834ec3f60db3a3ebedd8dbd"
 
 [[projects]]
   name = "github.com/tdewolff/minify"
@@ -349,7 +348,7 @@
     "pbkdf2",
     "scrypt"
   ]
-  revision = "c126467f60eb25f8f27e5a981f32a87e3965053f"
+  revision = "aabede6cba87e37f413b3e60ebfc214f8eeca1b0"
 
 [[projects]]
   branch = "master"
@@ -362,7 +361,7 @@
     "ipv6",
     "websocket"
   ]
-  revision = "c4299a1a0d8524c11563db160fbf9bddbceadb21"
+  revision = "aaf60122140d3fcf75376d319f0554393160eb50"
 
 [[projects]]
   branch = "master"
@@ -375,7 +374,7 @@
     "windows/svc/eventlog",
     "windows/svc/mgr"
   ]
-  revision = "bd9dbc187b6e1dacfdd2722a87e83093c2d7bd6e"
+  revision = "1a700e749ce29638d0bbcb531cce1094ea096bd3"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -398,13 +397,7 @@
     "imports",
     "internal/fastwalk"
   ]
-  revision = "8cc4e8a6f4841aa92a8683fca47bc5d64b58875b"
-
-[[projects]]
-  name = "gopkg.in/fatih/set.v0"
-  packages = ["."]
-  revision = "57907de300222151a123d29255ed17f5ed43fad3"
-  version = "v0.1.0"
+  revision = "7d1dc997617fb662918b6ea95efc19faa87e1cf8"
 
 [[projects]]
   branch = "v2"
@@ -427,6 +420,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "07ddf9dc3d9ea566564e85372051ef625c1d1e4c95b932e52aaab6e0eb53c6ba"
+  inputs-digest = "af276415a7ebbe1fb1452914441bd112e50999f36f0140c08b786dcf63d44a7d"
   solver-name = "gps-cdcl"
   solver-version = 1

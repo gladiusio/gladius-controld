@@ -2,6 +2,7 @@ package routing
 
 import (
 	"fmt"
+	"github.com/jinzhu/gorm"
 	"log"
 	"net/http"
 	"strings"
@@ -19,15 +20,16 @@ const (
 )
 
 var apiRouter *mux.Router
+var Database *gorm.DB
 
-func Start(router *mux.Router, port *string) {
-	if port != nil {
-		fmt.Println("Starting API at http://localhost:" + *port)
-		log.Fatal(http.ListenAndServe(":"+*port, ghandlers.CORS()(router)))
-	} else {
-		fmt.Println("Starting API at http://localhost:" + PORT)
-		log.Fatal(http.ListenAndServe(":"+PORT, ghandlers.CORS()(router)))
-	}
+type ControlRouter struct {
+	Router *mux.Router
+	Port   string
+}
+
+func (cRouter *ControlRouter) Start() {
+	fmt.Println("Starting API at http://localhost:" + cRouter.Port)
+	log.Fatal(http.ListenAndServe(":"+cRouter.Port, ghandlers.CORS()(cRouter.Router)))
 }
 
 func InitializeRouter() (*mux.Router, error) {
@@ -165,7 +167,7 @@ func AppendMarketEndpoints(router *mux.Router, ga *blockchain.GladiusAccountMana
 	return nil
 }
 
-func AppendPoolManagerEndpoints(router *mux.Router, ga *blockchain.GladiusAccountManager) error {
+func AppendPoolManagerEndpoints(router *mux.Router, ga *blockchain.GladiusAccountManager, db *gorm.DB) error {
 	// Initialize Base API sub-route
 	InitializeAPISubRoutes(router)
 
@@ -176,13 +178,13 @@ func AppendPoolManagerEndpoints(router *mux.Router, ga *blockchain.GladiusAccoun
 		Methods(http.MethodGet)
 	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/data", handlers.PoolSetBlockchainDataHandler()).
 		Methods(http.MethodPost)
-	poolRouter.HandleFunc("/applications/pending/pool", handlers.PoolRetrievePendingPoolConfirmationApplicationsHandler()).
+	poolRouter.HandleFunc("/applications/pending/pool", handlers.PoolRetrievePendingPoolConfirmationApplicationsHandler(db)).
 		Methods(http.MethodGet)
-	poolRouter.HandleFunc("/applications/pending/node", handlers.PoolRetrievePendingNodeConfirmationApplicationsHandler()).
+	poolRouter.HandleFunc("/applications/pending/node", handlers.PoolRetrievePendingNodeConfirmationApplicationsHandler(db)).
 		Methods(http.MethodGet)
-	poolRouter.HandleFunc("/applications/rejected", handlers.PoolRetrieveRejectedApplicationsHandler()).
+	poolRouter.HandleFunc("/applications/rejected", handlers.PoolRetrieveRejectedApplicationsHandler(db)).
 		Methods(http.MethodGet)
-	poolRouter.HandleFunc("/applications/approved", handlers.PoolRetrieveApprovedApplicationsHandler()).
+	poolRouter.HandleFunc("/applications/approved", handlers.PoolRetrieveApprovedApplicationsHandler(db)).
 		Methods(http.MethodGet)
 
 	// Market
@@ -194,30 +196,30 @@ func AppendPoolManagerEndpoints(router *mux.Router, ga *blockchain.GladiusAccoun
 	return nil
 }
 
-func AppendServerEndpoints(router *mux.Router) error {
+func AppendServerEndpoints(router *mux.Router, db *gorm.DB) error {
 	// Initialize Base API sub-route
 	InitializeAPISubRoutes(router)
 	// Applications
 	applicationRouter := apiRouter.PathPrefix("/server").Subrouter()
-	applicationRouter.HandleFunc("/info", handlers.PublicPoolInformationHandler).
+	applicationRouter.HandleFunc("/info", handlers.PublicPoolInformationHandler(db)).
 		Methods(http.MethodGet)
 
 	return nil
 }
 
-func AppendApplicationEndpoints(router *mux.Router) error {
+func AppendApplicationEndpoints(router *mux.Router, db *gorm.DB) error {
 	// Initialize Base API sub-route
 	InitializeAPISubRoutes(router)
 
 	// Applications
 	applicationRouter := apiRouter.PathPrefix("/applications").Subrouter()
-	applicationRouter.HandleFunc("/new", handlers.PoolNewApplicationHandler).
+	applicationRouter.HandleFunc("/new", handlers.PoolNewApplicationHandler(db)).
 		Methods(http.MethodPost)
-	applicationRouter.HandleFunc("/edit", handlers.PoolEditApplicationHandler).
+	applicationRouter.HandleFunc("/edit", handlers.PoolEditApplicationHandler(db)).
 		Methods(http.MethodPost)
-	applicationRouter.HandleFunc("/view", handlers.PoolViewApplicationHandler).
+	applicationRouter.HandleFunc("/view", handlers.PoolViewApplicationHandler(db)).
 		Methods(http.MethodPost)
-	applicationRouter.HandleFunc("/status", handlers.PoolStatusViewHandler).
+	applicationRouter.HandleFunc("/status", handlers.PoolStatusViewHandler(db)).
 		Methods(http.MethodPost)
 
 	return nil
@@ -226,7 +228,9 @@ func AppendApplicationEndpoints(router *mux.Router) error {
 func responseMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/json")
-		next.ServeHTTP(w, r)
+		if next != nil {
+			next.ServeHTTP(w, r)
+		}
 	})
 }
 

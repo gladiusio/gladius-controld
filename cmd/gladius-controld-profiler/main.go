@@ -1,22 +1,26 @@
 package main
 
 import (
-	_ "net/http/pprof"
-
+	"github.com/gladiusio/gladius-controld/pkg/config"
 	"github.com/gladiusio/gladius-controld/pkg/routing"
-	"github.com/gladiusio/gladius-utils/config"
 	"github.com/gladiusio/gladius-utils/init/manager"
+	_ "net/http/pprof"
 )
 
 func main() {
-	// Setup config handling
-	config.SetupConfig("gladius-controld", config.ControlDaemonDefaults())
 	// Define some variables
 	name, displayName, description :=
 		"GladiusControlDaemon",
 		"Gladius Control Daemon",
 		"Gladius Control Daemon"
 
+	router := config.NodeRouter()
+
+	cRouter := routing.ControlRouter{
+		Router:router,
+		Port: "3001",
+	}
+
 	// Run the function "run" in newtworkd as a service
-	manager.RunService(name, displayName, description, routing.Start)
+	manager.RunService(name, displayName, description, cRouter.Start)
 }

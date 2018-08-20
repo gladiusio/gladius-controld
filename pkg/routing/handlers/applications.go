@@ -3,13 +3,13 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/gladiusio/gladius-controld/pkg/p2p/message"
+	"github.com/gladiusio/gladius-controld/pkg/p2p/signature"
+	"github.com/jinzhu/gorm"
+	"github.com/pkg/errors"
 	"net"
 	"net/http"
 	"strings"
-
-	"github.com/gladiusio/gladius-controld/pkg/p2p/message"
-	"github.com/gladiusio/gladius-controld/pkg/p2p/signature"
-	"github.com/pkg/errors"
 
 	"github.com/gladiusio/gladius-application-server/pkg/controller"
 	"github.com/gladiusio/gladius-application-server/pkg/db/models"
@@ -22,73 +22,70 @@ type statusResponse struct {
 	PoolAccepted bool `json:"poolAcceptance"`
 }
 
-func PoolStatusViewHandler(w http.ResponseWriter, r *http.Request) {
-	signedMessage, err := getSignedMessage(r)
-	if err != nil {
-		ErrorHandler(w, r, "Could not verify signature and address for request", err, http.StatusForbidden)
-		return
-	}
+func PoolStatusViewHandler(db *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		signedMessage, err := getSignedMessage(r)
+		if err != nil {
+			ErrorHandler(w, r, "Could not verify signature and address for request", err, http.StatusForbidden)
+			return
+		}
 
-	profile, err := getProfile(signedMessage)
-	if err != nil {
-		ErrorHandler(w, r, "Could not retrieve profile for wallet: "+signedMessage.Address, err, http.StatusBadRequest)
-		return
-	}
+		profile, err := getProfile(signedMessage, db)
+		if err != nil {
+			ErrorHandler(w, r, "Could not retrieve profile for wallet: "+signedMessage.Address, err, http.StatusBadRequest)
+			return
+		}
 
-	response := statusResponse{
-		Accepted:     profile.NodeProfile.Approved && !profile.NodeProfile.Pending,
-		NodeAccepted: profile.NodeProfile.NodeAccepted,
-		PoolAccepted: profile.NodeProfile.PoolAccepted,
-	}
+		response := statusResponse{
+			Accepted:     profile.NodeProfile.Approved && !profile.NodeProfile.Pending,
+			NodeAccepted: profile.NodeProfile.NodeAccepted,
+			PoolAccepted: profile.NodeProfile.PoolAccepted,
+		}
 
-	ResponseHandler(w, r, "null", true, nil, response, nil)
+		ResponseHandler(w, r, "null", true, nil, response, nil)
+	}
 }
 
-func PoolNewApplicationHandler(w http.ResponseWriter, r *http.Request) {
-	requestPayload, err := getRequestPayload(r)
-	if err != nil {
-		ErrorHandler(w, r, "Could not verify request payload", err, http.StatusBadRequest)
-		return
-	}
+func PoolNewApplicationHandler(db *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		requestPayload, err := getRequestPayload(r)
+		if err != nil {
+			ErrorHandler(w, r, "Could not verify request payload", err, http.StatusBadRequest)
+			return
+		}
 
-	db, err := controller.Initialize(nil)
-	if err != nil {
-		ErrorHandler(w, r, "Could not apply to pool", err, http.StatusBadRequest)
-		return
-	}
+		profile, err := controller.NodeApplyToPool(db, requestPayload)
+		if err != nil {
+			ErrorHandler(w, r, "Could not apply to pool", err, http.StatusBadRequest)
+			return
+		}
 
-	profile, err := controller.NodeApplyToPool(db, requestPayload)
-	if err != nil {
-		ErrorHandler(w, r, "Could not apply to pool", err, http.StatusBadRequest)
-		return
+		ResponseHandler(w, r, "null", true, nil, profile, nil)
 	}
-
-	ResponseHandler(w, r, "null", true, nil, profile, nil)
 }
 
-func PoolEditApplicationHandler(w http.ResponseWriter, r *http.Request) {
-	requestPayload, err := getRequestPayload(r)
-	if err != nil {
-		ErrorHandler(w, r, "Could not verify request payload", err, http.StatusBadRequest)
-		return
-	}
+func PoolEditApplicationHandler(db *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		requestPayload, err := getRequestPayload(r)
+		if err != nil {
+			ErrorHandler(w, r, "Could not verify request payload", err, http.StatusBadRequest)
+			return
+		}
 
-	db, err := controller.Initialize(nil)
-	if err != nil {
-		ErrorHandler(w, r, "Could not apply to pool", err, http.StatusBadRequest)
-		return
+		controller.NodeUpdateProfile(db, requestPayload)
+		viewApplication(w, r, db)
 	}
-
-	controller.NodeUpdateProfile(db, requestPayload)
-	viewApplication(w, r)
 }
 
-func PoolViewApplicationHandler(w http.ResponseWriter, r *http.Request) {
-	viewApplication(w, r)
+func PoolViewApplicationHandler(db *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		viewApplication(w, r, db)
+	}
 }
 
 func getSignedMessage(r *http.Request) (signature.SignedMessage, error) {
 	decoder := json.NewDecoder(r.Body)
+	defer r.Body.Close()
 
 	var signedMessage signature.SignedMessage
 	err := decoder.Decode(&signedMessage)
@@ -138,14 +135,9 @@ func getRequestPayload(r *http.Request) (models.NodeRequestPayload, error) {
 	return requestPayload, nil
 }
 
-func getProfile(signedMessage signature.SignedMessage) (controller.FullProfile, error) {
+func getProfile(signedMessage signature.SignedMessage, db *gorm.DB) (controller.FullProfile, error) {
 	if !signedMessage.IsVerified() {
 		return controller.FullProfile{}, errors.New("Message could not be verified")
-	}
-
-	db, err := controller.Initialize(nil)
-	if err != nil {
-		return controller.FullProfile{}, err
 	}
 
 	profile, err := controller.NodePoolApplication(db, signedMessage.Address)
@@ -156,14 +148,14 @@ func getProfile(signedMessage signature.SignedMessage) (controller.FullProfile, 
 	return profile, err
 }
 
-func viewApplication(w http.ResponseWriter, r *http.Request) {
+func viewApplication(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 	signedMessage, err := getSignedMessage(r)
 	if err != nil {
 		ErrorHandler(w, r, "Could not verify signature and address for request", err, http.StatusForbidden)
 		return
 	}
 
-	profile, err := getProfile(signedMessage)
+	profile, err := getProfile(signedMessage, db)
 	if err != nil {
 		ErrorHandler(w, r, "Could not retrieve profile for wallet: "+signedMessage.Address, err, http.StatusBadRequest)
 		return

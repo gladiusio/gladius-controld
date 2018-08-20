@@ -1,12 +1,12 @@
 package config
 
 import (
-	"log"
-
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"github.com/gladiusio/gladius-controld/pkg/routing"
 	"github.com/gladiusio/gladius-utils/config"
 	"github.com/gorilla/mux"
+	"github.com/jinzhu/gorm"
+	"log"
 )
 
 func Config() (Name, DisplayName, Description string) {
@@ -64,7 +64,7 @@ func NodeRouter() *mux.Router {
 	return router
 }
 
-func PoolManagerRouter() *mux.Router {
+func PoolManagerRouter(db *gorm.DB) *mux.Router {
 	router, ga := setupRouter()
 
 	err := routing.AppendWalletManagementEndpoints(router, ga)
@@ -87,7 +87,7 @@ func PoolManagerRouter() *mux.Router {
 		log.Fatalln("Failed to append Market Endpoints")
 	}
 
-	err = routing.AppendPoolManagerEndpoints(router, ga)
+	err = routing.AppendPoolManagerEndpoints(router, ga, db)
 	if err != nil {
 		println("Failed to append pool manager endpoints")
 	}
@@ -95,7 +95,7 @@ func PoolManagerRouter() *mux.Router {
 	return router
 }
 
-func ApplicationServerRouter() *mux.Router {
+func ApplicationServerRouter(db *gorm.DB) *mux.Router {
 	router, _ := setupRouter()
 
 	err := routing.AppendAccountManagementEndpoints(router)
@@ -108,12 +108,12 @@ func ApplicationServerRouter() *mux.Router {
 		log.Fatalln("Failed to append Status Endpoints")
 	}
 
-	err = routing.AppendServerEndpoints(router)
+	err = routing.AppendServerEndpoints(router, db)
 	if err != nil {
 		log.Fatalln("Failed to append Server Endpoints")
 	}
 
-	err = routing.AppendApplicationEndpoints(router)
+	err = routing.AppendApplicationEndpoints(router, db)
 	if err != nil {
 		log.Fatalln("Failed to append Application Endpoints")
 	}
