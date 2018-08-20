@@ -53,6 +53,10 @@ func KeystoreAccountCreationHandler(ga *blockchain.GladiusAccountManager) func(w
 }
 func KeystoreAccountRetrievalHandler(ga *blockchain.GladiusAccountManager) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		err := AccountErrorHandler(w, r, ga)
+		if err != nil {
+			return
+		}
 		address, err := ga.GetAccountAddress()
 		if err != nil {
 			ErrorHandler(w, r, "Account address could not be retrieved", err, http.StatusInternalServerError)

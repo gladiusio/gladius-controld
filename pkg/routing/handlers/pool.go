@@ -13,6 +13,11 @@ import (
 
 func PoolPublicDataHandler(ga *blockchain.GladiusAccountManager) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		err := AccountErrorHandler(w, r, ga)
+		if err != nil {
+			return
+		}
+
 		vars := mux.Vars(r)
 		poolAddress := vars["poolAddress"]
 
