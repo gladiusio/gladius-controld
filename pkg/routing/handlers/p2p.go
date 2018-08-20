@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/buger/jsonparser"
+	"github.com/gorilla/mux"
 
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/message"
@@ -201,6 +202,20 @@ func GetFullStateHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Reque
 	return func(w http.ResponseWriter, r *http.Request) {
 		state := p.GetState()
 		ResponseHandler(w, r, "Got full state", true, nil, state, nil)
+	}
+}
+
+// GetNodeStateHandler gets the current state of a specific node
+func GetNodeStateHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		na := vars["node_address"]
+		nodeState, exists := p.GetState().NodeDataMap[na]
+		if exists {
+			ResponseHandler(w, r, "Got state for: "+na, true, nil, nodeState, nil)
+			return
+		}
+		ErrorHandler(w, r, "That node doesn't exist", nil, http.StatusBadRequest)
 	}
 }
 
