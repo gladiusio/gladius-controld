@@ -10,6 +10,11 @@ import (
 // MarketPoolsHandler - Returns all Pools
 func MarketPoolsHandler(ga *blockchain.GladiusAccountManager) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		err := AccountErrorHandler(w, r, ga)
+		if err != nil {
+			return
+		}
+
 		poolsWithData, err := blockchain.MarketPools(true, ga)
 		if err != nil {
 			ErrorHandler(w, r, "Could not retrieve pools", err, http.StatusNotFound)
@@ -21,6 +26,11 @@ func MarketPoolsHandler(ga *blockchain.GladiusAccountManager) func(w http.Respon
 
 func MarketPoolsOwnedHandler(ga *blockchain.GladiusAccountManager) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		err := AccountErrorHandler(w, r, ga)
+		if err != nil {
+			return
+		}
+
 		pools, err := blockchain.MarketPoolsOwnedByUser(true, ga)
 		if err != nil {
 			ErrorHandler(w, r, "Could not retrieve pools", err, http.StatusNotFound)
@@ -38,11 +48,16 @@ type poolData struct {
 // MarketPoolsCreateHandler - Create a new Pool
 func MarketPoolsCreateHandler(ga *blockchain.GladiusAccountManager) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		err := AccountErrorHandler(w, r, ga)
+		if err != nil {
+			return
+		}
+
 		auth := r.Header.Get("X-Authorization")
 		decoder := json.NewDecoder(r.Body)
 		defer r.Body.Close()
 		var data poolData
-		err := decoder.Decode(&data)
+		err = decoder.Decode(&data)
 
 		transaction, err := blockchain.MarketCreatePool(auth, data.PublicKey, ga)
 		if err != nil {

@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"net/http"
 
 	"github.com/ethereum/go-ethereum/core/types"
@@ -61,4 +62,21 @@ func ErrorHandler(w http.ResponseWriter, r *http.Request, m string, e error, sta
 	ResponseHandler(w, r, m, false, &err, nil, nil)
 
 	return
+}
+
+// Account Manager Error Handler, checks required account permissions prior to accessing API endpoints
+func AccountErrorHandler(w http.ResponseWriter, r *http.Request, ga *blockchain.GladiusAccountManager) error {
+	if !ga.HasAccount() {
+		err := errors.New("account not found")
+		ErrorHandler(w, r, "Account not found, please create an account", err, http.StatusBadRequest)
+		return err
+	}
+
+	if !ga.Unlocked() {
+		err := errors.New("wallet locked")
+		ErrorHandler(w, r, "Wallet is not unlocked, open wallet before trying your request again", err, http.StatusMethodNotAllowed)
+		return err
+	}
+
+	return nil
 }
