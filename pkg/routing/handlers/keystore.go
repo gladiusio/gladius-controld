@@ -91,13 +91,15 @@ func KeystoreAccountUnlockHandler(ga *blockchain.GladiusAccountManager) func(w h
 
 		success, err := ga.UnlockAccount(accountBody.Passphrase)
 		if !success || err != nil {
-			accountErr := AccountErrorHandler(w, r, ga)
-			if accountErr != nil {
+			if err != nil {
+				ErrorHandler(w, r, "Wallet could not be opened with given passphrase", err, http.StatusForbidden)
 				return
 			}
 
-			ErrorHandler(w, r, "Wallet could not be opened", err, http.StatusInternalServerError)
-			return
+			accountErr := AccountUnlockedErrorHandler(w, r, ga)
+			if accountErr != nil {
+				return
+			}
 		}
 
 		if err != nil {
