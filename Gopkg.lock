@@ -3,11 +3,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:3152ee2d59ba95fb37b4a3967d9a096dee53ed70d18be4937ae2cbd8b693b3ee"
+  digest = "1:e25b7b8d93b9b3f12e50eb8ecb1317fac42e271c389e6f71b10abfff3711e3ae"
   name = "github.com/aristanetworks/goarista"
   packages = ["monotime"]
   pruneopts = ""
-  revision = "12d26871e3c44933da47b09cd3730a49422bc1fe"
+  revision = "18b896026201d8e1758468d9c5d5a558c69c5e9b"
 
 [[projects]]
   branch = "master"
@@ -19,11 +19,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:542be9fb8d738302988a3733cd1391f5909c3b580825df99a9fae723f493e2bf"
+  digest = "1:06875c403d2c58d69ac1edea7a6d632a87f61de2bc24dd2d65b273af808aaa11"
   name = "github.com/btcsuite/btcd"
   packages = ["btcec"]
   pruneopts = ""
-  revision = "9a2f9524024889e129a5422aca2cff73cb3eabf6"
+  revision = "f899737d7f2764dc13e4d01ff00108ec58f766a9"
 
 [[projects]]
   digest = "1:20195fd5ea205530da872fac77b797774c13d7f92527be47857c4bd2472a32dc"
@@ -41,7 +41,7 @@
   version = "v1.7"
 
 [[projects]]
-  digest = "1:fbcf43e9ceff5eca58cb3ae5bae1a7cfc4b1e5dc5f0e9369d96ec7c4d8daefac"
+  digest = "1:52020b0d8d20e2e73c4d6436aeb019d0f965bc73b81a7ea2547ab2b7023d4ef2"
   name = "github.com/ethereum/go-ethereum"
   packages = [
     ".",
@@ -55,7 +55,6 @@
     "common/mclock",
     "core/types",
     "crypto",
-    "crypto/randentropy",
     "crypto/secp256k1",
     "crypto/sha3",
     "ethclient",
@@ -70,8 +69,8 @@
     "trie",
   ]
   pruneopts = ""
-  revision = "37685930d953bcbe023f9bc65b135a8d8b8f1488"
-  version = "v1.8.12"
+  revision = "225171a4bfcc16bd12a1906b1e0d43d0b18c353b"
+  version = "v1.8.13"
 
 [[projects]]
   digest = "1:eb53021a8aa3f599d29c7102e65026242bdedce998a54837dc67f14b6a97c5fd"
@@ -83,25 +82,25 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:0aa9ee13c77b00ba94d61dc309c82b3b75062992b3e39f9eba610e0a630a1a97"
+  digest = "1:7fcc0caa92bd37a3edd4ed1c3ce28e7158cc15e3394a15cd874672b7ee04fe65"
   name = "github.com/gladiusio/gladius-application-server"
   packages = [
     "pkg/controller",
     "pkg/db/models",
   ]
   pruneopts = ""
-  revision = "f033d782cd083dbb9d8f9ca52460c58cbfb31025"
+  revision = "e4aeae9f23b473714cfac98f1978ba55f7f1de16"
 
 [[projects]]
-  digest = "1:0ccd7887c362b4ac12ab567bb905eaf1e5791d486031921e79de8c08b43322b4"
+  digest = "1:bf1d95ddba70b52437b7fe4c61aecc6d9795e829c8ebb1c8fade39fe34135731"
   name = "github.com/gladiusio/gladius-utils"
   packages = [
     "config",
     "init/manager",
   ]
   pruneopts = ""
-  revision = "ceb48e78a63fcee86795bf168e21bb88d0b3b23f"
-  version = "0.3.4"
+  revision = "563c83e7e92bcdd1322616a70d139865ba1efb78"
+  version = "0.3.5"
 
 [[projects]]
   digest = "1:9ca737b471693542351e112c9e86be9bf7385e42256893a09ecb2a98e2036f74"
@@ -248,11 +247,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:fed90fa725d3b1bac0a760de64426834dfef4546474cf182f2ec94285afa74a8"
+  digest = "1:f051415854295f969c8ee605e81f1df68579600db89a43cdf56c791ec606abe7"
   name = "github.com/kardianos/service"
   packages = ["."]
   pruneopts = ""
-  revision = "615a14ed75099c9eaac6949e22ac2341bf9d3197"
+  revision = "4cdeddd6f419cb717c4234a9566405565fcfcae7"
 
 [[projects]]
   branch = "master"
@@ -375,19 +374,19 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:104517520aab91164020ab6524a5d6b7cafc641b2e42ac6236f6ac1deac4f66a"
+  digest = "1:49d1a9ccb9502d5ce81e7ae622211c496612970bbbfd1c9e4065e6ec13c3d030"
   name = "github.com/spf13/jwalterweatherman"
   packages = ["."]
   pruneopts = ""
-  revision = "7c0cea34c8ece3fbeb2b27ab9b59511d360fb394"
+  revision = "14d3d4c518341bea657dd8a226f5121c0ff8c9f2"
 
 [[projects]]
-  digest = "1:8e243c568f36b09031ec18dff5f7d2769dcf5ca4d624ea511c8e3197dc3d352d"
+  digest = "1:0a52bcb568386d98f4894575d53ce3e456f56471de6897bb8b9de13c33d9340e"
   name = "github.com/spf13/pflag"
   packages = ["."]
   pruneopts = ""
-  revision = "583c0c0531f06d5278b7d917446061adc344b5cd"
-  version = "v1.0.1"
+  revision = "9a97c102cda95a86cec2345a6f09f55a939babf5"
+  version = "v1.0.2"
 
 [[projects]]
   digest = "1:a3018c5a423d6cfacf5c6e736ad07637494728fb446390e3f34cacae9e80a529"
@@ -399,7 +398,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:3ec9ff608353f8176fe35b526e860fba94eafd055aa218505296562b812f3e2a"
+  digest = "1:ce5194e5afac308cc34e500cab45b4ce88a0742d689e3cf7e37b607ad76bed2f"
   name = "github.com/syndtr/goleveldb"
   packages = [
     "leveldb",
@@ -416,7 +415,7 @@
     "leveldb/util",
   ]
   pruneopts = ""
-  revision = "c4c61651e9e37fa117f53c5a906d3b63090d8445"
+  revision = "ae2bd5eed72d46b28834ec3f60db3a3ebedd8dbd"
 
 [[projects]]
   digest = "1:0308279931f894a1ba11e7d354d346c96ead9c7539a4fff1fce030845ec6c780"
@@ -444,7 +443,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:cae234a803b78380e4d769db6036b9fcc8c08ed4ff862571ffc1a958edc1f629"
+  digest = "1:793a79198b755828dec284c6f1325e24e09186f1b7ba818b65c7c35104ed86eb"
   name = "golang.org/x/crypto"
   packages = [
     "ed25519",
@@ -453,11 +452,11 @@
     "scrypt",
   ]
   pruneopts = ""
-  revision = "c126467f60eb25f8f27e5a981f32a87e3965053f"
+  revision = "614d502a4dac94afa3a6ce146bd1736da82514c6"
 
 [[projects]]
   branch = "master"
-  digest = "1:8e4a79517b6b555b3a9dc63bb9bc91382a725f6b1a7f4471bb07e5fa3f1bd1f6"
+  digest = "1:7a1f3a425a5c3cbef7ff19f11aeef1b3c057a71b4df7f396af5c62cd220ba120"
   name = "golang.org/x/net"
   packages = [
     "bpf",
@@ -468,11 +467,11 @@
     "websocket",
   ]
   pruneopts = ""
-  revision = "c4299a1a0d8524c11563db160fbf9bddbceadb21"
+  revision = "922f4815f713f213882e8ef45e0d315b164d705c"
 
 [[projects]]
   branch = "master"
-  digest = "1:dd631ee90bd2e7aa16b6e094217d77a797684b52811374c948c695cbb46b5bbb"
+  digest = "1:54d1b4c40f05586ddc168fc0f94ceebe85bdb285613ae4a5dafd5e43b52b4d0f"
   name = "golang.org/x/sys"
   packages = [
     "unix",
@@ -483,7 +482,7 @@
     "windows/svc/mgr",
   ]
   pruneopts = ""
-  revision = "bd9dbc187b6e1dacfdd2722a87e83093c2d7bd6e"
+  revision = "3b58ed4ad3395d483fc92d5d14123ce2c3581fec"
 
 [[projects]]
   digest = "1:5acd3512b047305d49e8763eef7ba423901e85d5dd2fd1e71778a0ea8de10bd4"
@@ -502,7 +501,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:5245bbf30a228b22cb61683ba5ad9641b98e0f81a9c4918394f49b40f6aa80f7"
+  digest = "1:6ac060e8427160d2a39987c5b82b0079bceed25417d73457786445556497fdbd"
   name = "golang.org/x/tools"
   packages = [
     "go/ast/astutil",
@@ -510,15 +509,7 @@
     "internal/fastwalk",
   ]
   pruneopts = ""
-  revision = "8cc4e8a6f4841aa92a8683fca47bc5d64b58875b"
-
-[[projects]]
-  digest = "1:812b8cd6b58e655c0399b001419f51442b6ca9d9cf9a9edf471a4a5ad497c767"
-  name = "gopkg.in/fatih/set.v0"
-  packages = ["."]
-  pruneopts = ""
-  revision = "57907de300222151a123d29255ed17f5ed43fad3"
-  version = "v0.1.0"
+  revision = "5fad05c81888302518e9dfb20b55b3e1790c7a11"
 
 [[projects]]
   branch = "v2"
