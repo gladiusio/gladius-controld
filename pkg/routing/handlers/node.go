@@ -123,8 +123,6 @@ func NodeViewApplicationHandler(ga *blockchain.GladiusAccountManager) func(w htt
 
 func NodeViewAllApplicationsHandler(ga *blockchain.GladiusAccountManager) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		unlocked := ga.Unlocked()
-		print(unlocked)
 		err := AccountErrorHandler(w, r, ga)
 		if err != nil {
 			return

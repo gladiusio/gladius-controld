@@ -64,17 +64,34 @@ func ErrorHandler(w http.ResponseWriter, r *http.Request, m string, e error, sta
 	return
 }
 
-// Account Manager Error Handler, checks required account permissions prior to accessing API endpoints
-func AccountErrorHandler(w http.ResponseWriter, r *http.Request, ga *blockchain.GladiusAccountManager) error {
+func AccountNotFoundErrorHandler(w http.ResponseWriter, r *http.Request, ga *blockchain.GladiusAccountManager) error {
 	if !ga.HasAccount() {
 		err := errors.New("account not found")
 		ErrorHandler(w, r, "Account not found, please create an account", err, http.StatusBadRequest)
 		return err
 	}
 
+	return nil
+}
+
+func AccountUnlockedErrorHandler(w http.ResponseWriter, r *http.Request, ga *blockchain.GladiusAccountManager) error {
 	if !ga.Unlocked() {
 		err := errors.New("wallet locked")
-		ErrorHandler(w, r, "Wallet is not unlocked, open wallet before trying your request again", err, http.StatusMethodNotAllowed)
+		ErrorHandler(w, r, "Wallet could not be opened, passphrase is incorrect", err, http.StatusMethodNotAllowed)
+		return err
+	}
+	return nil
+}
+
+// Account Manager Error Handler, checks required account permissions prior to accessing API endpoints
+func AccountErrorHandler(w http.ResponseWriter, r *http.Request, ga *blockchain.GladiusAccountManager) error {
+	err := AccountNotFoundErrorHandler(w, r, ga)
+	if err != nil {
+		return err
+	}
+
+	err = AccountUnlockedErrorHandler(w, r, ga)
+	if err != nil {
 		return err
 	}
 

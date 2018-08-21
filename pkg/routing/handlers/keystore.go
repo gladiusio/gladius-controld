@@ -30,7 +30,7 @@ func KeystoreAccountCreationHandler(ga *blockchain.GladiusAccountManager) func(w
 	return func(w http.ResponseWriter, r *http.Request) {
 		wallet, err := passphraseDecoder(w, r)
 		if err != nil {
-			ErrorHandler(w, r, "Could not find `passphrase` in request", err, http.StatusInternalServerError)
+			ErrorHandler(w, r, "Could not find `passphrase` in request", err, http.StatusBadRequest)
 			return
 		}
 
@@ -70,15 +70,20 @@ func KeystoreAccountRetrievalHandler(ga *blockchain.GladiusAccountManager) func(
 }
 func KeystoreAccountUnlockHandler(ga *blockchain.GladiusAccountManager) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		err := AccountNotFoundErrorHandler(w, r, ga)
+		if err != nil {
+			return
+		}
+
 		accountBody, err := passphraseDecoder(w, r)
 		if err != nil {
-			ErrorHandler(w, r, "Could not find `passphrase` in request", err, http.StatusInternalServerError)
+			ErrorHandler(w, r, "Could not find `passphrase` in request", err, http.StatusBadRequest)
 			return
 		}
 
 		success, err := ga.UnlockAccount(accountBody.Passphrase)
 		if success == false || err != nil {
-			ErrorHandler(w, r, "Wallet could not be opened, passphrase could be incorrect", err, http.StatusBadRequest)
+			ErrorHandler(w, r, "Wallet could not be opened, passphrase is incorrect", err, http.StatusMethodNotAllowed)
 			return
 		}
 
