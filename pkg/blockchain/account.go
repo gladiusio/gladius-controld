@@ -34,6 +34,30 @@ func NewGladiusAccountManager() *GladiusAccountManager {
 	return &GladiusAccountManager{keystore: ks}
 }
 
+// Determines if account is unlocked by signing a blank hash
+func (ga GladiusAccountManager) Unlocked() bool {
+	if !ga.HasAccount() {
+		return false
+	}
+
+	account, err := ga.GetAccount()
+	if err != nil {
+		return false
+	}
+
+	_, err = ga.Keystore().SignHash(*account, []byte("00000000000000000000000000000000"))
+	if err != nil {
+		return false
+	}
+
+	return true
+}
+
+// Checks if AccountManager has an account
+func (ga GladiusAccountManager) HasAccount() bool {
+	return len(ga.keystore.Accounts()) > 0
+}
+
 // Keystore gets the keystore associated with the account manager
 func (ga GladiusAccountManager) Keystore() *keystore.KeyStore {
 	return ga.keystore
@@ -60,6 +84,7 @@ func (ga GladiusAccountManager) CreateAccount(passphrase string) (accounts.Accou
 	if len(ga.Keystore().Accounts()) < 1 {
 		return ks.NewAccount(passphrase)
 	}
+
 	return accounts.Account{}, errors.New("gladius account already exists")
 
 }
@@ -111,7 +136,6 @@ func GetAccountBalance(address common.Address, symbol BalanceType) (Balance, err
 		symbolString = "ETH"
 		break
 	case GLA:
-		// https://api.etherscan.io/api?module=account&action=tokenbalance&contractaddress=0x57d90b64a1a57749b0f932f1a3395792e12e7055&address=0xe04f27eb70e025b78871a2ad7eabe85e61212761&tag=latest&apikey=YourApiKeyToken
 		resp, err = http.Get("https://api-ropsten.etherscan.io/api?module=account&action=tokenbalance&contractaddress=" + glaTokenAddress + "&address=" + address.String() + "&apikey=3VRW685YYESSYIFVND3DVN9ZNF4BTT1GB8")
 		symbolString = "GLA"
 		break

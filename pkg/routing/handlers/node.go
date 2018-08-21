@@ -28,12 +28,17 @@ func PoolResponseForAddress(poolAddress string, ga *blockchain.GladiusAccountMan
 // New Routes
 func NodeNewApplicationHandler(ga *blockchain.GladiusAccountManager) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		err := AccountErrorHandler(w, r, ga)
+		if err != nil {
+			return
+		}
+
 		vars := mux.Vars(r)
 		poolAddress := vars["poolAddress"]
 
 		poolResponse, err := PoolResponseForAddress(poolAddress, ga)
 		if err != nil {
-			ErrorHandler(w, r, "Pool data could not be found for Pool: "+poolAddress, err, http.StatusBadRequest)
+			ErrorHandler(w, r, "Pool data could not be found for Pool: "+poolAddress, err, http.StatusNotFound)
 			return
 		}
 
@@ -81,6 +86,11 @@ func NodeNewApplicationHandler(ga *blockchain.GladiusAccountManager) func(w http
 
 func NodeViewApplicationHandler(ga *blockchain.GladiusAccountManager) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		err := AccountErrorHandler(w, r, ga)
+		if err != nil {
+			return
+		}
+
 		vars := mux.Vars(r)
 		poolAddress := vars["poolAddress"]
 
@@ -113,9 +123,14 @@ func NodeViewApplicationHandler(ga *blockchain.GladiusAccountManager) func(w htt
 
 func NodeViewAllApplicationsHandler(ga *blockchain.GladiusAccountManager) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		err := AccountErrorHandler(w, r, ga)
+		if err != nil {
+			return
+		}
+
 		poolArrayResponse, err := blockchain.MarketPools(true, ga)
 		if err != nil {
-			ErrorHandler(w, r, "Could not retrieve pools", err, http.StatusBadRequest)
+			ErrorHandler(w, r, "Could not retrieve pools", err, http.StatusServiceUnavailable)
 			return
 		}
 
@@ -132,7 +147,6 @@ func NodeViewAllApplicationsHandler(ga *blockchain.GladiusAccountManager) func(w
 			//poolResponse.Data.URL
 			if poolResponse.Data.URL != "" {
 				applicationResponse, err := sendRequest(http.MethodPost, poolResponse.Data.URL+"applications/view", signedMessage)
-				//applicationResponse, err := sendRequest(http.MethodPost, "http://localhost:3333/api/applications/view", signedMessage)
 
 				if err == nil {
 					var responseStruct response.DefaultResponse
