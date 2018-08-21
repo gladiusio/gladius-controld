@@ -1,13 +1,13 @@
 package main
 
 import (
-		"github.com/gladiusio/gladius-application-server/pkg/controller"
+	"github.com/gladiusio/gladius-application-server/pkg/controller"
 	. "github.com/gladiusio/gladius-controld/pkg/config"
 	"github.com/gladiusio/gladius-controld/pkg/routing"
 	"github.com/gladiusio/gladius-utils/init/manager"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-		"log"
+	"log"
 )
 
 var Database *gorm.DB

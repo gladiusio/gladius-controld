@@ -17,7 +17,7 @@ type ConfigurationOptions struct {
 
 type ApplicationServerConfig struct {
 	Database DatabaseConfig
-	Config ConfigurationOptions
+	Config   ConfigurationOptions
 }
 
 func (databaseConfig *DatabaseConfig) GormConnectionString() string {
@@ -40,7 +40,7 @@ func (databaseConfig *DatabaseConfig) GormConnectionString() string {
 }
 
 type DatabaseConfig struct {
-	Type	 string
+	Type     string
 	Host     string
 	Port     string
 	User     string
@@ -49,8 +49,15 @@ type DatabaseConfig struct {
 	SSL      bool
 }
 
+type BlockchainConfig struct {
+	Provider      string
+	MarketAddress string
+}
+
 type Configuration struct {
 	Title             string
+	Version           string
+	Blockchain        BlockchainConfig
 	ApplicationServer ApplicationServerConfig
 }
 
@@ -59,9 +66,10 @@ func DefaultConfiguration() (Configuration, error) {
 
 	viper.SetConfigName("config")
 	viper.AddConfigPath(".")
+
 	err := viper.ReadInConfig()
 	if err != nil {
-		log.Fatalf("\n\nUnable to find config.toml in project root, or default directories below.\n\nError: \n%v", err)
+		log.Printf("\n\nUnable to find config.toml in project root, or default directories below.\n\nError: \n%v", err)
 	}
 
 	err = viper.Unmarshal(&configuration)
