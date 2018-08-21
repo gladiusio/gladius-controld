@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"github.com/gladiusio/gladius-controld/pkg/routing"
-	"github.com/gladiusio/gladius-utils/config"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	"github.com/spf13/viper"
@@ -12,7 +11,11 @@ import (
 )
 
 type ConfigurationOptions struct {
-	Port string
+	Name        string
+	DisplayName string
+	Description string
+	Debug       bool
+	Port        string
 }
 
 type ApplicationServerConfig struct {
@@ -54,22 +57,32 @@ type BlockchainConfig struct {
 	MarketAddress string
 }
 
+type NodeManagerConfig struct {
+	Config ConfigurationOptions
+}
+
+type PoolManagerConfig struct {
+	Database DatabaseConfig
+	Config   ConfigurationOptions
+}
+
 type Configuration struct {
-	Title             string
 	Version           string
 	Blockchain        BlockchainConfig
+	NodeManager       NodeManagerConfig
+	PoolManager       PoolManagerConfig
 	ApplicationServer ApplicationServerConfig
 }
 
 func DefaultConfiguration() (Configuration, error) {
 	var configuration Configuration
 
-	viper.SetConfigName("config")
+	viper.SetConfigName("gladius-controld-defaults")
 	viper.AddConfigPath(".")
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		log.Printf("\n\nUnable to find config.toml in project root, or default directories below.\n\nError: \n%v", err)
+		log.Printf("\n\nUnable to find gladius-controld.toml in project root, or default directories below.\n\nError: \n%v", err)
 	}
 
 	err = viper.Unmarshal(&configuration)
@@ -78,12 +91,6 @@ func DefaultConfiguration() (Configuration, error) {
 	}
 
 	return configuration, nil
-}
-
-func Config() (Name, DisplayName, Description string) {
-	// Setup config handling
-	config.SetupConfig("gladius-controld", config.ControlDaemonDefaults())
-	return "GladiusControlDaemon", "Gladius Control Daemon", "Gladius Control Daemon"
 }
 
 func setupRouter() (*mux.Router, *blockchain.GladiusAccountManager) {

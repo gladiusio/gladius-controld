@@ -22,7 +22,7 @@ vendor/
 build/
 
 # config
-config.toml
+gladius-controld.toml
 
 ################
 # IntelliJ IDE #
