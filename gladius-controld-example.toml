@@ -9,6 +9,12 @@ build                 = 20180821
 [logging]
   path                = "./logs/"
 
+[directory]
+  # default wallet location
+  # unix-based, ~/.config/gladius/wallet
+  base                = "$home/.config/gladius/"
+  wallet              = "wallet"
+
 [blockchain]
   provider            = "https://ropsten.infura.io/tjqLYxxGIUp0NylVCiWw"
   marketAddress       = "0xc4dfb5c9e861eeae844795cfb8d30b77b78bbc38"
@@ -29,13 +35,13 @@ build                 = 20180821
     debug             = true # Toggle API Debugging
     port              = "3000"
   [poolManager.database]
-      type            = "postgres" # only supported db type
-      host            = "127.0.0.1"
-      port            = "5432"
-      user            = "some-user"
-      name            = "some-database-name"
-      password        = "some-password"
-      ssl             = false # true / false
+    type              = "postgres" # only supported db type
+    host              = "127.0.0.1"
+    port              = "5432"
+    user              = "some-user"
+    name              = "some-database-name"
+    password          = "some-password"
+    ssl               = false # true / false
 
 [applicationServer]
   [applicationServer.config]
@@ -48,7 +54,7 @@ build                 = 20180821
     type              = "postgres" # only supported db type
     host              = "127.0.0.1"
     port              = "5432"
-      user            = "some-user"
-      name            = "some-database-name"
-      password        = "some-password"
+    user              = "some-user"
+    name              = "some-database-name"
+    password          = "some-password"
     ssl               = false # true / false

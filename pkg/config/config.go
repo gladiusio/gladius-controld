@@ -1,13 +1,17 @@
 package config
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"github.com/gladiusio/gladius-controld/pkg/routing"
+	"github.com/gladiusio/gladius-utils/config"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	"github.com/spf13/viper"
 	"log"
+	"path/filepath"
 )
 
 type ConfigurationOptions struct {
@@ -16,11 +20,6 @@ type ConfigurationOptions struct {
 	Description string
 	Debug       bool
 	Port        string
-}
-
-type ApplicationServerConfig struct {
-	Database DatabaseConfig
-	Config   ConfigurationOptions
 }
 
 func (databaseConfig *DatabaseConfig) GormConnectionString() string {
@@ -57,37 +56,94 @@ type BlockchainConfig struct {
 	MarketAddress string
 }
 
-type NodeManagerConfig struct {
-	Config ConfigurationOptions
-}
-
-type PoolManagerConfig struct {
-	Database DatabaseConfig
-	Config   ConfigurationOptions
-}
-
 type Configuration struct {
-	Version           string
-	Blockchain        BlockchainConfig
-	NodeManager       NodeManagerConfig
-	PoolManager       PoolManagerConfig
-	ApplicationServer ApplicationServerConfig
+	Version    string
+	Build      int
+	Blockchain BlockchainConfig
+	Directory  struct {
+		Base   string
+		Wallet string
+	}
+	NodeManager struct {
+		Config ConfigurationOptions
+	}
+	PoolManager struct {
+		Database DatabaseConfig
+		Config   ConfigurationOptions
+	}
+	ApplicationServer struct {
+		Database DatabaseConfig
+		Config   ConfigurationOptions
+	}
+}
+
+func (configuration Configuration) defaults() Configuration {
+	baseDir, err := config.GetGladiusBase()
+	if err != nil {
+		baseDir = ""
+	}
+
+	return Configuration{
+		Version: "0.5.0",
+		Build:   20180821,
+		Blockchain: BlockchainConfig{
+			Provider:      "https://ropsten.infura.io/tjqLYxxGIUp0NylVCiWw",
+			MarketAddress: "0xc4dfb5c9e861eeae844795cfb8d30b77b78bbc38",
+		},
+		Directory: struct {
+			Base   string
+			Wallet string
+		}{
+			Base:   baseDir,
+			Wallet: filepath.Join(baseDir, "wallet"),
+		},
+		NodeManager: struct {
+			Config ConfigurationOptions
+		}{
+			Config: struct {
+				Name        string
+				DisplayName string
+				Description string
+				Debug       bool
+				Port        string
+			}{
+				Name:        "GladiusNodeControlDaemon",
+				DisplayName: "Gladius Node Manager",
+				Description: "Gladius Control Daemon",
+				Debug:       false,
+				Port:        "3001",
+			},
+		},
+	}
 }
 
 func DefaultConfiguration() (Configuration, error) {
 	var configuration Configuration
 
-	viper.SetConfigName("gladius-controld-defaults")
 	viper.AddConfigPath(".")
 
 	err := viper.ReadInConfig()
 	if err != nil {
 		log.Printf("\n\nUnable to find gladius-controld.toml in project root, or default directories below.\n\nError: \n%v", err)
-	}
+		log.Printf("\n\nUsing Default Node Manager Configuration")
 
-	err = viper.Unmarshal(&configuration)
-	if err != nil {
-		log.Fatalf("unable to decode into struct, %v", err)
+		configuration = configuration.defaults()
+
+		viper.SetDefault("blockchain", configuration.Blockchain)
+		viper.SetDefault("nodeManager", configuration.NodeManager)
+
+		jsonBytes, err := json.Marshal(configuration)
+		if err != nil {
+			log.Fatalf("Unable to marshal configuration struct to load defaults, %v", err)
+		}
+
+		viper.SetConfigType("json")
+		viper.ReadConfig(bytes.NewBuffer(jsonBytes))
+	} else {
+		err = viper.Unmarshal(&configuration)
+		if err != nil {
+			log.Fatalf("unable to decode into struct, %v", err)
+		}
 	}
 
 	return configuration, nil
