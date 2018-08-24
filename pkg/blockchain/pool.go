@@ -1,14 +1,11 @@
 package blockchain
 
 import (
-
-"encoding/json"
-"github.com/ethereum/go-ethereum/accounts/abi/bind"
-"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain/generated"
-"log"
-"strings"
+	"log"
 )
 
 // ConnectNode - Connect and grab node
@@ -23,35 +20,22 @@ func ConnectPool(poolAddress common.Address) *generated.Pool {
 	return pool
 }
 
-type PoolPublicData struct {
-	Name         string `json:"name"`
-	Location     string `json:"location"`
-	Rating       string `json:"rating"`
-	NodeCount    string `json:"nodeCount"`
-	MaxBandwidth string `json:"maxBandwidth"`
-	URL          string `json:"url"`
-}
-
-func PoolRetrievePublicData(poolAddress string, ga *GladiusAccountManager) (*PoolPublicData, error) {
+func PoolRetrieveApplicationServerUrl(poolAddress string, ga *GladiusAccountManager) (string, error) {
 	pool := ConnectPool(common.HexToAddress(poolAddress))
 	address, err := ga.GetAccountAddress()
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	publicDataResponse, err := pool.PublicData(&bind.CallOpts{From: *address})
+	url, err := pool.GetUrl(&bind.CallOpts{From: *address})
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	dataReader := strings.NewReader(publicDataResponse)
-	decoder := json.NewDecoder(dataReader)
-	var poolPublicData PoolPublicData
-	decoder.Decode(&poolPublicData)
-	return &poolPublicData, nil
+	return url, nil
 }
 
-func PoolSetPublicData(passphrase, poolAddress, data string) (*types.Transaction, error) {
+func PoolSetApplicationServerUrl(passphrase, poolAddress, url string) (*types.Transaction, error) {
 	pool := ConnectPool(common.HexToAddress(poolAddress))
 	ga := NewGladiusAccountManager()
 
@@ -60,7 +44,7 @@ func PoolSetPublicData(passphrase, poolAddress, data string) (*types.Transaction
 		return nil, err
 	}
 
-	transaction, err := pool.SetPublicData(auth, data)
+	transaction, err := pool.SetUrl(auth, url)
 
 	if err != nil {
 		return nil, err

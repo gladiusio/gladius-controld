@@ -88,7 +88,7 @@ func (configuration Configuration) defaults() Configuration {
 		Build:   20180821,
 		Blockchain: BlockchainConfig{
 			Provider:      "https://ropsten.infura.io/tjqLYxxGIUp0NylVCiWw",
-			MarketAddress: "0xc4dfb5c9e861eeae844795cfb8d30b77b78bbc38",
+			MarketAddress: "0xad5c2c9eb5630780808e9333a08fcedec0afd03f",
 		},
 		Directory: struct {
 			Base   string
@@ -119,7 +119,6 @@ func (configuration Configuration) defaults() Configuration {
 
 func DefaultConfiguration() (Configuration, error) {
 	var configuration Configuration
-
 	viper.AddConfigPath(".")
 
 	err := viper.ReadInConfig()
