@@ -69,21 +69,29 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:53123c7a26f445c662b4e058128957bf6ee799c14eab2c8d901df718cd012eab"
+
   name = "github.com/gladiusio/gladius-application-server"
   packages = [
     "pkg/controller",
     "pkg/db/models"
   ]
-  revision = "e4aeae9f23b473714cfac98f1978ba55f7f1de16"
+
+  pruneopts = ""
+  revision = "4bc453994fbf9ac7cc526bad1a42ab41697dde23"
 
 [[projects]]
+  digest = "1:1f6d1b29f353bfd7fd36c254f5bc9e0e0ee903083f907a3f930fa03171834449"
   name = "github.com/gladiusio/gladius-utils"
   packages = [
     "config",
     "init/manager"
   ]
-  revision = "563c83e7e92bcdd1322616a70d139865ba1efb78"
-  version = "0.3.5"
+
+  pruneopts = ""
+  revision = "9ab431d232e7950de753c3cfa307b73fa726cbfa"
+  version = "0.3.6"
+
 
 [[projects]]
   name = "github.com/go-stack/stack"

@@ -14,7 +14,7 @@ import (
 )
 
 // PoolABI is the input ABI used to generate the binding from.
-const PoolABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"work\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"publicKey\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"data\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"publicData\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"balance\",\"outputs\":[{\"name\":\"owed\",\"type\":\"uint256\"},{\"name\":\"total\",\"type\":\"uint256\"},{\"name\":\"completed\",\"type\":\"uint256\"},{\"name\":\"paid\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"pay\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"allocateFunds\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_publicKey\",\"type\":\"string\"},{\"name\":\"_owner\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"constant\":false,\"inputs\":[{\"name\":\"_data\",\"type\":\"string\"}],\"name\":\"setData\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_publicData\",\"type\":\"string\"}],\"name\":\"setPublicData\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_user\",\"type\":\"address\"}],\"name\":\"getBalanceStructFor\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"},{\"name\":\"\",\"type\":\"uint256\"},{\"name\":\"\",\"type\":\"uint256\"},{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_user\",\"type\":\"address\"}],\"name\":\"getTotalBalanceFor\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_user\",\"type\":\"address\"}],\"name\":\"getOwedBalanceFor\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_client\",\"type\":\"address\"},{\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"allocateFundsFrom\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_node\",\"type\":\"address\"},{\"name\":\"_client\",\"type\":\"address\"},{\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"logWorkFrom\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_node\",\"type\":\"address\"},{\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"payout\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getNodeList\",\"outputs\":[{\"name\":\"\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getClientList\",\"outputs\":[{\"name\":\"\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"addNode\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"addClient\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_node\",\"type\":\"address\"}],\"name\":\"acceptNode\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_client\",\"type\":\"address\"}],\"name\":\"acceptClient\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_node\",\"type\":\"address\"}],\"name\":\"rejectNode\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_client\",\"type\":\"address\"}],\"name\":\"rejectClient\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]"
+const PoolABI = "[{\"constant\":true,\"inputs\":[],\"name\":\"url\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"data\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"masterNodes\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"seedNode\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_owner\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"constant\":true,\"inputs\":[],\"name\":\"getOwner\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getMasterNodes\",\"outputs\":[{\"name\":\"\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getSeedNode\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getData\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getUrl\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_owner\",\"type\":\"address\"}],\"name\":\"changeOwner\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_data\",\"type\":\"string\"}],\"name\":\"setData\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_url\",\"type\":\"string\"}],\"name\":\"setUrl\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_node\",\"type\":\"string\"}],\"name\":\"setSeedNode\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_node\",\"type\":\"address\"}],\"name\":\"addMasterNode\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]"
 
 // Pool is an auto generated Go binding around an Ethereum contract.
 type Pool struct {
@@ -158,50 +158,6 @@ func (_Pool *PoolTransactorRaw) Transact(opts *bind.TransactOpts, method string,
 	return _Pool.Contract.contract.Transact(opts, method, params...)
 }
 
-// Balance is a free data retrieval call binding the contract method 0xb69ef8a8.
-//
-// Solidity: function balance() constant returns(owed uint256, total uint256, completed uint256, paid uint256)
-func (_Pool *PoolCaller) Balance(opts *bind.CallOpts) (struct {
-	Owed      *big.Int
-	Total     *big.Int
-	Completed *big.Int
-	Paid      *big.Int
-}, error) {
-	ret := new(struct {
-		Owed      *big.Int
-		Total     *big.Int
-		Completed *big.Int
-		Paid      *big.Int
-	})
-	out := ret
-	err := _Pool.contract.Call(opts, out, "balance")
-	return *ret, err
-}
-
-// Balance is a free data retrieval call binding the contract method 0xb69ef8a8.
-//
-// Solidity: function balance() constant returns(owed uint256, total uint256, completed uint256, paid uint256)
-func (_Pool *PoolSession) Balance() (struct {
-	Owed      *big.Int
-	Total     *big.Int
-	Completed *big.Int
-	Paid      *big.Int
-}, error) {
-	return _Pool.Contract.Balance(&_Pool.CallOpts)
-}
-
-// Balance is a free data retrieval call binding the contract method 0xb69ef8a8.
-//
-// Solidity: function balance() constant returns(owed uint256, total uint256, completed uint256, paid uint256)
-func (_Pool *PoolCallerSession) Balance() (struct {
-	Owed      *big.Int
-	Total     *big.Int
-	Completed *big.Int
-	Paid      *big.Int
-}, error) {
-	return _Pool.Contract.Balance(&_Pool.CallOpts)
-}
-
 // Data is a free data retrieval call binding the contract method 0x73d4a13a.
 //
 // Solidity: function data() constant returns(string)
@@ -228,425 +184,280 @@ func (_Pool *PoolCallerSession) Data() (string, error) {
 	return _Pool.Contract.Data(&_Pool.CallOpts)
 }
 
-// GetBalanceStructFor is a free data retrieval call binding the contract method 0x7cc62dd7.
+// GetData is a free data retrieval call binding the contract method 0x3bc5de30.
 //
-// Solidity: function getBalanceStructFor(_user address) constant returns(uint256, uint256, uint256, uint256)
-func (_Pool *PoolCaller) GetBalanceStructFor(opts *bind.CallOpts, _user common.Address) (*big.Int, *big.Int, *big.Int, *big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-		ret1 = new(*big.Int)
-		ret2 = new(*big.Int)
-		ret3 = new(*big.Int)
-	)
-	out := &[]interface{}{
-		ret0,
-		ret1,
-		ret2,
-		ret3,
-	}
-	err := _Pool.contract.Call(opts, out, "getBalanceStructFor", _user)
-	return *ret0, *ret1, *ret2, *ret3, err
-}
-
-// GetBalanceStructFor is a free data retrieval call binding the contract method 0x7cc62dd7.
-//
-// Solidity: function getBalanceStructFor(_user address) constant returns(uint256, uint256, uint256, uint256)
-func (_Pool *PoolSession) GetBalanceStructFor(_user common.Address) (*big.Int, *big.Int, *big.Int, *big.Int, error) {
-	return _Pool.Contract.GetBalanceStructFor(&_Pool.CallOpts, _user)
-}
-
-// GetBalanceStructFor is a free data retrieval call binding the contract method 0x7cc62dd7.
-//
-// Solidity: function getBalanceStructFor(_user address) constant returns(uint256, uint256, uint256, uint256)
-func (_Pool *PoolCallerSession) GetBalanceStructFor(_user common.Address) (*big.Int, *big.Int, *big.Int, *big.Int, error) {
-	return _Pool.Contract.GetBalanceStructFor(&_Pool.CallOpts, _user)
-}
-
-// GetClientList is a free data retrieval call binding the contract method 0xd644f767.
-//
-// Solidity: function getClientList() constant returns(address[])
-func (_Pool *PoolCaller) GetClientList(opts *bind.CallOpts) ([]common.Address, error) {
-	var (
-		ret0 = new([]common.Address)
-	)
-	out := ret0
-	err := _Pool.contract.Call(opts, out, "getClientList")
-	return *ret0, err
-}
-
-// GetClientList is a free data retrieval call binding the contract method 0xd644f767.
-//
-// Solidity: function getClientList() constant returns(address[])
-func (_Pool *PoolSession) GetClientList() ([]common.Address, error) {
-	return _Pool.Contract.GetClientList(&_Pool.CallOpts)
-}
-
-// GetClientList is a free data retrieval call binding the contract method 0xd644f767.
-//
-// Solidity: function getClientList() constant returns(address[])
-func (_Pool *PoolCallerSession) GetClientList() ([]common.Address, error) {
-	return _Pool.Contract.GetClientList(&_Pool.CallOpts)
-}
-
-// GetNodeList is a free data retrieval call binding the contract method 0x53f3b713.
-//
-// Solidity: function getNodeList() constant returns(address[])
-func (_Pool *PoolCaller) GetNodeList(opts *bind.CallOpts) ([]common.Address, error) {
-	var (
-		ret0 = new([]common.Address)
-	)
-	out := ret0
-	err := _Pool.contract.Call(opts, out, "getNodeList")
-	return *ret0, err
-}
-
-// GetNodeList is a free data retrieval call binding the contract method 0x53f3b713.
-//
-// Solidity: function getNodeList() constant returns(address[])
-func (_Pool *PoolSession) GetNodeList() ([]common.Address, error) {
-	return _Pool.Contract.GetNodeList(&_Pool.CallOpts)
-}
-
-// GetNodeList is a free data retrieval call binding the contract method 0x53f3b713.
-//
-// Solidity: function getNodeList() constant returns(address[])
-func (_Pool *PoolCallerSession) GetNodeList() ([]common.Address, error) {
-	return _Pool.Contract.GetNodeList(&_Pool.CallOpts)
-}
-
-// GetOwedBalanceFor is a free data retrieval call binding the contract method 0xac28949c.
-//
-// Solidity: function getOwedBalanceFor(_user address) constant returns(uint256)
-func (_Pool *PoolCaller) GetOwedBalanceFor(opts *bind.CallOpts, _user common.Address) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _Pool.contract.Call(opts, out, "getOwedBalanceFor", _user)
-	return *ret0, err
-}
-
-// GetOwedBalanceFor is a free data retrieval call binding the contract method 0xac28949c.
-//
-// Solidity: function getOwedBalanceFor(_user address) constant returns(uint256)
-func (_Pool *PoolSession) GetOwedBalanceFor(_user common.Address) (*big.Int, error) {
-	return _Pool.Contract.GetOwedBalanceFor(&_Pool.CallOpts, _user)
-}
-
-// GetOwedBalanceFor is a free data retrieval call binding the contract method 0xac28949c.
-//
-// Solidity: function getOwedBalanceFor(_user address) constant returns(uint256)
-func (_Pool *PoolCallerSession) GetOwedBalanceFor(_user common.Address) (*big.Int, error) {
-	return _Pool.Contract.GetOwedBalanceFor(&_Pool.CallOpts, _user)
-}
-
-// GetTotalBalanceFor is a free data retrieval call binding the contract method 0xa8f9868e.
-//
-// Solidity: function getTotalBalanceFor(_user address) constant returns(uint256)
-func (_Pool *PoolCaller) GetTotalBalanceFor(opts *bind.CallOpts, _user common.Address) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _Pool.contract.Call(opts, out, "getTotalBalanceFor", _user)
-	return *ret0, err
-}
-
-// GetTotalBalanceFor is a free data retrieval call binding the contract method 0xa8f9868e.
-//
-// Solidity: function getTotalBalanceFor(_user address) constant returns(uint256)
-func (_Pool *PoolSession) GetTotalBalanceFor(_user common.Address) (*big.Int, error) {
-	return _Pool.Contract.GetTotalBalanceFor(&_Pool.CallOpts, _user)
-}
-
-// GetTotalBalanceFor is a free data retrieval call binding the contract method 0xa8f9868e.
-//
-// Solidity: function getTotalBalanceFor(_user address) constant returns(uint256)
-func (_Pool *PoolCallerSession) GetTotalBalanceFor(_user common.Address) (*big.Int, error) {
-	return _Pool.Contract.GetTotalBalanceFor(&_Pool.CallOpts, _user)
-}
-
-// PublicData is a free data retrieval call binding the contract method 0x9a76717a.
-//
-// Solidity: function publicData() constant returns(string)
-func (_Pool *PoolCaller) PublicData(opts *bind.CallOpts) (string, error) {
+// Solidity: function getData() constant returns(string)
+func (_Pool *PoolCaller) GetData(opts *bind.CallOpts) (string, error) {
 	var (
 		ret0 = new(string)
 	)
 	out := ret0
-	err := _Pool.contract.Call(opts, out, "publicData")
+	err := _Pool.contract.Call(opts, out, "getData")
 	return *ret0, err
 }
 
-// PublicData is a free data retrieval call binding the contract method 0x9a76717a.
+// GetData is a free data retrieval call binding the contract method 0x3bc5de30.
 //
-// Solidity: function publicData() constant returns(string)
-func (_Pool *PoolSession) PublicData() (string, error) {
-	return _Pool.Contract.PublicData(&_Pool.CallOpts)
+// Solidity: function getData() constant returns(string)
+func (_Pool *PoolSession) GetData() (string, error) {
+	return _Pool.Contract.GetData(&_Pool.CallOpts)
 }
 
-// PublicData is a free data retrieval call binding the contract method 0x9a76717a.
+// GetData is a free data retrieval call binding the contract method 0x3bc5de30.
 //
-// Solidity: function publicData() constant returns(string)
-func (_Pool *PoolCallerSession) PublicData() (string, error) {
-	return _Pool.Contract.PublicData(&_Pool.CallOpts)
+// Solidity: function getData() constant returns(string)
+func (_Pool *PoolCallerSession) GetData() (string, error) {
+	return _Pool.Contract.GetData(&_Pool.CallOpts)
 }
 
-// PublicKey is a free data retrieval call binding the contract method 0x63ffab31.
+// GetMasterNodes is a free data retrieval call binding the contract method 0x67eeae72.
 //
-// Solidity: function publicKey() constant returns(string)
-func (_Pool *PoolCaller) PublicKey(opts *bind.CallOpts) (string, error) {
+// Solidity: function getMasterNodes() constant returns(address[])
+func (_Pool *PoolCaller) GetMasterNodes(opts *bind.CallOpts) ([]common.Address, error) {
+	var (
+		ret0 = new([]common.Address)
+	)
+	out := ret0
+	err := _Pool.contract.Call(opts, out, "getMasterNodes")
+	return *ret0, err
+}
+
+// GetMasterNodes is a free data retrieval call binding the contract method 0x67eeae72.
+//
+// Solidity: function getMasterNodes() constant returns(address[])
+func (_Pool *PoolSession) GetMasterNodes() ([]common.Address, error) {
+	return _Pool.Contract.GetMasterNodes(&_Pool.CallOpts)
+}
+
+// GetMasterNodes is a free data retrieval call binding the contract method 0x67eeae72.
+//
+// Solidity: function getMasterNodes() constant returns(address[])
+func (_Pool *PoolCallerSession) GetMasterNodes() ([]common.Address, error) {
+	return _Pool.Contract.GetMasterNodes(&_Pool.CallOpts)
+}
+
+// GetOwner is a free data retrieval call binding the contract method 0x893d20e8.
+//
+// Solidity: function getOwner() constant returns(address)
+func (_Pool *PoolCaller) GetOwner(opts *bind.CallOpts) (common.Address, error) {
+	var (
+		ret0 = new(common.Address)
+	)
+	out := ret0
+	err := _Pool.contract.Call(opts, out, "getOwner")
+	return *ret0, err
+}
+
+// GetOwner is a free data retrieval call binding the contract method 0x893d20e8.
+//
+// Solidity: function getOwner() constant returns(address)
+func (_Pool *PoolSession) GetOwner() (common.Address, error) {
+	return _Pool.Contract.GetOwner(&_Pool.CallOpts)
+}
+
+// GetOwner is a free data retrieval call binding the contract method 0x893d20e8.
+//
+// Solidity: function getOwner() constant returns(address)
+func (_Pool *PoolCallerSession) GetOwner() (common.Address, error) {
+	return _Pool.Contract.GetOwner(&_Pool.CallOpts)
+}
+
+// GetSeedNode is a free data retrieval call binding the contract method 0x3c714980.
+//
+// Solidity: function getSeedNode() constant returns(string)
+func (_Pool *PoolCaller) GetSeedNode(opts *bind.CallOpts) (string, error) {
 	var (
 		ret0 = new(string)
 	)
 	out := ret0
-	err := _Pool.contract.Call(opts, out, "publicKey")
+	err := _Pool.contract.Call(opts, out, "getSeedNode")
 	return *ret0, err
 }
 
-// PublicKey is a free data retrieval call binding the contract method 0x63ffab31.
+// GetSeedNode is a free data retrieval call binding the contract method 0x3c714980.
 //
-// Solidity: function publicKey() constant returns(string)
-func (_Pool *PoolSession) PublicKey() (string, error) {
-	return _Pool.Contract.PublicKey(&_Pool.CallOpts)
+// Solidity: function getSeedNode() constant returns(string)
+func (_Pool *PoolSession) GetSeedNode() (string, error) {
+	return _Pool.Contract.GetSeedNode(&_Pool.CallOpts)
 }
 
-// PublicKey is a free data retrieval call binding the contract method 0x63ffab31.
+// GetSeedNode is a free data retrieval call binding the contract method 0x3c714980.
 //
-// Solidity: function publicKey() constant returns(string)
-func (_Pool *PoolCallerSession) PublicKey() (string, error) {
-	return _Pool.Contract.PublicKey(&_Pool.CallOpts)
+// Solidity: function getSeedNode() constant returns(string)
+func (_Pool *PoolCallerSession) GetSeedNode() (string, error) {
+	return _Pool.Contract.GetSeedNode(&_Pool.CallOpts)
 }
 
-// AcceptClient is a paid mutator transaction binding the contract method 0xa3eb9444.
+// GetUrl is a free data retrieval call binding the contract method 0xd6bd8727.
 //
-// Solidity: function acceptClient(_client address) returns()
-func (_Pool *PoolTransactor) AcceptClient(opts *bind.TransactOpts, _client common.Address) (*types.Transaction, error) {
-	return _Pool.contract.Transact(opts, "acceptClient", _client)
+// Solidity: function getUrl() constant returns(string)
+func (_Pool *PoolCaller) GetUrl(opts *bind.CallOpts) (string, error) {
+	var (
+		ret0 = new(string)
+	)
+	out := ret0
+	err := _Pool.contract.Call(opts, out, "getUrl")
+	return *ret0, err
 }
 
-// AcceptClient is a paid mutator transaction binding the contract method 0xa3eb9444.
+// GetUrl is a free data retrieval call binding the contract method 0xd6bd8727.
 //
-// Solidity: function acceptClient(_client address) returns()
-func (_Pool *PoolSession) AcceptClient(_client common.Address) (*types.Transaction, error) {
-	return _Pool.Contract.AcceptClient(&_Pool.TransactOpts, _client)
+// Solidity: function getUrl() constant returns(string)
+func (_Pool *PoolSession) GetUrl() (string, error) {
+	return _Pool.Contract.GetUrl(&_Pool.CallOpts)
 }
 
-// AcceptClient is a paid mutator transaction binding the contract method 0xa3eb9444.
+// GetUrl is a free data retrieval call binding the contract method 0xd6bd8727.
 //
-// Solidity: function acceptClient(_client address) returns()
-func (_Pool *PoolTransactorSession) AcceptClient(_client common.Address) (*types.Transaction, error) {
-	return _Pool.Contract.AcceptClient(&_Pool.TransactOpts, _client)
+// Solidity: function getUrl() constant returns(string)
+func (_Pool *PoolCallerSession) GetUrl() (string, error) {
+	return _Pool.Contract.GetUrl(&_Pool.CallOpts)
 }
 
-// AcceptNode is a paid mutator transaction binding the contract method 0x400008cf.
+// MasterNodes is a free data retrieval call binding the contract method 0xca2e6c77.
 //
-// Solidity: function acceptNode(_node address) returns()
-func (_Pool *PoolTransactor) AcceptNode(opts *bind.TransactOpts, _node common.Address) (*types.Transaction, error) {
-	return _Pool.contract.Transact(opts, "acceptNode", _node)
+// Solidity: function masterNodes( uint256) constant returns(address)
+func (_Pool *PoolCaller) MasterNodes(opts *bind.CallOpts, arg0 *big.Int) (common.Address, error) {
+	var (
+		ret0 = new(common.Address)
+	)
+	out := ret0
+	err := _Pool.contract.Call(opts, out, "masterNodes", arg0)
+	return *ret0, err
 }
 
-// AcceptNode is a paid mutator transaction binding the contract method 0x400008cf.
+// MasterNodes is a free data retrieval call binding the contract method 0xca2e6c77.
 //
-// Solidity: function acceptNode(_node address) returns()
-func (_Pool *PoolSession) AcceptNode(_node common.Address) (*types.Transaction, error) {
-	return _Pool.Contract.AcceptNode(&_Pool.TransactOpts, _node)
+// Solidity: function masterNodes( uint256) constant returns(address)
+func (_Pool *PoolSession) MasterNodes(arg0 *big.Int) (common.Address, error) {
+	return _Pool.Contract.MasterNodes(&_Pool.CallOpts, arg0)
 }
 
-// AcceptNode is a paid mutator transaction binding the contract method 0x400008cf.
+// MasterNodes is a free data retrieval call binding the contract method 0xca2e6c77.
 //
-// Solidity: function acceptNode(_node address) returns()
-func (_Pool *PoolTransactorSession) AcceptNode(_node common.Address) (*types.Transaction, error) {
-	return _Pool.Contract.AcceptNode(&_Pool.TransactOpts, _node)
+// Solidity: function masterNodes( uint256) constant returns(address)
+func (_Pool *PoolCallerSession) MasterNodes(arg0 *big.Int) (common.Address, error) {
+	return _Pool.Contract.MasterNodes(&_Pool.CallOpts, arg0)
 }
 
-// AddClient is a paid mutator transaction binding the contract method 0x533aa474.
+// Owner is a free data retrieval call binding the contract method 0x8da5cb5b.
 //
-// Solidity: function addClient() returns()
-func (_Pool *PoolTransactor) AddClient(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _Pool.contract.Transact(opts, "addClient")
+// Solidity: function owner() constant returns(address)
+func (_Pool *PoolCaller) Owner(opts *bind.CallOpts) (common.Address, error) {
+	var (
+		ret0 = new(common.Address)
+	)
+	out := ret0
+	err := _Pool.contract.Call(opts, out, "owner")
+	return *ret0, err
 }
 
-// AddClient is a paid mutator transaction binding the contract method 0x533aa474.
+// Owner is a free data retrieval call binding the contract method 0x8da5cb5b.
 //
-// Solidity: function addClient() returns()
-func (_Pool *PoolSession) AddClient() (*types.Transaction, error) {
-	return _Pool.Contract.AddClient(&_Pool.TransactOpts)
+// Solidity: function owner() constant returns(address)
+func (_Pool *PoolSession) Owner() (common.Address, error) {
+	return _Pool.Contract.Owner(&_Pool.CallOpts)
 }
 
-// AddClient is a paid mutator transaction binding the contract method 0x533aa474.
+// Owner is a free data retrieval call binding the contract method 0x8da5cb5b.
 //
-// Solidity: function addClient() returns()
-func (_Pool *PoolTransactorSession) AddClient() (*types.Transaction, error) {
-	return _Pool.Contract.AddClient(&_Pool.TransactOpts)
+// Solidity: function owner() constant returns(address)
+func (_Pool *PoolCallerSession) Owner() (common.Address, error) {
+	return _Pool.Contract.Owner(&_Pool.CallOpts)
 }
 
-// AddNode is a paid mutator transaction binding the contract method 0xe07c60e1.
+// SeedNode is a free data retrieval call binding the contract method 0xe0a18ee7.
 //
-// Solidity: function addNode() returns()
-func (_Pool *PoolTransactor) AddNode(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _Pool.contract.Transact(opts, "addNode")
+// Solidity: function seedNode() constant returns(string)
+func (_Pool *PoolCaller) SeedNode(opts *bind.CallOpts) (string, error) {
+	var (
+		ret0 = new(string)
+	)
+	out := ret0
+	err := _Pool.contract.Call(opts, out, "seedNode")
+	return *ret0, err
 }
 
-// AddNode is a paid mutator transaction binding the contract method 0xe07c60e1.
+// SeedNode is a free data retrieval call binding the contract method 0xe0a18ee7.
 //
-// Solidity: function addNode() returns()
-func (_Pool *PoolSession) AddNode() (*types.Transaction, error) {
-	return _Pool.Contract.AddNode(&_Pool.TransactOpts)
+// Solidity: function seedNode() constant returns(string)
+func (_Pool *PoolSession) SeedNode() (string, error) {
+	return _Pool.Contract.SeedNode(&_Pool.CallOpts)
 }
 
-// AddNode is a paid mutator transaction binding the contract method 0xe07c60e1.
+// SeedNode is a free data retrieval call binding the contract method 0xe0a18ee7.
 //
-// Solidity: function addNode() returns()
-func (_Pool *PoolTransactorSession) AddNode() (*types.Transaction, error) {
-	return _Pool.Contract.AddNode(&_Pool.TransactOpts)
+// Solidity: function seedNode() constant returns(string)
+func (_Pool *PoolCallerSession) SeedNode() (string, error) {
+	return _Pool.Contract.SeedNode(&_Pool.CallOpts)
 }
 
-// AllocateFunds is a paid mutator transaction binding the contract method 0xc9f8cc67.
+// Url is a free data retrieval call binding the contract method 0x5600f04f.
 //
-// Solidity: function allocateFunds(_amount uint256) returns(bool)
-func (_Pool *PoolTransactor) AllocateFunds(opts *bind.TransactOpts, _amount *big.Int) (*types.Transaction, error) {
-	return _Pool.contract.Transact(opts, "allocateFunds", _amount)
+// Solidity: function url() constant returns(string)
+func (_Pool *PoolCaller) Url(opts *bind.CallOpts) (string, error) {
+	var (
+		ret0 = new(string)
+	)
+	out := ret0
+	err := _Pool.contract.Call(opts, out, "url")
+	return *ret0, err
 }
 
-// AllocateFunds is a paid mutator transaction binding the contract method 0xc9f8cc67.
+// Url is a free data retrieval call binding the contract method 0x5600f04f.
 //
-// Solidity: function allocateFunds(_amount uint256) returns(bool)
-func (_Pool *PoolSession) AllocateFunds(_amount *big.Int) (*types.Transaction, error) {
-	return _Pool.Contract.AllocateFunds(&_Pool.TransactOpts, _amount)
+// Solidity: function url() constant returns(string)
+func (_Pool *PoolSession) Url() (string, error) {
+	return _Pool.Contract.Url(&_Pool.CallOpts)
 }
 
-// AllocateFunds is a paid mutator transaction binding the contract method 0xc9f8cc67.
+// Url is a free data retrieval call binding the contract method 0x5600f04f.
 //
-// Solidity: function allocateFunds(_amount uint256) returns(bool)
-func (_Pool *PoolTransactorSession) AllocateFunds(_amount *big.Int) (*types.Transaction, error) {
-	return _Pool.Contract.AllocateFunds(&_Pool.TransactOpts, _amount)
+// Solidity: function url() constant returns(string)
+func (_Pool *PoolCallerSession) Url() (string, error) {
+	return _Pool.Contract.Url(&_Pool.CallOpts)
 }
 
-// AllocateFundsFrom is a paid mutator transaction binding the contract method 0xa1f2e9bf.
+// AddMasterNode is a paid mutator transaction binding the contract method 0x6b8a98a9.
 //
-// Solidity: function allocateFundsFrom(_client address, _amount uint256) returns(bool)
-func (_Pool *PoolTransactor) AllocateFundsFrom(opts *bind.TransactOpts, _client common.Address, _amount *big.Int) (*types.Transaction, error) {
-	return _Pool.contract.Transact(opts, "allocateFundsFrom", _client, _amount)
+// Solidity: function addMasterNode(_node address) returns()
+func (_Pool *PoolTransactor) AddMasterNode(opts *bind.TransactOpts, _node common.Address) (*types.Transaction, error) {
+	return _Pool.contract.Transact(opts, "addMasterNode", _node)
 }
 
-// AllocateFundsFrom is a paid mutator transaction binding the contract method 0xa1f2e9bf.
+// AddMasterNode is a paid mutator transaction binding the contract method 0x6b8a98a9.
 //
-// Solidity: function allocateFundsFrom(_client address, _amount uint256) returns(bool)
-func (_Pool *PoolSession) AllocateFundsFrom(_client common.Address, _amount *big.Int) (*types.Transaction, error) {
-	return _Pool.Contract.AllocateFundsFrom(&_Pool.TransactOpts, _client, _amount)
+// Solidity: function addMasterNode(_node address) returns()
+func (_Pool *PoolSession) AddMasterNode(_node common.Address) (*types.Transaction, error) {
+	return _Pool.Contract.AddMasterNode(&_Pool.TransactOpts, _node)
 }
 
-// AllocateFundsFrom is a paid mutator transaction binding the contract method 0xa1f2e9bf.
+// AddMasterNode is a paid mutator transaction binding the contract method 0x6b8a98a9.
 //
-// Solidity: function allocateFundsFrom(_client address, _amount uint256) returns(bool)
-func (_Pool *PoolTransactorSession) AllocateFundsFrom(_client common.Address, _amount *big.Int) (*types.Transaction, error) {
-	return _Pool.Contract.AllocateFundsFrom(&_Pool.TransactOpts, _client, _amount)
+// Solidity: function addMasterNode(_node address) returns()
+func (_Pool *PoolTransactorSession) AddMasterNode(_node common.Address) (*types.Transaction, error) {
+	return _Pool.Contract.AddMasterNode(&_Pool.TransactOpts, _node)
 }
 
-// LogWorkFrom is a paid mutator transaction binding the contract method 0x32a6a376.
+// ChangeOwner is a paid mutator transaction binding the contract method 0xa6f9dae1.
 //
-// Solidity: function logWorkFrom(_node address, _client address, _amount uint256) returns(bool)
-func (_Pool *PoolTransactor) LogWorkFrom(opts *bind.TransactOpts, _node common.Address, _client common.Address, _amount *big.Int) (*types.Transaction, error) {
-	return _Pool.contract.Transact(opts, "logWorkFrom", _node, _client, _amount)
+// Solidity: function changeOwner(_owner address) returns()
+func (_Pool *PoolTransactor) ChangeOwner(opts *bind.TransactOpts, _owner common.Address) (*types.Transaction, error) {
+	return _Pool.contract.Transact(opts, "changeOwner", _owner)
 }
 
-// LogWorkFrom is a paid mutator transaction binding the contract method 0x32a6a376.
+// ChangeOwner is a paid mutator transaction binding the contract method 0xa6f9dae1.
 //
-// Solidity: function logWorkFrom(_node address, _client address, _amount uint256) returns(bool)
-func (_Pool *PoolSession) LogWorkFrom(_node common.Address, _client common.Address, _amount *big.Int) (*types.Transaction, error) {
-	return _Pool.Contract.LogWorkFrom(&_Pool.TransactOpts, _node, _client, _amount)
+// Solidity: function changeOwner(_owner address) returns()
+func (_Pool *PoolSession) ChangeOwner(_owner common.Address) (*types.Transaction, error) {
+	return _Pool.Contract.ChangeOwner(&_Pool.TransactOpts, _owner)
 }
 
-// LogWorkFrom is a paid mutator transaction binding the contract method 0x32a6a376.
+// ChangeOwner is a paid mutator transaction binding the contract method 0xa6f9dae1.
 //
-// Solidity: function logWorkFrom(_node address, _client address, _amount uint256) returns(bool)
-func (_Pool *PoolTransactorSession) LogWorkFrom(_node common.Address, _client common.Address, _amount *big.Int) (*types.Transaction, error) {
-	return _Pool.Contract.LogWorkFrom(&_Pool.TransactOpts, _node, _client, _amount)
-}
-
-// Pay is a paid mutator transaction binding the contract method 0xc290d691.
-//
-// Solidity: function pay(_amount uint256) returns(bool)
-func (_Pool *PoolTransactor) Pay(opts *bind.TransactOpts, _amount *big.Int) (*types.Transaction, error) {
-	return _Pool.contract.Transact(opts, "pay", _amount)
-}
-
-// Pay is a paid mutator transaction binding the contract method 0xc290d691.
-//
-// Solidity: function pay(_amount uint256) returns(bool)
-func (_Pool *PoolSession) Pay(_amount *big.Int) (*types.Transaction, error) {
-	return _Pool.Contract.Pay(&_Pool.TransactOpts, _amount)
-}
-
-// Pay is a paid mutator transaction binding the contract method 0xc290d691.
-//
-// Solidity: function pay(_amount uint256) returns(bool)
-func (_Pool *PoolTransactorSession) Pay(_amount *big.Int) (*types.Transaction, error) {
-	return _Pool.Contract.Pay(&_Pool.TransactOpts, _amount)
-}
-
-// Payout is a paid mutator transaction binding the contract method 0x117de2fd.
-//
-// Solidity: function payout(_node address, _amount uint256) returns(bool)
-func (_Pool *PoolTransactor) Payout(opts *bind.TransactOpts, _node common.Address, _amount *big.Int) (*types.Transaction, error) {
-	return _Pool.contract.Transact(opts, "payout", _node, _amount)
-}
-
-// Payout is a paid mutator transaction binding the contract method 0x117de2fd.
-//
-// Solidity: function payout(_node address, _amount uint256) returns(bool)
-func (_Pool *PoolSession) Payout(_node common.Address, _amount *big.Int) (*types.Transaction, error) {
-	return _Pool.Contract.Payout(&_Pool.TransactOpts, _node, _amount)
-}
-
-// Payout is a paid mutator transaction binding the contract method 0x117de2fd.
-//
-// Solidity: function payout(_node address, _amount uint256) returns(bool)
-func (_Pool *PoolTransactorSession) Payout(_node common.Address, _amount *big.Int) (*types.Transaction, error) {
-	return _Pool.Contract.Payout(&_Pool.TransactOpts, _node, _amount)
-}
-
-// RejectClient is a paid mutator transaction binding the contract method 0xe086f581.
-//
-// Solidity: function rejectClient(_client address) returns()
-func (_Pool *PoolTransactor) RejectClient(opts *bind.TransactOpts, _client common.Address) (*types.Transaction, error) {
-	return _Pool.contract.Transact(opts, "rejectClient", _client)
-}
-
-// RejectClient is a paid mutator transaction binding the contract method 0xe086f581.
-//
-// Solidity: function rejectClient(_client address) returns()
-func (_Pool *PoolSession) RejectClient(_client common.Address) (*types.Transaction, error) {
-	return _Pool.Contract.RejectClient(&_Pool.TransactOpts, _client)
-}
-
-// RejectClient is a paid mutator transaction binding the contract method 0xe086f581.
-//
-// Solidity: function rejectClient(_client address) returns()
-func (_Pool *PoolTransactorSession) RejectClient(_client common.Address) (*types.Transaction, error) {
-	return _Pool.Contract.RejectClient(&_Pool.TransactOpts, _client)
-}
-
-// RejectNode is a paid mutator transaction binding the contract method 0xaef2a618.
-//
-// Solidity: function rejectNode(_node address) returns()
-func (_Pool *PoolTransactor) RejectNode(opts *bind.TransactOpts, _node common.Address) (*types.Transaction, error) {
-	return _Pool.contract.Transact(opts, "rejectNode", _node)
-}
-
-// RejectNode is a paid mutator transaction binding the contract method 0xaef2a618.
-//
-// Solidity: function rejectNode(_node address) returns()
-func (_Pool *PoolSession) RejectNode(_node common.Address) (*types.Transaction, error) {
-	return _Pool.Contract.RejectNode(&_Pool.TransactOpts, _node)
-}
-
-// RejectNode is a paid mutator transaction binding the contract method 0xaef2a618.
-//
-// Solidity: function rejectNode(_node address) returns()
-func (_Pool *PoolTransactorSession) RejectNode(_node common.Address) (*types.Transaction, error) {
-	return _Pool.Contract.RejectNode(&_Pool.TransactOpts, _node)
+// Solidity: function changeOwner(_owner address) returns()
+func (_Pool *PoolTransactorSession) ChangeOwner(_owner common.Address) (*types.Transaction, error) {
+	return _Pool.Contract.ChangeOwner(&_Pool.TransactOpts, _owner)
 }
 
 // SetData is a paid mutator transaction binding the contract method 0x47064d6a.
@@ -670,44 +481,44 @@ func (_Pool *PoolTransactorSession) SetData(_data string) (*types.Transaction, e
 	return _Pool.Contract.SetData(&_Pool.TransactOpts, _data)
 }
 
-// SetPublicData is a paid mutator transaction binding the contract method 0xfddbd275.
+// SetSeedNode is a paid mutator transaction binding the contract method 0x6bc3af27.
 //
-// Solidity: function setPublicData(_publicData string) returns()
-func (_Pool *PoolTransactor) SetPublicData(opts *bind.TransactOpts, _publicData string) (*types.Transaction, error) {
-	return _Pool.contract.Transact(opts, "setPublicData", _publicData)
+// Solidity: function setSeedNode(_node string) returns()
+func (_Pool *PoolTransactor) SetSeedNode(opts *bind.TransactOpts, _node string) (*types.Transaction, error) {
+	return _Pool.contract.Transact(opts, "setSeedNode", _node)
 }
 
-// SetPublicData is a paid mutator transaction binding the contract method 0xfddbd275.
+// SetSeedNode is a paid mutator transaction binding the contract method 0x6bc3af27.
 //
-// Solidity: function setPublicData(_publicData string) returns()
-func (_Pool *PoolSession) SetPublicData(_publicData string) (*types.Transaction, error) {
-	return _Pool.Contract.SetPublicData(&_Pool.TransactOpts, _publicData)
+// Solidity: function setSeedNode(_node string) returns()
+func (_Pool *PoolSession) SetSeedNode(_node string) (*types.Transaction, error) {
+	return _Pool.Contract.SetSeedNode(&_Pool.TransactOpts, _node)
 }
 
-// SetPublicData is a paid mutator transaction binding the contract method 0xfddbd275.
+// SetSeedNode is a paid mutator transaction binding the contract method 0x6bc3af27.
 //
-// Solidity: function setPublicData(_publicData string) returns()
-func (_Pool *PoolTransactorSession) SetPublicData(_publicData string) (*types.Transaction, error) {
-	return _Pool.Contract.SetPublicData(&_Pool.TransactOpts, _publicData)
+// Solidity: function setSeedNode(_node string) returns()
+func (_Pool *PoolTransactorSession) SetSeedNode(_node string) (*types.Transaction, error) {
+	return _Pool.Contract.SetSeedNode(&_Pool.TransactOpts, _node)
 }
 
-// Work is a paid mutator transaction binding the contract method 0x5858d161.
+// SetUrl is a paid mutator transaction binding the contract method 0x252498a2.
 //
-// Solidity: function work(_amount uint256) returns(bool)
-func (_Pool *PoolTransactor) Work(opts *bind.TransactOpts, _amount *big.Int) (*types.Transaction, error) {
-	return _Pool.contract.Transact(opts, "work", _amount)
+// Solidity: function setUrl(_url string) returns()
+func (_Pool *PoolTransactor) SetUrl(opts *bind.TransactOpts, _url string) (*types.Transaction, error) {
+	return _Pool.contract.Transact(opts, "setUrl", _url)
 }
 
-// Work is a paid mutator transaction binding the contract method 0x5858d161.
+// SetUrl is a paid mutator transaction binding the contract method 0x252498a2.
 //
-// Solidity: function work(_amount uint256) returns(bool)
-func (_Pool *PoolSession) Work(_amount *big.Int) (*types.Transaction, error) {
-	return _Pool.Contract.Work(&_Pool.TransactOpts, _amount)
+// Solidity: function setUrl(_url string) returns()
+func (_Pool *PoolSession) SetUrl(_url string) (*types.Transaction, error) {
+	return _Pool.Contract.SetUrl(&_Pool.TransactOpts, _url)
 }
 
-// Work is a paid mutator transaction binding the contract method 0x5858d161.
+// SetUrl is a paid mutator transaction binding the contract method 0x252498a2.
 //
-// Solidity: function work(_amount uint256) returns(bool)
-func (_Pool *PoolTransactorSession) Work(_amount *big.Int) (*types.Transaction, error) {
-	return _Pool.Contract.Work(&_Pool.TransactOpts, _amount)
+// Solidity: function setUrl(_url string) returns()
+func (_Pool *PoolTransactorSession) SetUrl(_url string) (*types.Transaction, error) {
+	return _Pool.Contract.SetUrl(&_Pool.TransactOpts, _url)
 }
