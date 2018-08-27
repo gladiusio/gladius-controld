@@ -4,14 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
+	"path/filepath"
+
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"github.com/gladiusio/gladius-controld/pkg/routing"
 	"github.com/gladiusio/gladius-utils/config"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	"github.com/spf13/viper"
-	"log"
-	"path/filepath"
 )
 
 type ConfigurationOptions struct {
@@ -52,8 +53,9 @@ type DatabaseConfig struct {
 }
 
 type BlockchainConfig struct {
-	Provider      string
-	MarketAddress string
+	Provider           string
+	MarketAddress      string
+	PoolManagerAddress string
 }
 
 type Configuration struct {
@@ -87,8 +89,9 @@ func (configuration Configuration) defaults() Configuration {
 		Version: "0.5.0",
 		Build:   20180821,
 		Blockchain: BlockchainConfig{
-			Provider:      "https://ropsten.infura.io/tjqLYxxGIUp0NylVCiWw",
-			MarketAddress: "0xc4dfb5c9e861eeae844795cfb8d30b77b78bbc38",
+			Provider:           "https://ropsten.infura.io/tjqLYxxGIUp0NylVCiWw",
+			MarketAddress:      "0xc4dfb5c9e861eeae844795cfb8d30b77b78bbc38",
+			PoolManagerAddress: "0x1f136d7b6308870ed334378f381c9f56d04c3aba",
 		},
 		Directory: struct {
 			Base   string
