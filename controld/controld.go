@@ -15,8 +15,7 @@ import (
 var Database *gorm.DB
 
 func initializeConfiguration() (config.Configuration, error) {
-	gladiusConfig.SetupConfig("gladius-controld", gladiusConfig.ControlDaemonDefaults())
-
+	gladiusConfig.SetupConfig("gladius-controld", map[string]string{})
 	return config.DefaultConfiguration()
 }
 
