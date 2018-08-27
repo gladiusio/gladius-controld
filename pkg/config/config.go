@@ -119,7 +119,6 @@ func (configuration Configuration) defaults() Configuration {
 
 func DefaultConfiguration() (Configuration, error) {
 	var configuration Configuration
-	viper.AddConfigPath(".")
 
 	err := viper.ReadInConfig()
 	if err != nil {
