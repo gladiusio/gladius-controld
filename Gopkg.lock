@@ -20,9 +20,10 @@
   revision = "f899737d7f2764dc13e4d01ff00108ec58f766a9"
 
 [[projects]]
+  branch = "master"
   name = "github.com/buger/jsonparser"
   packages = ["."]
-  revision = "2cac668e8456b4284edb0715e17e2af02d3ec993"
+  revision = "f4dd9f5a6b441265aefc1d44872a6f8c10f42b37"
 
 [[projects]]
   name = "github.com/deckarep/golang-set"
@@ -430,6 +431,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c46e6ffeb9a96afac0174274d5ced73e3c7164609cb2d84c74c06a5a995b40cf"
+  inputs-digest = "bccb6d112c72423553cb477abe1dbafe9c67b9d4b88016469a66c39c22dc6f0d"
   solver-name = "gps-cdcl"
   solver-version = 1
