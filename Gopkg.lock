@@ -106,14 +106,14 @@
 [[projects]]
   name = "github.com/gorilla/handlers"
   packages = ["."]
-  revision = "7e0847f9db758cdebd26c149d0ae9d5d0b9c98ce"
-  version = "v1.4.0"
+  revision = "90663712d74cb411cbef281bc1e08c19d1a76145"
+  version = "v1.3.0"
 
 [[projects]]
   name = "github.com/gorilla/mux"
   packages = ["."]
-  revision = "e3702bed27f0d39777b0b37b664b6280e8ef8fbf"
-  version = "v1.6.2"
+  revision = "53c1911da2b537f792e7cafcb446b05ffe33b996"
+  version = "v1.6.1"
 
 [[projects]]
   branch = "master"
@@ -178,6 +178,7 @@
   name = "github.com/jinzhu/gorm"
   packages = [
     ".",
+    "dialects/postgres",
     "dialects/sqlite"
   ]
   revision = "6ed508ec6a4ecb3531899a69cbc746ccf65a4166"
@@ -199,7 +200,17 @@
   branch = "master"
   name = "github.com/kardianos/service"
   packages = ["."]
-  revision = "615a14ed75099c9eaac6949e22ac2341bf9d3197"
+  revision = "4cdeddd6f419cb717c4234a9566405565fcfcae7"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/lib/pq"
+  packages = [
+    ".",
+    "hstore",
+    "oid"
+  ]
+  revision = "90697d60dd844d5ef6ff15135d0203f65d2f53b8"
 
 [[projects]]
   name = "github.com/magiconair/properties"
@@ -348,7 +359,7 @@
     "pbkdf2",
     "scrypt"
   ]
-  revision = "aabede6cba87e37f413b3e60ebfc214f8eeca1b0"
+  revision = "614d502a4dac94afa3a6ce146bd1736da82514c6"
 
 [[projects]]
   branch = "master"
@@ -361,7 +372,7 @@
     "ipv6",
     "websocket"
   ]
-  revision = "aaf60122140d3fcf75376d319f0554393160eb50"
+  revision = "922f4815f713f213882e8ef45e0d315b164d705c"
 
 [[projects]]
   branch = "master"
@@ -374,7 +385,7 @@
     "windows/svc/eventlog",
     "windows/svc/mgr"
   ]
-  revision = "1a700e749ce29638d0bbcb531cce1094ea096bd3"
+  revision = "3b58ed4ad3395d483fc92d5d14123ce2c3581fec"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -397,7 +408,7 @@
     "imports",
     "internal/fastwalk"
   ]
-  revision = "7d1dc997617fb662918b6ea95efc19faa87e1cf8"
+  revision = "5fad05c81888302518e9dfb20b55b3e1790c7a11"
 
 [[projects]]
   branch = "v2"
@@ -420,6 +431,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "af276415a7ebbe1fb1452914441bd112e50999f36f0140c08b786dcf63d44a7d"
+  inputs-digest = "bccb6d112c72423553cb477abe1dbafe9c67b9d4b88016469a66c39c22dc6f0d"
   solver-name = "gps-cdcl"
   solver-version = 1

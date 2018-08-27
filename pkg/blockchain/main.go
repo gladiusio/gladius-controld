@@ -9,10 +9,9 @@ import (
 
 // ConnectClient - Main Connection function
 func ConnectClient() *ethclient.Client {
-	providerURL := viper.GetString("BlockchainProvider")
+	providerURL := viper.GetString("blockchain.provider")
 	// Create an IPC based RPC connection to a remote node
 	conn, err := ethclient.Dial(providerURL)
-	//conn, err := ethclient.Dial("/home/nate/.ethereum/testnet/geth.ipc")
 	if err != nil {
 		log.Fatalf("Failed to connect to the Ethereum client: %v", err)
 	}

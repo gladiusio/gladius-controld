@@ -15,31 +15,26 @@ import (
 	"github.com/gorilla/mux"
 )
 
-const (
-	PORT  = "3001"
-	DEBUG = false
-)
-
 var apiRouter *mux.Router
 var Database *gorm.DB
 
 type ControlRouter struct {
 	Router *mux.Router
 	Port   string
+	Debug  bool
 }
 
 func (cRouter *ControlRouter) Start() {
+	if cRouter.Debug {
+		cRouter.Router.Use(loggingMiddleware)
+	}
+
 	fmt.Println("Starting API at http://localhost:" + cRouter.Port)
 	log.Fatal(http.ListenAndServe(":"+cRouter.Port, ghandlers.CORS()(cRouter.Router)))
 }
 
 func InitializeRouter() (*mux.Router, error) {
-	// Main Router
 	router := mux.NewRouter()
-	if DEBUG {
-		router.Use(loggingMiddleware)
-	}
-
 	return router, nil
 }
 

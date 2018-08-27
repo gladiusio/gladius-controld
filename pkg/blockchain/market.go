@@ -16,7 +16,7 @@ func ConnectMarket() *generated.Market {
 
 	conn := ConnectClient()
 
-	marketAddress := viper.GetString("BlockchainMarketAddress")
+	marketAddress := viper.GetString("blockchain.market")
 	market, err := generated.NewMarket(common.HexToAddress(marketAddress), conn)
 
 	if err != nil {
