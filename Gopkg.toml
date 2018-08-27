@@ -27,7 +27,7 @@
   version = "=1.6.1"
 
 [[constraint]]
-  revision = "2cac668e8456b4284edb0715e17e2af02d3ec993"
+  branch = "master"
   name = "github.com/buger/jsonparser"
 
 # P2P
