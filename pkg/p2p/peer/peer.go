@@ -16,6 +16,7 @@ import (
 	"github.com/gladiusio/gladius-controld/pkg/p2p/state"
 	"github.com/hashicorp/memberlist"
 	"github.com/satori/go.uuid"
+	"github.com/spf13/viper"
 )
 
 // New returns a new peer type
@@ -33,6 +34,8 @@ func New(ga *blockchain.GladiusAccountManager) *Peer {
 	c.Delegate = d
 	c.Merge = md
 	c.Name = hostname + "-" + uuid.NewV4().String()
+	c.AdvertisePort = viper.GetInt("AdvertisePort")
+	c.BindPort = viper.GetInt("BindPort")
 
 	m, err := memberlist.Create(c)
 	if err != nil {

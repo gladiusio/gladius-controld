@@ -58,10 +58,16 @@ type BlockchainConfig struct {
 	PoolManagerAddress string
 }
 
+type P2PConfig struct {
+	BindPort      int
+	AdvertisePort int
+}
+
 type Configuration struct {
 	Version    string
 	Build      int
 	Blockchain BlockchainConfig
+	P2P        P2PConfig
 	Directory  struct {
 		Base   string
 		Wallet string
@@ -92,6 +98,10 @@ func (configuration Configuration) defaults() Configuration {
 			Provider:           "https://ropsten.infura.io/tjqLYxxGIUp0NylVCiWw",
 			MarketAddress:      "0xc4dfb5c9e861eeae844795cfb8d30b77b78bbc38",
 			PoolManagerAddress: "0x1f136d7b6308870ed334378f381c9f56d04c3aba",
+		},
+		P2P: P2PConfig{
+			AdvertisePort: 7946,
+			BindPort:      7946,
 		},
 		Directory: struct {
 			Base   string
