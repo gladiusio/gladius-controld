@@ -132,12 +132,14 @@ func (configuration Configuration) defaults() Configuration {
 
 func DefaultConfiguration() (Configuration, error) {
 	var configuration Configuration
+	basePath, err := config.GetGladiusBase()
 
+	viper.AddConfigPath(basePath)
 	viper.AddConfigPath(".")
 
-	err := viper.ReadInConfig()
+	err = viper.ReadInConfig()
 	if err != nil {
-		log.Printf("\n\nUnable to find gladius-controld.toml in project root, or default directories below.\n\nError: \n%v", err)
+		log.Printf("\n\nUnable to find gladius-controld-bak.toml in project root, or default directories below.\n\nError: \n%v", err)
 		log.Printf("\n\nUsing Default Node Manager Configuration")
 
 		configuration = configuration.defaults()

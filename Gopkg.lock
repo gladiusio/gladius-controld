@@ -17,7 +17,7 @@
   branch = "master"
   name = "github.com/btcsuite/btcd"
   packages = ["btcec"]
-  revision = "f899737d7f2764dc13e4d01ff00108ec58f766a9"
+  revision = "79e00513b1011888b1e675157ab89f527f901cae"
 
 [[projects]]
   branch = "master"
@@ -58,8 +58,8 @@
     "rpc",
     "trie"
   ]
-  revision = "225171a4bfcc16bd12a1906b1e0d43d0b18c353b"
-  version = "v1.8.13"
+  revision = "316fc7ecfc10d06603f1358c1f4c1020ec36dd2a"
+  version = "v1.8.14"
 
 [[projects]]
   name = "github.com/fsnotify/fsnotify"
@@ -74,7 +74,7 @@
     "pkg/controller",
     "pkg/db/models"
   ]
-  revision = "e4aeae9f23b473714cfac98f1978ba55f7f1de16"
+  revision = "3fbac6ea93474113d34c3c58e1532916fef1caf7"
 
 [[projects]]
   name = "github.com/gladiusio/gladius-utils"
@@ -82,14 +82,14 @@
     "config",
     "init/manager"
   ]
-  revision = "563c83e7e92bcdd1322616a70d139865ba1efb78"
-  version = "0.3.5"
+  revision = "9ab431d232e7950de753c3cfa307b73fa726cbfa"
+  version = "0.3.6"
 
 [[projects]]
   name = "github.com/go-stack/stack"
   packages = ["."]
-  revision = "259ab82a6cad3992b4e21ff5cac294ccb06474bc"
-  version = "v1.7.0"
+  revision = "2fee6af1a9795aafbe0253a0cfbdf668e1fb8a9a"
+  version = "v1.8.0"
 
 [[projects]]
   branch = "master"
@@ -116,10 +116,10 @@
   version = "v1.6.1"
 
 [[projects]]
-  branch = "master"
   name = "github.com/hashicorp/errwrap"
   packages = ["."]
-  revision = "d6c0cd88035724dd42e0f335ae30161c20575ecc"
+  revision = "8a6fb523712970c966eefc6b39ed2c5e74880354"
+  version = "v1.0.0"
 
 [[projects]]
   branch = "master"
@@ -134,10 +134,10 @@
   revision = "fa3f63826f7c23912c15263591e65d54d080b458"
 
 [[projects]]
-  branch = "master"
   name = "github.com/hashicorp/go-multierror"
   packages = ["."]
-  revision = "3d5d8f294aa03d8e98859feac328afbdf1ae0703"
+  revision = "886a7fbe3eb1c874d46f623bfa70af45f425b3d1"
+  version = "v1.0.0"
 
 [[projects]]
   branch = "master"
@@ -152,7 +152,6 @@
   revision = "0fb14efe8c47ae851c0034ed7a448854d3d34cf3"
 
 [[projects]]
-  branch = "master"
   name = "github.com/hashicorp/hcl"
   packages = [
     ".",
@@ -166,7 +165,8 @@
     "json/scanner",
     "json/token"
   ]
-  revision = "ef8a98b0bbce4a65b5aa4c368430a80ddc533168"
+  revision = "8cb6e5b959231cc1119e43259c4a608f9c51a241"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/hashicorp/memberlist"
@@ -200,17 +200,17 @@
   branch = "master"
   name = "github.com/kardianos/service"
   packages = ["."]
-  revision = "4cdeddd6f419cb717c4234a9566405565fcfcae7"
+  revision = "8f267d80f2eb68998661a325c0e53fca4485e626"
 
 [[projects]]
-  branch = "master"
   name = "github.com/lib/pq"
   packages = [
     ".",
     "hstore",
     "oid"
   ]
-  revision = "90697d60dd844d5ef6ff15135d0203f65d2f53b8"
+  revision = "4ded0e9383f75c197b3a2aaa6d590ac52df6fd79"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/magiconair/properties"
@@ -231,10 +231,10 @@
   version = "v1.0.8"
 
 [[projects]]
-  branch = "master"
   name = "github.com/mitchellh/mapstructure"
   packages = ["."]
-  revision = "f15292f7a699fcc1a38a80977f80a046874ba8ac"
+  revision = "fa473d140ef3c6adf42d6b391fe76707f1f243c8"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/pborman/uuid"
@@ -372,7 +372,7 @@
     "ipv6",
     "websocket"
   ]
-  revision = "922f4815f713f213882e8ef45e0d315b164d705c"
+  revision = "8a410e7b638dca158bf9e766925842f6651ff828"
 
 [[projects]]
   branch = "master"
@@ -385,7 +385,7 @@
     "windows/svc/eventlog",
     "windows/svc/mgr"
   ]
-  revision = "3b58ed4ad3395d483fc92d5d14123ce2c3581fec"
+  revision = "4910a1d54f876d7b22162a85f4d066d3ee649450"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -408,7 +408,7 @@
     "imports",
     "internal/fastwalk"
   ]
-  revision = "5fad05c81888302518e9dfb20b55b3e1790c7a11"
+  revision = "f6ba5742950514ddd66494151ed5498ed77969ca"
 
 [[projects]]
   branch = "v2"

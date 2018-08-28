@@ -16,7 +16,7 @@ func ConnectMarket() *generated.Market {
 
 	conn := ConnectClient()
 
-	marketAddress := viper.GetString("blockchain.market")
+	marketAddress := viper.GetString("blockchain.marketAddress")
 	market, err := generated.NewMarket(common.HexToAddress(marketAddress), conn)
 
 	if err != nil {
@@ -34,7 +34,7 @@ func MarketPoolsOwnedByUser(includeData bool, ga *GladiusAccountManager) (PoolAr
 		return PoolArrayResponse{}, err
 	}
 
-	pools, err := market.GetOwnedPools(&bind.CallOpts{From: *address}, *address)
+	pools, err := market.GetOwnerAllPools(&bind.CallOpts{From: *address}, *address)
 	if err != nil {
 		return PoolArrayResponse{}, err
 	}
@@ -47,8 +47,8 @@ type PoolArrayResponse struct {
 }
 
 type PoolResponse struct {
-	Address string          `json:"address"`
-	Data    *PoolPublicData `json:"data,omitempty"`
+	Address string `json:"address"`
+	Url     string `json:"url,omitempty"`
 }
 
 func (d *PoolResponse) String() string {
@@ -77,13 +77,13 @@ func MarketPoolAddressesToArrayResponse(poolAddresses []common.Address, includeD
 	for _, poolAddress := range poolAddresses {
 		var poolResponse PoolResponse
 		if includeData {
-			poolData, err := PoolRetrievePublicData(poolAddress.String(), ga)
-			poolResponse = PoolResponse{poolAddress.String(), poolData}
+			poolUrl, err := PoolRetrieveApplicationServerUrl(poolAddress.String(), ga)
+			poolResponse = PoolResponse{poolAddress.String(), poolUrl}
 			if err != nil {
 				return PoolArrayResponse{}, err
 			}
 		} else {
-			poolResponse = PoolResponse{poolAddress.String(), nil}
+			poolResponse = PoolResponse{poolAddress.String(), ""}
 		}
 		pools.Pools = append(pools.Pools, poolResponse)
 	}
@@ -92,7 +92,7 @@ func MarketPoolAddressesToArrayResponse(poolAddresses []common.Address, includeD
 }
 
 //MarketCreatePool - Create new pool
-func MarketCreatePool(passphrase, publicKey string, ga *GladiusAccountManager) (*types.Transaction, error) {
+func MarketCreatePool(passphrase string, ga *GladiusAccountManager) (*types.Transaction, error) {
 	market := ConnectMarket()
 
 	auth, err := ga.GetAuth(passphrase)
@@ -100,7 +100,7 @@ func MarketCreatePool(passphrase, publicKey string, ga *GladiusAccountManager) (
 		return nil, err
 	}
 
-	transaction, err := market.CreatePool(auth, publicKey)
+	transaction, err := market.CreatePool(auth)
 	if err != nil {
 		return nil, err
 	}

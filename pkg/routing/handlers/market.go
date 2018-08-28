@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
@@ -54,12 +53,8 @@ func MarketPoolsCreateHandler(ga *blockchain.GladiusAccountManager) func(w http.
 		}
 
 		auth := r.Header.Get("X-Authorization")
-		decoder := json.NewDecoder(r.Body)
-		defer r.Body.Close()
-		var data poolData
-		err = decoder.Decode(&data)
 
-		transaction, err := blockchain.MarketCreatePool(auth, data.PublicKey, ga)
+		transaction, err := blockchain.MarketCreatePool(auth, ga)
 		if err != nil {
 			ErrorHandler(w, r, "Could not build pool creation transaction", err, http.StatusNotFound)
 			return
