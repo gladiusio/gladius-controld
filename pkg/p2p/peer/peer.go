@@ -34,8 +34,8 @@ func New(ga *blockchain.GladiusAccountManager) *Peer {
 	c.Delegate = d
 	c.Merge = md
 	c.Name = hostname + "-" + uuid.NewV4().String()
-	c.AdvertisePort = viper.GetInt("AdvertisePort")
-	c.BindPort = viper.GetInt("BindPort")
+	c.AdvertisePort = viper.GetInt("P2P.AdvertisePort")
+	c.BindPort = viper.GetInt("P2P.BindPort")
 
 	m, err := memberlist.Create(c)
 	if err != nil {

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
+	"strings"
 
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"github.com/gladiusio/gladius-controld/pkg/routing"
@@ -139,7 +140,7 @@ func DefaultConfiguration() (Configuration, error) {
 
 	err = viper.ReadInConfig()
 	if err != nil {
-		log.Printf("\n\nUnable to find gladius-controld-bak.toml in project root, or default directories below.\n\nError: \n%v", err)
+		log.Printf("\n\nUnable to find gladius-controld.toml in project root, or default directories below.\n\nError: \n%v", err)
 		log.Printf("\n\nUsing Default Node Manager Configuration")
 
 		configuration = configuration.defaults()
@@ -160,6 +161,12 @@ func DefaultConfiguration() (Configuration, error) {
 			log.Fatalf("unable to decode into struct, %v", err)
 		}
 	}
+
+	// Setup environment vars, they look like CONTROLD_OBJECT_KEY
+	viper.SetEnvPrefix("CONTROLD")
+	r := strings.NewReplacer(".", "_")
+	viper.SetEnvKeyReplacer(r)
+	viper.AutomaticEnv()
 
 	return configuration, nil
 }
