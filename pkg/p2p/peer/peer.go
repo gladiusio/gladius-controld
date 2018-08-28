@@ -234,7 +234,10 @@ func (p *Peer) GetContentLinks(contentList []string) map[string][]string {
 					toReturn[contentWanted] = make([]string, 0)
 				}
 				// Add the URL to the map
-				toReturn[contentWanted] = append(toReturn[contentWanted], p.createContentLink(nodeAddress, contentWanted))
+				link := p.createContentLink(nodeAddress, contentWanted)
+				if link != "" {
+					toReturn[contentWanted] = append(toReturn[contentWanted], link)
+				}
 			}
 		}
 	}
@@ -244,15 +247,20 @@ func (p *Peer) GetContentLinks(contentList []string) map[string][]string {
 // Builds a URL to a node
 func (p *Peer) createContentLink(nodeAddress, contentFileName string) string {
 	nodeIP := p.GetState().GetNodeField(nodeAddress, "IPAddress").(state.SignedField).Data
+	nodePort := p.GetState().GetNodeField(nodeAddress, "ContentPort").(state.SignedField).Data
+
 	contentData := strings.Split(contentFileName, "/")
 	u := url.URL{}
-	u.Host = nodeIP + ":8080"
+	if nodeIP == nil || nodePort == nil {
+		return ""
+	}
+	u.Host = nodeIP.(string) + ":" + nodePort.(string)
 	u.Scheme = "http"
 
-	if len(contentData) == 3 {
+	if len(contentData) == 2 {
 		q := u.Query()
-		q.Set("website", contentData[0])      // website name
-		q.Set(contentData[1], contentData[2]) // "asset" or "route" to name of file
+		q.Set("website", contentData[0]) // website name
+		q.Set("asset", contentData[1])   // "asset" or "route" to name of file
 		u.RawQuery = q.Encode()
 		return u.String()
 	}
