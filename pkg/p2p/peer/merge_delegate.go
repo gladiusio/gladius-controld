@@ -26,11 +26,7 @@ func (md *mergeDelegate) NotifyMerge(peers []*memberlist.Node) error {
 
 	challengeMap := make(map[string]bool)
 
-	// Some saftey concerns for now (may change this in the future as the
-	// code below supports n sized clusters)
-	if len(peers) > 1 {
-		return fmt.Errorf("Max size of joining cluster is 1, you have %d", len(peers))
-	}
+	// TODO: Create some timeouts etc for stopping large join reqeusts
 
 	// Go through all nodes in the cluster requesting to join
 	for _, peer := range peers {
