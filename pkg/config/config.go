@@ -93,12 +93,12 @@ func (configuration Configuration) defaults() Configuration {
 	}
 
 	return Configuration{
-		Version: "0.5.0",
-		Build:   20180821,
+		Version: "0.6.0",
+		Build:   20180829,
 		Blockchain: BlockchainConfig{
-			Provider:           "https://ropsten.infura.io/tjqLYxxGIUp0NylVCiWw",
-			MarketAddress:      "0xc4dfb5c9e861eeae844795cfb8d30b77b78bbc38",
-			PoolManagerAddress: "0x1f136d7b6308870ed334378f381c9f56d04c3aba",
+			Provider:           "https://mainnet.infura.io/tjqLYxxGIUp0NylVCiWw",
+			MarketAddress:      "0x27a9390283236f836a0b3c8dfdbed2ed854322fc",
+			PoolManagerAddress: "0x9717eadbfe344457135a4f1fa8ae3b11b4cab0b7",
 		},
 		P2P: P2PConfig{
 			AdvertisePort: 7946,

@@ -14,7 +14,7 @@ import (
 )
 
 // MarketABI is the input ABI used to generate the binding from.
-const MarketABI = "[{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"},{\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"poolOwners\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"data\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"allPoolsList\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"poolToOwner\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"},{\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"marketPoolOwners\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"marketPoolsList\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_owner\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"constant\":false,\"inputs\":[],\"name\":\"createPool\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getAllPools\",\"outputs\":[{\"name\":\"\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getMarketPools\",\"outputs\":[{\"name\":\"\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getOwner\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getData\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_ownerAddress\",\"type\":\"address\"}],\"name\":\"getOwnerAllPools\",\"outputs\":[{\"name\":\"\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_ownerAddress\",\"type\":\"address\"}],\"name\":\"getOwnerMarketPools\",\"outputs\":[{\"name\":\"\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_pool\",\"type\":\"address\"}],\"name\":\"getPoolOwner\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_owner\",\"type\":\"address\"}],\"name\":\"changeOwner\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_data\",\"type\":\"string\"}],\"name\":\"setData\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_poolAddress\",\"type\":\"address\"}],\"name\":\"addToMarketplace\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]"
+const MarketABI = "[{\"constant\":true,\"inputs\":[],\"name\":\"data\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"},{\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"marketPoolOwners\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"marketPoolsList\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_owner\",\"type\":\"address\"},{\"name\":\"_poolFactory\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"constant\":false,\"inputs\":[],\"name\":\"createPool\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getAllPools\",\"outputs\":[{\"name\":\"\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getMarketPools\",\"outputs\":[{\"name\":\"\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getOwner\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getData\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getPoolFactory\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_ownerAddress\",\"type\":\"address\"}],\"name\":\"getOwnerAllPools\",\"outputs\":[{\"name\":\"\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_ownerAddress\",\"type\":\"address\"}],\"name\":\"getOwnerMarketPools\",\"outputs\":[{\"name\":\"\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_pool\",\"type\":\"address\"}],\"name\":\"getPoolOwner\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_owner\",\"type\":\"address\"}],\"name\":\"changeOwner\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_data\",\"type\":\"string\"}],\"name\":\"setData\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_factory\",\"type\":\"address\"}],\"name\":\"changePoolFactory\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_poolAddress\",\"type\":\"address\"}],\"name\":\"addToMarketplace\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]"
 
 // Market is an auto generated Go binding around an Ethereum contract.
 type Market struct {
@@ -156,32 +156,6 @@ func (_Market *MarketTransactorRaw) Transfer(opts *bind.TransactOpts) (*types.Tr
 // Transact invokes the (paid) contract method with params as input values.
 func (_Market *MarketTransactorRaw) Transact(opts *bind.TransactOpts, method string, params ...interface{}) (*types.Transaction, error) {
 	return _Market.Contract.contract.Transact(opts, method, params...)
-}
-
-// AllPoolsList is a free data retrieval call binding the contract method 0x894958aa.
-//
-// Solidity: function allPoolsList( uint256) constant returns(address)
-func (_Market *MarketCaller) AllPoolsList(opts *bind.CallOpts, arg0 *big.Int) (common.Address, error) {
-	var (
-		ret0 = new(common.Address)
-	)
-	out := ret0
-	err := _Market.contract.Call(opts, out, "allPoolsList", arg0)
-	return *ret0, err
-}
-
-// AllPoolsList is a free data retrieval call binding the contract method 0x894958aa.
-//
-// Solidity: function allPoolsList( uint256) constant returns(address)
-func (_Market *MarketSession) AllPoolsList(arg0 *big.Int) (common.Address, error) {
-	return _Market.Contract.AllPoolsList(&_Market.CallOpts, arg0)
-}
-
-// AllPoolsList is a free data retrieval call binding the contract method 0x894958aa.
-//
-// Solidity: function allPoolsList( uint256) constant returns(address)
-func (_Market *MarketCallerSession) AllPoolsList(arg0 *big.Int) (common.Address, error) {
-	return _Market.Contract.AllPoolsList(&_Market.CallOpts, arg0)
 }
 
 // Data is a free data retrieval call binding the contract method 0x73d4a13a.
@@ -366,6 +340,32 @@ func (_Market *MarketCallerSession) GetOwnerMarketPools(_ownerAddress common.Add
 	return _Market.Contract.GetOwnerMarketPools(&_Market.CallOpts, _ownerAddress)
 }
 
+// GetPoolFactory is a free data retrieval call binding the contract method 0x6bd969b3.
+//
+// Solidity: function getPoolFactory() constant returns(address)
+func (_Market *MarketCaller) GetPoolFactory(opts *bind.CallOpts) (common.Address, error) {
+	var (
+		ret0 = new(common.Address)
+	)
+	out := ret0
+	err := _Market.contract.Call(opts, out, "getPoolFactory")
+	return *ret0, err
+}
+
+// GetPoolFactory is a free data retrieval call binding the contract method 0x6bd969b3.
+//
+// Solidity: function getPoolFactory() constant returns(address)
+func (_Market *MarketSession) GetPoolFactory() (common.Address, error) {
+	return _Market.Contract.GetPoolFactory(&_Market.CallOpts)
+}
+
+// GetPoolFactory is a free data retrieval call binding the contract method 0x6bd969b3.
+//
+// Solidity: function getPoolFactory() constant returns(address)
+func (_Market *MarketCallerSession) GetPoolFactory() (common.Address, error) {
+	return _Market.Contract.GetPoolFactory(&_Market.CallOpts)
+}
+
 // GetPoolOwner is a free data retrieval call binding the contract method 0x7cf25517.
 //
 // Solidity: function getPoolOwner(_pool address) constant returns(address)
@@ -470,58 +470,6 @@ func (_Market *MarketCallerSession) Owner() (common.Address, error) {
 	return _Market.Contract.Owner(&_Market.CallOpts)
 }
 
-// PoolOwners is a free data retrieval call binding the contract method 0x6a05e5fe.
-//
-// Solidity: function poolOwners( address,  uint256) constant returns(address)
-func (_Market *MarketCaller) PoolOwners(opts *bind.CallOpts, arg0 common.Address, arg1 *big.Int) (common.Address, error) {
-	var (
-		ret0 = new(common.Address)
-	)
-	out := ret0
-	err := _Market.contract.Call(opts, out, "poolOwners", arg0, arg1)
-	return *ret0, err
-}
-
-// PoolOwners is a free data retrieval call binding the contract method 0x6a05e5fe.
-//
-// Solidity: function poolOwners( address,  uint256) constant returns(address)
-func (_Market *MarketSession) PoolOwners(arg0 common.Address, arg1 *big.Int) (common.Address, error) {
-	return _Market.Contract.PoolOwners(&_Market.CallOpts, arg0, arg1)
-}
-
-// PoolOwners is a free data retrieval call binding the contract method 0x6a05e5fe.
-//
-// Solidity: function poolOwners( address,  uint256) constant returns(address)
-func (_Market *MarketCallerSession) PoolOwners(arg0 common.Address, arg1 *big.Int) (common.Address, error) {
-	return _Market.Contract.PoolOwners(&_Market.CallOpts, arg0, arg1)
-}
-
-// PoolToOwner is a free data retrieval call binding the contract method 0xd4cced9a.
-//
-// Solidity: function poolToOwner( address) constant returns(address)
-func (_Market *MarketCaller) PoolToOwner(opts *bind.CallOpts, arg0 common.Address) (common.Address, error) {
-	var (
-		ret0 = new(common.Address)
-	)
-	out := ret0
-	err := _Market.contract.Call(opts, out, "poolToOwner", arg0)
-	return *ret0, err
-}
-
-// PoolToOwner is a free data retrieval call binding the contract method 0xd4cced9a.
-//
-// Solidity: function poolToOwner( address) constant returns(address)
-func (_Market *MarketSession) PoolToOwner(arg0 common.Address) (common.Address, error) {
-	return _Market.Contract.PoolToOwner(&_Market.CallOpts, arg0)
-}
-
-// PoolToOwner is a free data retrieval call binding the contract method 0xd4cced9a.
-//
-// Solidity: function poolToOwner( address) constant returns(address)
-func (_Market *MarketCallerSession) PoolToOwner(arg0 common.Address) (common.Address, error) {
-	return _Market.Contract.PoolToOwner(&_Market.CallOpts, arg0)
-}
-
 // AddToMarketplace is a paid mutator transaction binding the contract method 0xd00e1e72.
 //
 // Solidity: function addToMarketplace(_poolAddress address) returns(bool)
@@ -562,6 +510,27 @@ func (_Market *MarketSession) ChangeOwner(_owner common.Address) (*types.Transac
 // Solidity: function changeOwner(_owner address) returns()
 func (_Market *MarketTransactorSession) ChangeOwner(_owner common.Address) (*types.Transaction, error) {
 	return _Market.Contract.ChangeOwner(&_Market.TransactOpts, _owner)
+}
+
+// ChangePoolFactory is a paid mutator transaction binding the contract method 0x72591be5.
+//
+// Solidity: function changePoolFactory(_factory address) returns()
+func (_Market *MarketTransactor) ChangePoolFactory(opts *bind.TransactOpts, _factory common.Address) (*types.Transaction, error) {
+	return _Market.contract.Transact(opts, "changePoolFactory", _factory)
+}
+
+// ChangePoolFactory is a paid mutator transaction binding the contract method 0x72591be5.
+//
+// Solidity: function changePoolFactory(_factory address) returns()
+func (_Market *MarketSession) ChangePoolFactory(_factory common.Address) (*types.Transaction, error) {
+	return _Market.Contract.ChangePoolFactory(&_Market.TransactOpts, _factory)
+}
+
+// ChangePoolFactory is a paid mutator transaction binding the contract method 0x72591be5.
+//
+// Solidity: function changePoolFactory(_factory address) returns()
+func (_Market *MarketTransactorSession) ChangePoolFactory(_factory common.Address) (*types.Transaction, error) {
+	return _Market.Contract.ChangePoolFactory(&_Market.TransactOpts, _factory)
 }
 
 // CreatePool is a paid mutator transaction binding the contract method 0x9a06b113.

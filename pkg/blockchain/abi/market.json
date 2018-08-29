@@ -1,29 +1,6 @@
 [
     {
         "constant": true,
-        "inputs": [
-            {
-                "name": "",
-                "type": "address"
-            },
-            {
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "name": "poolOwners",
-        "outputs": [
-            {
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "constant": true,
         "inputs": [],
         "name": "data",
         "outputs": [
@@ -38,46 +15,8 @@
     },
     {
         "constant": true,
-        "inputs": [
-            {
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "name": "allPoolsList",
-        "outputs": [
-            {
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "constant": true,
         "inputs": [],
         "name": "owner",
-        "outputs": [
-            {
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "constant": true,
-        "inputs": [
-            {
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "name": "poolToOwner",
         "outputs": [
             {
                 "name": "",
@@ -134,6 +73,10 @@
         "inputs": [
             {
                 "name": "_owner",
+                "type": "address"
+            },
+            {
+                "name": "_poolFactory",
                 "type": "address"
             }
         ],
@@ -205,6 +148,20 @@
             {
                 "name": "",
                 "type": "string"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "getPoolFactory",
+        "outputs": [
+            {
+                "name": "",
+                "type": "address"
             }
         ],
         "payable": false,
@@ -291,6 +248,20 @@
             }
         ],
         "name": "setData",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "_factory",
+                "type": "address"
+            }
+        ],
+        "name": "changePoolFactory",
         "outputs": [],
         "payable": false,
         "stateMutability": "nonpayable",
