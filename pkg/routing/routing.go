@@ -80,6 +80,7 @@ func AppendP2PEndPoints(router *mux.Router, ga *blockchain.GladiusAccountManager
 	p2pRouter.HandleFunc("/state/content_links", handlers.GetContentLinksHandler(peerStruct)).
 		Methods("POST")
 
+	// Only enable for testing
 	if viper.GetBool("NodeManager.Config.Debug") {
 		p2pRouter.HandleFunc("/state/set_state", handlers.SetStateDebugHandler(peerStruct)).
 			Methods("POST")
