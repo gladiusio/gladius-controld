@@ -3,7 +3,6 @@ package peer
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/url"
 	"os"
 	"strings"
@@ -115,7 +114,6 @@ func (p *Peer) Join(ipList []string) error {
 	}
 
 	node := p.member.LocalNode()
-	fmt.Printf("Local member %s:%d\n", node.Addr, node.Port)
 
 	return nil
 }
