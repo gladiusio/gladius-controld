@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/jinzhu/gorm"
+	"github.com/spf13/viper"
 
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/peer"
@@ -78,6 +79,11 @@ func AppendP2PEndPoints(router *mux.Router, ga *blockchain.GladiusAccountManager
 		Methods("POST")
 	p2pRouter.HandleFunc("/state/content_links", handlers.GetContentLinksHandler(peerStruct)).
 		Methods("POST")
+
+	if viper.GetBool("NodeManager.Config.Debug") {
+		p2pRouter.HandleFunc("/state/set_state", handlers.SetStateDebugHandler(peerStruct)).
+			Methods("POST")
+	}
 
 	return nil
 }

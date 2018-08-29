@@ -116,6 +116,12 @@ func (p *Peer) Join(ipList []string) error {
 	return nil
 }
 
+func (p *Peer) SetState(s *state.State) {
+	p.mux.Lock()
+	p.peerState = s
+	p.mux.Unlock()
+}
+
 // StopAndLeave will infomr the network of it leaving and shutdown
 func (p *Peer) StopAndLeave() error {
 	err := p.member.Leave(1 * time.Millisecond)
