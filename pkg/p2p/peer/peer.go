@@ -113,8 +113,6 @@ func (p *Peer) Join(ipList []string) error {
 		return err
 	}
 
-	node := p.member.LocalNode()
-
 	return nil
 }
 
