@@ -12,13 +12,16 @@
     </data-source>
     <data-source source="LOCAL" name="Local" uuid="e1469fa1-d6c1-4e1d-8d4c-45573fcdc308">
       <driver-ref>postgresql</driver-ref>
-      <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
       <jdbc-url>jdbc:postgresql://localhost:5432/nate</jdbc-url>
     </data-source>
     <data-source source="LOCAL" name="AS - B" uuid="3870879a-795f-4393-acf9-7ab28ee89cd6">
       <driver-ref>postgresql</driver-ref>
-      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://10.136.17.131:5432/gladius</jdbc-url>
+    </data-source>
+    <data-source source="LOCAL" name="Public Beta" uuid="a119f78d-c1f4-4c67-a731-c7d82912cb53">
+      <driver-ref>postgresql</driver-ref>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
       <jdbc-url>jdbc:postgresql://10.136.17.131:5432/gladius</jdbc-url>
     </data-source>
