@@ -18,6 +18,7 @@ build                 = 20180821
 [blockchain]
   provider            = "https://ropsten.infura.io/tjqLYxxGIUp0NylVCiWw"
   marketAddress       = "0xc4dfb5c9e861eeae844795cfb8d30b77b78bbc38"
+  poolManagerAddress  = "0x1f136d7b6308870ed334378f381c9f56d04c3aba"
 
 [nodeManager]
   [nodeManager.config]

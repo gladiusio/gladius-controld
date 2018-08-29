@@ -2,10 +2,11 @@ package routing
 
 import (
 	"fmt"
-	"github.com/jinzhu/gorm"
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/jinzhu/gorm"
 
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/peer"

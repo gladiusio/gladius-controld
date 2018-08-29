@@ -4,14 +4,16 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
+	"path/filepath"
+	"strings"
+
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"github.com/gladiusio/gladius-controld/pkg/routing"
 	"github.com/gladiusio/gladius-utils/config"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	"github.com/spf13/viper"
-	"log"
-	"path/filepath"
 )
 
 type ConfigurationOptions struct {
@@ -52,14 +54,21 @@ type DatabaseConfig struct {
 }
 
 type BlockchainConfig struct {
-	Provider      string
-	MarketAddress string
+	Provider           string
+	MarketAddress      string
+	PoolManagerAddress string
+}
+
+type P2PConfig struct {
+	BindPort      int
+	AdvertisePort int
 }
 
 type Configuration struct {
 	Version    string
 	Build      int
 	Blockchain BlockchainConfig
+	P2P        P2PConfig
 	Directory  struct {
 		Base   string
 		Wallet string
@@ -87,8 +96,13 @@ func (configuration Configuration) defaults() Configuration {
 		Version: "0.5.0",
 		Build:   20180821,
 		Blockchain: BlockchainConfig{
-			Provider:      "https://ropsten.infura.io/tjqLYxxGIUp0NylVCiWw",
-			MarketAddress: "0xad5c2c9eb5630780808e9333a08fcedec0afd03f",
+			Provider:           "https://ropsten.infura.io/tjqLYxxGIUp0NylVCiWw",
+			MarketAddress:      "0xc4dfb5c9e861eeae844795cfb8d30b77b78bbc38",
+			PoolManagerAddress: "0x1f136d7b6308870ed334378f381c9f56d04c3aba",
+		},
+		P2P: P2PConfig{
+			AdvertisePort: 7946,
+			BindPort:      7946,
 		},
 		Directory: struct {
 			Base   string
@@ -126,7 +140,7 @@ func DefaultConfiguration() (Configuration, error) {
 
 	err = viper.ReadInConfig()
 	if err != nil {
-		log.Printf("\n\nUnable to find gladius-controld-bak.toml in project root, or default directories below.\n\nError: \n%v", err)
+		log.Printf("\n\nUnable to find gladius-controld.toml in project root, or default directories below.\n\nError: \n%v", err)
 		log.Printf("\n\nUsing Default Node Manager Configuration")
 
 		configuration = configuration.defaults()
@@ -147,6 +161,12 @@ func DefaultConfiguration() (Configuration, error) {
 			log.Fatalf("unable to decode into struct, %v", err)
 		}
 	}
+
+	// Setup environment vars, they look like CONTROLD_OBJECT_KEY
+	viper.SetEnvPrefix("CONTROLD")
+	r := strings.NewReplacer(".", "_")
+	viper.SetEnvKeyReplacer(r)
+	viper.AutomaticEnv()
 
 	return configuration, nil
 }

@@ -161,6 +161,13 @@ func (s *State) nodeHandler(nodeUpdate []byte, timestamp int64, sm *signature.Si
 
 				s.NodeDataMap[sm.Address].IPAddress = SignedField{Data: string(value), SignedMessage: sm}
 			}
+		case "content_port":
+			// Verify that the timestamp is newer on the incoming signed message
+			if s.NodeDataMap[sm.Address].ContentPort.SignedMessage == nil ||
+				s.NodeDataMap[sm.Address].ContentPort.SignedMessage.GetTimestamp() < timestamp {
+				updated = true
+				s.NodeDataMap[sm.Address].ContentPort = SignedField{Data: string(value), SignedMessage: sm}
+			}
 		case "disk_content":
 			// Verify that the timestamp is newer on the incoming signed message
 			if s.NodeDataMap[sm.Address].DiskContent.SignedMessage == nil ||
@@ -234,6 +241,7 @@ type PoolData struct {
 // NodeData is a type that stores infomration about an indiviudal node
 type NodeData struct {
 	IPAddress     SignedField `json:"ip_address"`
+	ContentPort   SignedField `json:"content_port"`
 	LastHeartbeat SignedField `json:"last_heartbeat"`
 	DiskContent   SignedList  `json:"disk_content"`
 }
@@ -241,7 +249,7 @@ type NodeData struct {
 // SignedField is a type that represents a string field that includes the
 // signature that last updated it
 type SignedField struct {
-	Data          string                   `json:"data"`
+	Data          interface{}              `json:"data"`
 	SignedMessage *signature.SignedMessage `json:"signed_message"`
 }
 

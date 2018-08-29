@@ -1,6 +1,8 @@
 package controld
 
 import (
+	"log"
+
 	"github.com/gladiusio/gladius-application-server/pkg/controller"
 	"github.com/gladiusio/gladius-controld/pkg/config"
 	"github.com/gladiusio/gladius-controld/pkg/routing"
@@ -9,7 +11,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	"log"
+	"github.com/spf13/viper"
 )
 
 var Database *gorm.DB
@@ -42,6 +44,18 @@ func initializeService(router *mux.Router, configuration config.ConfigurationOpt
 	manager.RunService(configuration.Name, configuration.DisplayName, configuration.Description, cRouter.Start)
 }
 
+// TODO: Refactor so this doesn't have to be here. All calls should be to viper.Get() not the struct
+func initializeNodeManagerService(router *mux.Router, configuration config.ConfigurationOptions) {
+	// Router Setup
+	cRouter := routing.ControlRouter{
+		Router: router,
+		Port:   viper.GetString("NodeManager.config.port"),
+		Debug:  configuration.Debug,
+	}
+
+	manager.RunService(configuration.Name, configuration.DisplayName, configuration.Description, cRouter.Start)
+}
+
 func InitializeNodeManager() {
 	// Grab default configuration
 	configuration, err := initializeConfiguration()
@@ -50,7 +64,7 @@ func InitializeNodeManager() {
 	}
 
 	nodeConfig := configuration.NodeManager.Config
-	initializeService(config.NodeRouter(), nodeConfig)
+	initializeNodeManagerService(config.NodeRouter(), nodeConfig)
 }
 
 func InitializePoolManager() {

@@ -91,7 +91,7 @@ func (sm SignedMessage) IsVerified() bool {
 }
 
 func (sm SignedMessage) IsPoolManagerAndVerified() bool {
-	return sm.IsVerified() && sm.Address == config.GetString("PoolManagerAddress")
+	return sm.IsVerified() && sm.Address == config.GetString("blockchain.poolManagerAddress")
 }
 
 func (sm SignedMessage) IsInPoolAndVerified() bool {
