@@ -32,7 +32,9 @@ func New(ga *blockchain.GladiusAccountManager) *Peer {
 	c.ProbeInterval = 8 * time.Second
 	c.GossipNodes = 3
 	c.Delegate = d
-	c.Merge = md
+	// FIXME: Renable this feature, problem now is that the challenges that nodes
+	// respond with seem to be wrong
+	// c.Merge = md
 	c.Name = hostname + "-" + uuid.NewV4().String()
 	c.AdvertisePort = viper.GetInt("P2P.AdvertisePort")
 	c.BindPort = viper.GetInt("P2P.BindPort")
