@@ -19,6 +19,7 @@ func MarketPoolsHandler(ga *blockchain.GladiusAccountManager) func(w http.Respon
 			ErrorHandler(w, r, "Could not retrieve pools", err, http.StatusNotFound)
 			return
 		}
+
 		ResponseHandler(w, r, "null", true, nil, poolsWithData, nil)
 	}
 }
