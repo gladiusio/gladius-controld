@@ -26,10 +26,10 @@ func New(ga *blockchain.GladiusAccountManager) *Peer {
 
 	c := memberlist.DefaultWANConfig()
 	c.PushPullInterval = 15 * time.Second
-	c.GossipInterval = 300 * time.Millisecond
+	c.GossipInterval = 200 * time.Millisecond
 	c.ProbeTimeout = 4 * time.Second
-	c.ProbeInterval = 8 * time.Second
-	c.GossipNodes = 3
+	c.ProbeInterval = 7 * time.Second
+	c.GossipNodes = 4
 	c.Delegate = d
 	// FIXME: Renable this feature, problem now is that the challenges that nodes
 	// respond with seem to be wrong
@@ -44,7 +44,7 @@ func New(ga *blockchain.GladiusAccountManager) *Peer {
 	}
 
 	queue := &memberlist.TransmitLimitedQueue{
-		RetransmitMult: 3,
+		RetransmitMult: 4,
 	}
 
 	peer := &Peer{
