@@ -3,12 +3,13 @@ package blockchain
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/gladiusio/gladius-application-server/pkg/db/models"
-	"github.com/gladiusio/gladius-controld/pkg/routing/response"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/gladiusio/gladius-application-server/pkg/db/models"
+	"github.com/gladiusio/gladius-controld/pkg/routing/response"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -93,7 +94,7 @@ func MarketPoolAddressesToArrayResponse(poolAddresses []common.Address, includeD
 			var poolInformation models.PoolInformation
 			poolInfoByteArray, err := json.Marshal(defaultResponse.Response)
 			json.Unmarshal(poolInfoByteArray, &poolInformation)
-			poolInformation.Url = poolUrl
+			// poolInformation.Url = poolUrl
 
 			poolResponse = PoolResponse{poolAddress.String(), poolUrl, poolInformation}
 			if err != nil {
