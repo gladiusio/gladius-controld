@@ -264,8 +264,8 @@ func (p *Peer) createContentLink(nodeAddress, contentFileName string) string {
 
 	if len(contentData) == 2 {
 		q := u.Query()
-		q.Set("website", contentData[0]) // website name
-		q.Set("asset", contentData[1])   // "asset" or "route" to name of file
+		q.Add("website", contentData[0]) // website name
+		q.Add("asset", contentData[1])   // "asset" to name of file
 		u.RawQuery = q.Encode()
 		return u.String()
 	}
