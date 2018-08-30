@@ -12,6 +12,7 @@ import (
 	"github.com/gladiusio/gladius-controld/pkg/p2p/message"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/peer"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/signature"
+	"github.com/gladiusio/gladius-controld/pkg/p2p/state"
 )
 
 func parseSignedMessageFromBytes(smBytes []byte) (*signature.SignedMessage, error) {
@@ -128,6 +129,26 @@ func CreateSignedMessageHandler(ga *blockchain.GladiusAccountManager) func(w htt
 		}
 
 		ResponseHandler(w, r, "Created signed message", true, nil, signed, nil)
+	}
+}
+
+func SetStateDebugHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			ErrorHandler(w, r, "Error decoding body", err, http.StatusBadRequest)
+			return
+		}
+
+		toUpdate, _, _, err := jsonparser.Get(body, "state")
+		if err != nil {
+			ErrorHandler(w, r, "Could not find `state` in body", err, http.StatusBadRequest)
+			return
+		}
+		s, _ := state.ParseNetworkState(toUpdate)
+		p.SetState(s)
+
+		ResponseHandler(w, r, "Updated state", true, nil, s, nil)
 	}
 }
 
