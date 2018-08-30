@@ -259,6 +259,7 @@ func (p *Peer) createContentLink(nodeAddress, contentFileName string) string {
 		return ""
 	}
 	u.Host = nodeIP.(string) + ":" + nodePort.(string)
+	u.Path = "/content"
 	u.Scheme = "http"
 
 	if len(contentData) == 2 {
