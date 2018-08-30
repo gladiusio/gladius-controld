@@ -86,6 +86,14 @@ type Configuration struct {
 	}
 }
 
+// Returns the singleton viper config as a parsed struct
+func ViperConfiguration() Configuration {
+	var viperConfiguration Configuration
+	viper.Unmarshal(&viperConfiguration)
+
+	return viperConfiguration
+}
+
 func (configuration Configuration) defaults() Configuration {
 	baseDir, err := config.GetGladiusBase()
 	if err != nil {
@@ -131,16 +139,14 @@ func (configuration Configuration) defaults() Configuration {
 	}
 }
 
-func DefaultConfiguration() (Configuration, error) {
+func DefaultConfiguration() {
 	var configuration Configuration
-	basePath, err := config.GetGladiusBase()
 
-	viper.AddConfigPath(basePath)
-	viper.AddConfigPath(".")
+	// Path of used config value
+	configFile := viper.ConfigFileUsed()
 
-	err = viper.ReadInConfig()
-	if err != nil {
-		log.Printf("\n\nUnable to find gladius-controld.toml in project root, or default directories below.\n\nError: \n%v", err)
+	if configFile == "" {
+		log.Printf("\n\nUnable to find gladius-controld.toml in project root, or default directories below.\n")
 		log.Printf("\n\nUsing Default Node Manager Configuration")
 
 		configuration = configuration.defaults()
@@ -155,11 +161,6 @@ func DefaultConfiguration() (Configuration, error) {
 
 		viper.SetConfigType("json")
 		viper.ReadConfig(bytes.NewBuffer(jsonBytes))
-	} else {
-		err = viper.Unmarshal(&configuration)
-		if err != nil {
-			log.Fatalf("unable to decode into struct, %v", err)
-		}
 	}
 
 	// Setup environment vars, they look like CONTROLD_OBJECT_KEY
@@ -167,8 +168,6 @@ func DefaultConfiguration() (Configuration, error) {
 	r := strings.NewReplacer(".", "_")
 	viper.SetEnvKeyReplacer(r)
 	viper.AutomaticEnv()
-
-	return configuration, nil
 }
 
 func setupRouter() (*mux.Router, *blockchain.GladiusAccountManager) {
