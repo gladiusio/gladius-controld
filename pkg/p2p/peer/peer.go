@@ -3,7 +3,6 @@ package peer
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/url"
 	"os"
 	"strings"
@@ -32,7 +31,9 @@ func New(ga *blockchain.GladiusAccountManager) *Peer {
 	c.ProbeInterval = 8 * time.Second
 	c.GossipNodes = 3
 	c.Delegate = d
-	c.Merge = md
+	// FIXME: Renable this feature, problem now is that the challenges that nodes
+	// respond with seem to be wrong
+	// c.Merge = md
 	c.Name = hostname + "-" + uuid.NewV4().String()
 	c.AdvertisePort = viper.GetInt("P2P.AdvertisePort")
 	c.BindPort = viper.GetInt("P2P.BindPort")
@@ -111,9 +112,6 @@ func (p *Peer) Join(ipList []string) error {
 	if err != nil {
 		return err
 	}
-
-	node := p.member.LocalNode()
-	fmt.Printf("Local member %s:%d\n", node.Addr, node.Port)
 
 	return nil
 }
