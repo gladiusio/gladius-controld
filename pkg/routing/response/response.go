@@ -60,10 +60,10 @@ type etherscan struct {
 
 func (response *DefaultResponse) FormatTransactionResponse(transaction string) {
 	response.Transaction = &TxHash{
-		EndPoint: "http://localhost:3000/api/status/tx/" + transaction,
+		EndPoint: "http://localhost:3001/api/status/tx/" + transaction,
 		Value:    transaction,
 		Etherscan: etherscan{
-			//Main: "https://etherscan.io/tx/" + transaction,
+			Main: "https://etherscan.io/tx/" + transaction,
 			Ropsten: "https://ropsten.etherscan.io/tx/" + transaction,
 		},
 	}
