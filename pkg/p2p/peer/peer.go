@@ -25,7 +25,7 @@ func New(ga *blockchain.GladiusAccountManager) *Peer {
 	hostname, _ := os.Hostname()
 
 	c := memberlist.DefaultWANConfig()
-	c.PushPullInterval = 15 * time.Second
+	c.PushPullInterval = 10 * time.Second
 	c.GossipInterval = 200 * time.Millisecond
 	c.ProbeTimeout = 4 * time.Second
 	c.ProbeInterval = 7 * time.Second
