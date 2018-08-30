@@ -3,6 +3,7 @@ package blockchain
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/gladiusio/gladius-application-server/pkg/db/models"
 	"github.com/gladiusio/gladius-controld/pkg/routing/response"
 	"io/ioutil"
 	"log"
@@ -51,18 +52,10 @@ type PoolArrayResponse struct {
 	Pools []PoolResponse `json:"pools"`
 }
 
-type PoolPublicData struct {
-	Name         string `json:"name"`
-	Location     string `json:"location"`
-	Rating       string `json:"rating"`
-	NodeCount    string `json:"nodeCount"`
-	MaxBandwidth string `json:"maxBandwidth"`
-}
-
 type PoolResponse struct {
-	Address string      `json:"address"`
-	Url     string      `json:"url,omitempty"`
-	Data    interface{} `json:"data,omitempty"`
+	Address string                 `json:"address"`
+	Url     string                 `json:"url,omitempty"`
+	Data    models.PoolInformation `json:"data,omitempty"`
 }
 
 func (d *PoolResponse) String() string {
@@ -97,12 +90,17 @@ func MarketPoolAddressesToArrayResponse(poolAddresses []common.Address, includeD
 			var defaultResponse response.DefaultResponse
 			json.Unmarshal([]byte(poolInformationResponse), &defaultResponse)
 
-			poolResponse = PoolResponse{poolAddress.String(), poolUrl, defaultResponse.Response}
+			var poolInformation models.PoolInformation
+			poolInfoByteArray, err := json.Marshal(defaultResponse.Response)
+			json.Unmarshal(poolInfoByteArray, &poolInformation)
+			poolInformation.Url = poolUrl
+
+			poolResponse = PoolResponse{poolAddress.String(), poolUrl, poolInformation}
 			if err != nil {
 				return PoolArrayResponse{}, err
 			}
 		} else {
-			poolResponse = PoolResponse{poolAddress.String(), "", nil}
+			poolResponse = PoolResponse{poolAddress.String(), "", models.PoolInformation{}}
 		}
 		pools.Pools = append(pools.Pools, poolResponse)
 	}
