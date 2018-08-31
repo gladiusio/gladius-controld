@@ -5,12 +5,13 @@ import (
 	b64 "encoding/base64"
 	"encoding/json"
 	"errors"
-	response2 "github.com/gladiusio/gladius-controld/pkg/routing/response"
-	"github.com/gladiusio/gladius-controld/pkg/utils"
-	"github.com/spf13/viper"
 	"net/http"
 	"regexp"
 	"time"
+
+	response2 "github.com/gladiusio/gladius-controld/pkg/routing/response"
+	"github.com/gladiusio/gladius-controld/pkg/utils"
+	"github.com/spf13/viper"
 
 	"github.com/buger/jsonparser"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -102,7 +103,7 @@ func (sm SignedMessage) IsInPoolAndVerified() bool {
 	// Check if address is part of pool
 	// config override
 	if viper.GetBool("P2P.VerifyOverride") {
-		return true
+		return sm.IsVerified() && true
 	}
 
 	if !sm.IsVerified() {
@@ -112,12 +113,12 @@ func (sm SignedMessage) IsInPoolAndVerified() bool {
 
 	poolUrl := viper.GetString("Blockchain.PoolUrl")
 
-	response, _ := utils.SendRequest(http.MethodGet, poolUrl + "applications/pool/contains/" + nodeAddress, nil)
+	response, _ := utils.SendRequest(http.MethodGet, poolUrl+"applications/pool/contains/"+nodeAddress, nil)
 	var defaultResponse response2.DefaultResponse
 	json.Unmarshal([]byte(response), &defaultResponse)
 
 	byteResponse, _ := json.Marshal(defaultResponse.Response)
-	var poolContainsWallet struct{ContainsWallet bool}
+	var poolContainsWallet struct{ ContainsWallet bool }
 	json.Unmarshal(byteResponse, &poolContainsWallet)
 
 	return poolContainsWallet.ContainsWallet
