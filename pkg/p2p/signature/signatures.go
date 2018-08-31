@@ -5,7 +5,6 @@ import (
 	b64 "encoding/base64"
 	"encoding/json"
 	"errors"
-	"github.com/gladiusio/gladius-controld/pkg/routing/handlers"
 	response2 "github.com/gladiusio/gladius-controld/pkg/routing/response"
 	"github.com/gladiusio/gladius-controld/pkg/utils"
 	"github.com/spf13/viper"
@@ -113,10 +112,12 @@ func (sm SignedMessage) IsInPoolAndVerified() bool {
 	json.Unmarshal([]byte(response), &defaultResponse)
 
 	byteResponse, _ := json.Marshal(defaultResponse.Response)
-	var poolContainsWallet handlers.PoolContainsWallet
+	var poolContainsWallet struct{ContainsWallet bool}
 	json.Unmarshal(byteResponse, &poolContainsWallet)
 
 	return poolContainsWallet.ContainsWallet
+
+	return true
 }
 
 func CreateSignedMessage(message *message.Message, ga *blockchain.GladiusAccountManager) (*SignedMessage, error) {
