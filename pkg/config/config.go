@@ -56,13 +56,14 @@ type DatabaseConfig struct {
 type BlockchainConfig struct {
 	Provider           string
 	MarketAddress      string
-	PoolUrl			   string
+	PoolUrl            string
 	PoolManagerAddress string
 }
 
 type P2PConfig struct {
-	BindPort      int
-	AdvertisePort int
+	BindPort       int
+	AdvertisePort  int
+	VerifyOverride bool
 }
 
 type Configuration struct {
@@ -107,12 +108,13 @@ func (configuration Configuration) defaults() Configuration {
 		Blockchain: BlockchainConfig{
 			Provider:           "https://mainnet.infura.io/tjqLYxxGIUp0NylVCiWw",
 			MarketAddress:      "0x27a9390283236f836a0b3c8dfdbed2ed854322fc",
-			PoolUrl:        	"http://174.138.111.1/api/",
+			PoolUrl:            "http://174.138.111.1/api/",
 			PoolManagerAddress: "0x9717eadbfe344457135a4f1fa8ae3b11b4cab0b7",
 		},
 		P2P: P2PConfig{
 			AdvertisePort: 7946,
 			BindPort:      7946,
+			VerifyOverride: false,
 		},
 		Directory: struct {
 			Base   string

@@ -100,6 +100,11 @@ func (sm SignedMessage) IsPoolManagerAndVerified() bool {
 
 func (sm SignedMessage) IsInPoolAndVerified() bool {
 	// Check if address is part of pool
+	// config override
+	if viper.GetBool("P2P.VerifyOverride") {
+		return true
+	}
+
 	if !sm.IsVerified() {
 		return false
 	}
@@ -120,7 +125,7 @@ func (sm SignedMessage) IsInPoolAndVerified() bool {
 
 func CreateSignedMessage(message *message.Message, ga *blockchain.GladiusAccountManager) (*SignedMessage, error) {
 
-	// Create a serailized JSON string
+	// Create a serialized JSON string
 	messageBytes := message.Serialize()
 
 	m := minify.New()
