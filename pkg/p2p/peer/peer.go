@@ -124,7 +124,7 @@ func (p *Peer) SetState(s *state.State) {
 
 // StopAndLeave will infomr the network of it leaving and shutdown
 func (p *Peer) StopAndLeave() error {
-	err := p.member.Leave(1 * time.Millisecond)
+	err := p.member.Leave(1 * time.Second)
 	if err != nil {
 		return err
 	}
