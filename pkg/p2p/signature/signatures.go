@@ -107,7 +107,7 @@ func (sm SignedMessage) IsInPoolAndVerified() bool {
 
 	poolUrl := viper.GetString("Blockchain.PoolUrl")
 
-	response, _ := utils.SendRequest(http.MethodGet, poolUrl + "/pool/contains/" + nodeAddress, nil)
+	response, _ := utils.SendRequest(http.MethodGet, poolUrl + "applications/pool/contains/" + nodeAddress, nil)
 	var defaultResponse response2.DefaultResponse
 	json.Unmarshal([]byte(response), &defaultResponse)
 
@@ -116,8 +116,6 @@ func (sm SignedMessage) IsInPoolAndVerified() bool {
 	json.Unmarshal(byteResponse, &poolContainsWallet)
 
 	return poolContainsWallet.ContainsWallet
-
-	return true
 }
 
 func CreateSignedMessage(message *message.Message, ga *blockchain.GladiusAccountManager) (*SignedMessage, error) {
