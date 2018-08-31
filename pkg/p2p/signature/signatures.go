@@ -5,6 +5,10 @@ import (
 	b64 "encoding/base64"
 	"encoding/json"
 	"errors"
+	response2 "github.com/gladiusio/gladius-controld/pkg/routing/response"
+	"github.com/gladiusio/gladius-controld/pkg/utils"
+	"github.com/spf13/viper"
+	"net/http"
 	"regexp"
 	"time"
 
@@ -96,9 +100,22 @@ func (sm SignedMessage) IsPoolManagerAndVerified() bool {
 
 func (sm SignedMessage) IsInPoolAndVerified() bool {
 	// Check if address is part of pool
-	// TODO: Check real address against pool
-	addressInPool := true
-	return addressInPool && sm.IsVerified()
+	if !sm.IsVerified() {
+		return false
+	}
+	nodeAddress := sm.Address
+
+	poolUrl := viper.GetString("Blockchain.PoolUrl")
+
+	response, _ := utils.SendRequest(http.MethodGet, poolUrl + "applications/pool/contains/" + nodeAddress, nil)
+	var defaultResponse response2.DefaultResponse
+	json.Unmarshal([]byte(response), &defaultResponse)
+
+	byteResponse, _ := json.Marshal(defaultResponse.Response)
+	var poolContainsWallet struct{ContainsWallet bool}
+	json.Unmarshal(byteResponse, &poolContainsWallet)
+
+	return poolContainsWallet.ContainsWallet
 }
 
 func CreateSignedMessage(message *message.Message, ga *blockchain.GladiusAccountManager) (*SignedMessage, error) {
