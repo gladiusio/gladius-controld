@@ -83,14 +83,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:545d83d3d0c0944a52bac06d5795f80f446b0dd198a501a076840eb5952ea5ce"
+  digest = "1:089a1d9d2858dfc58773e0c0afd51b0f8c856719db90b70ca19947ab4c3e8c21"
   name = "github.com/gladiusio/gladius-application-server"
   packages = [
     "pkg/controller",
     "pkg/db/models",
   ]
   pruneopts = ""
-  revision = "89d8ec205fb04de81dc030a75f204730ac367015"
+  revision = "7ef3c256815a6d83ee02c047e5b3ef862b08ca28"
 
 [[projects]]
   digest = "1:1f6d1b29f353bfd7fd36c254f5bc9e0e0ee903083f907a3f930fa03171834449"
