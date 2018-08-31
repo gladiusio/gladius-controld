@@ -11,14 +11,15 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	"github.com/spf13/viper"
 )
 
 var Database *gorm.DB
 
-func initializeConfiguration() (config.Configuration, error) {
+func initializeConfiguration() {
+	// Read in gladius-utils directory locations
 	gladiusConfig.SetupConfig("gladius-controld", map[string]string{})
-	return config.DefaultConfiguration()
+	// Set Defaults if no configuration file is found
+	config.DefaultConfiguration()
 }
 
 func initializeDatabase(databaseConfig config.DatabaseConfig) {
@@ -49,7 +50,7 @@ func initializeNodeManagerService(router *mux.Router, configuration config.Confi
 	// Router Setup
 	cRouter := routing.ControlRouter{
 		Router: router,
-		Port:   viper.GetString("NodeManager.config.port"),
+		Port:   configuration.Port,
 		Debug:  configuration.Debug,
 	}
 
@@ -58,10 +59,9 @@ func initializeNodeManagerService(router *mux.Router, configuration config.Confi
 
 func InitializeNodeManager() {
 	// Grab default configuration
-	configuration, err := initializeConfiguration()
-	if err != nil {
-		log.Print(err)
-	}
+	initializeConfiguration()
+
+	configuration := config.ViperConfiguration()
 
 	nodeConfig := configuration.NodeManager.Config
 	initializeNodeManagerService(config.NodeRouter(), nodeConfig)
@@ -69,10 +69,9 @@ func InitializeNodeManager() {
 
 func InitializePoolManager() {
 	// Grab default configuration
-	configuration, err := initializeConfiguration()
-	if err != nil {
-		log.Print(err)
-	}
+	initializeConfiguration()
+
+	configuration := config.ViperConfiguration()
 
 	poolConfig := configuration.PoolManager.Config
 
@@ -82,10 +81,9 @@ func InitializePoolManager() {
 
 func InitializeApplicationServer() {
 	// Grab default configuration
-	configuration, err := initializeConfiguration()
-	if err != nil {
-		log.Fatal(err)
-	}
+	initializeConfiguration()
+
+	configuration := config.ViperConfiguration()
 
 	asConfig := configuration.ApplicationServer.Config
 

@@ -132,11 +132,11 @@ func GetAccountBalance(address common.Address, symbol BalanceType) (Balance, err
 
 	switch symbol {
 	case ETH:
-		resp, err = http.Get("https://api-ropsten.etherscan.io/api?module=account&action=balance&address=" + address.String() + "&tag=latest&apikey=3VRW685YYESSYIFVND3DVN9ZNF4BTT1GB8")
+		resp, err = http.Get("https://api.etherscan.io/api?module=account&action=balance&address=" + address.String() + "&tag=latest&apikey=3VRW685YYESSYIFVND3DVN9ZNF4BTT1GB8")
 		symbolString = "ETH"
 		break
 	case GLA:
-		resp, err = http.Get("https://api-ropsten.etherscan.io/api?module=account&action=tokenbalance&contractaddress=" + glaTokenAddress + "&address=" + address.String() + "&apikey=3VRW685YYESSYIFVND3DVN9ZNF4BTT1GB8")
+		resp, err = http.Get("https://api.etherscan.io/api?module=account&action=tokenbalance&contractaddress=" + glaTokenAddress + "&address=" + address.String() + "&apikey=3VRW685YYESSYIFVND3DVN9ZNF4BTT1GB8")
 		symbolString = "GLA"
 		break
 	}
@@ -203,7 +203,7 @@ type EtherscanTransaction struct {
 }
 
 func GetAccountTransactions(address common.Address, options TransactionOptions) (EtherscanTransactionsResponse, error) {
-	resp, err := http.Get("https://api-ropsten.etherscan.io/api?module=account&action=txlist&address=" + address.String() + "&startblock=0&endblock=latest&sort=asc&apikey=3VRW685YYESSYIFVND3DVN9ZNF4BTT1GB8")
+	resp, err := http.Get("https://api.etherscan.io/api?module=account&action=txlist&address=" + address.String() + "&startblock=0&endblock=latest&sort=asc&apikey=3VRW685YYESSYIFVND3DVN9ZNF4BTT1GB8")
 
 	if err != nil {
 		return EtherscanTransactionsResponse{}, err
