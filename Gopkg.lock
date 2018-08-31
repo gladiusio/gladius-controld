@@ -3,11 +3,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e25b7b8d93b9b3f12e50eb8ecb1317fac42e271c389e6f71b10abfff3711e3ae"
+  digest = "1:bb683173fdfaab3517f9844e96e23173a4da2c1cd40841682f992bf55c99e0d1"
   name = "github.com/aristanetworks/goarista"
   packages = ["monotime"]
   pruneopts = ""
-  revision = "18b896026201d8e1758468d9c5d5a558c69c5e9b"
+  revision = "4dd728aa987e9168a1e609e4919921dbfac9bd7f"
 
 [[projects]]
   branch = "master"
@@ -42,7 +42,7 @@
   version = "v1.7"
 
 [[projects]]
-  digest = "1:a2daa1865bd98ecd61f67cf7f7617f2b7f0501a96ade3140b12d56f5cca60fd5"
+  digest = "1:8acdd83e35b407d026e546bf4d18cc778e9604433d03d468eccca62b9c51c718"
   name = "github.com/ethereum/go-ethereum"
   packages = [
     ".",
@@ -70,8 +70,8 @@
     "trie",
   ]
   pruneopts = ""
-  revision = "316fc7ecfc10d06603f1358c1f4c1020ec36dd2a"
-  version = "v1.8.14"
+  revision = "89451f7c382ad2185987ee369f16416f89c28a7d"
+  version = "v1.8.15"
 
 [[projects]]
   digest = "1:eb53021a8aa3f599d29c7102e65026242bdedce998a54837dc67f14b6a97c5fd"
@@ -83,14 +83,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:87431eacc77c69a0af8c4dd2e7aaa163e12eb9854279fb00608578add863fe0a"
+  digest = "1:545d83d3d0c0944a52bac06d5795f80f446b0dd198a501a076840eb5952ea5ce"
   name = "github.com/gladiusio/gladius-application-server"
   packages = [
     "pkg/controller",
     "pkg/db/models",
   ]
   pruneopts = ""
-  revision = "0aec01387c04d17be4006cae45b6b615f1f09644"
+  revision = "89d8ec205fb04de81dc030a75f204730ac367015"
 
 [[projects]]
   digest = "1:1f6d1b29f353bfd7fd36c254f5bc9e0e0ee903083f907a3f930fa03171834449"
@@ -152,12 +152,12 @@
   version = "v1.0.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:4423ee95d6ee30bb22f680445c58889bb5b91e1b955405bf34374a053784a8a2"
+  digest = "1:c5466dfad4c14bf8e52a34b0eb98f1301acc1e304e0f0ff2c51c356ca1b86747"
   name = "github.com/hashicorp/go-immutable-radix"
   packages = ["."]
   pruneopts = ""
-  revision = "7f3cd4390caab3250a57f30efdb2a65dd7649ecf"
+  revision = "27df80928bb34bb1b0d6d0e01b9e679902e7a6b5"
+  version = "v1.0.0"
 
 [[projects]]
   branch = "master"
@@ -184,12 +184,12 @@
   revision = "6d291a969b86c4b633730bfc6b8b9d64c3aafed9"
 
 [[projects]]
-  branch = "master"
-  digest = "1:9c776d7d9c54b7ed89f119e449983c3f24c0023e75001d6092442412ebca6b94"
+  digest = "1:3313a63031ae281e5f6fd7b0bbca733dfa04d2429df86519e3b4d4c016ccb836"
   name = "github.com/hashicorp/golang-lru"
   packages = ["simplelru"]
   pruneopts = ""
-  revision = "0fb14efe8c47ae851c0034ed7a448854d3d34cf3"
+  revision = "20f1fb78b0740ba8c3cb143a61e86ba5c8669768"
+  version = "v0.5.0"
 
 [[projects]]
   digest = "1:d14365c51dd1d34d5c79833ec91413bfbb166be978724f15701e17080dc06dec"
@@ -323,12 +323,12 @@
   version = "v0.8.0"
 
 [[projects]]
-  digest = "1:c75c214cb979e4cd45adaaf0e0a1c6bc7554bca52fb6b6aa5bac2919f75a570a"
+  digest = "1:7143292549152d009ca9e9c493b74736a2ebd93f921bea8a4b308d7cc5edc6b3"
   name = "github.com/rjeczalik/notify"
   packages = ["."]
   pruneopts = ""
-  revision = "52ae50d8490436622a8941bd70c3dbe0acdd4bbf"
-  version = "v0.9.0"
+  revision = "0f065fa99b48b842c3fd3e2c8b194c6f2b69f6b8"
+  version = "v0.9.1"
 
 [[projects]]
   digest = "1:78c9cf43ddeacd0e472f412082227a0fac2ae107ee60e9112156f9371f9912cf"
@@ -444,7 +444,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:793a79198b755828dec284c6f1325e24e09186f1b7ba818b65c7c35104ed86eb"
+  digest = "1:3ff237df1dca22c6296d2446c76ddcff8d359180ca53b8dcd301a44aa5c2f479"
   name = "golang.org/x/crypto"
   packages = [
     "ed25519",
@@ -453,7 +453,7 @@
     "scrypt",
   ]
   pruneopts = ""
-  revision = "614d502a4dac94afa3a6ce146bd1736da82514c6"
+  revision = "182538f80094b6a8efaade63a8fd8e0d9d5843dd"
 
 [[projects]]
   branch = "master"
@@ -472,7 +472,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:7a5f7a1206de6b90f67cb465e489eac3298e95afa7262813b542df4fab38952f"
+  digest = "1:12902fee4e8c9475c3f34ed83326414a240e3d3990ab7ac3e81f210d621003a3"
   name = "golang.org/x/sys"
   packages = [
     "unix",
@@ -483,7 +483,7 @@
     "windows/svc/mgr",
   ]
   pruneopts = ""
-  revision = "4910a1d54f876d7b22162a85f4d066d3ee649450"
+  revision = "49385e6e15226593f68b26af201feec29d5bba22"
 
 [[projects]]
   digest = "1:5acd3512b047305d49e8763eef7ba423901e85d5dd2fd1e71778a0ea8de10bd4"
@@ -502,7 +502,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:3b1b5e1c7268796692c39157a243d247073db39928c2cfdde66e686c522a335c"
+  digest = "1:a547b0e4c2e95939609350bf8d7634006749cb1af408efce9dc5bf3f05b96194"
   name = "golang.org/x/tools"
   packages = [
     "go/ast/astutil",
@@ -510,7 +510,7 @@
     "internal/fastwalk",
   ]
   pruneopts = ""
-  revision = "f6ba5742950514ddd66494151ed5498ed77969ca"
+  revision = "6cd1fcedba52a3e8045a1c96970cec308e4a632c"
 
 [[projects]]
   branch = "v2"

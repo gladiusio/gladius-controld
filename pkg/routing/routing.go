@@ -215,6 +215,7 @@ func AppendApplicationEndpoints(router *mux.Router, db *gorm.DB) error {
 		Methods(http.MethodPost)
 	applicationRouter.HandleFunc("/status", handlers.PoolStatusViewHandler(db)).
 		Methods(http.MethodPost)
+	applicationRouter.HandleFunc("/pool/contains/{walletAddress:0[xX][0-9a-fA-F]{40}}", handlers.PoolContainsNode(db))
 
 	return nil
 }

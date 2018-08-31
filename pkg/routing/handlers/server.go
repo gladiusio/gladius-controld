@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	"net/http"
 
@@ -17,5 +18,23 @@ func PublicPoolInformationHandler(database *gorm.DB) func(w http.ResponseWriter,
 		}
 
 		ResponseHandler(w, r, "null", true, nil, poolInformation, nil)
+	}
+}
+
+type PoolContainsWallet struct {
+	ContainsWallet bool
+}
+
+func PoolContainsNode(database *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		walletAddress := vars["walletAddress"]
+		containsWallet, err := controller.NodeInPool(database, walletAddress)
+		if err != nil {
+			ErrorHandler(w, r, "Could not query server", err, http.StatusInternalServerError)
+			return
+		}
+
+		ResponseHandler(w, r, "null", true, nil, PoolContainsWallet{ContainsWallet:containsWallet}, nil)
 	}
 }

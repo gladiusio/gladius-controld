@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"github.com/gladiusio/gladius-application-server/pkg/controller"
+	"github.com/gladiusio/gladius-controld/pkg/utils"
 	"github.com/jinzhu/gorm"
 	"net/http"
 
@@ -28,7 +29,7 @@ func PoolPublicDataHandler(ga *blockchain.GladiusAccountManager) func(w http.Res
 			return
 		}
 
-		poolInformationResponse, err := sendRequest(http.MethodGet, poolResponse.Url+"server/info", nil)
+		poolInformationResponse, err := utils.SendRequest(http.MethodGet, poolResponse.Url+"server/info", nil)
 		var defaultResponse response.DefaultResponse
 		json.Unmarshal([]byte(poolInformationResponse), &defaultResponse)
 
