@@ -214,7 +214,7 @@ func LeaveHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
 			ErrorHandler(w, r, "Couldn't leave network", err, http.StatusBadRequest)
 			return
 		}
-		ResponseHandler(w, r, "Pulled state and sent introduction", true, nil, nil, nil)
+		ResponseHandler(w, r, "Left network", true, nil, nil, nil)
 	}
 }
 
