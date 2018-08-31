@@ -10,7 +10,7 @@
 
 [[constraint]]
   name = "github.com/gladiusio/gladius-application-server"
-  branch = "master"
+  version = "~0.1.0"
 
 # Blockchain
 [[constraint]]
