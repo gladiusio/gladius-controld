@@ -5,6 +5,8 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/gladiusio/gladius-controld/pkg/blockchain"
+
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/gladiusio/gladius-controld/pkg/routing/response"
 )
@@ -30,14 +32,15 @@ func ResponseHandler(w http.ResponseWriter, r *http.Request, m string, success b
 		responseStruct.FormatTransactionResponse(transaction.Hash().String())
 	}
 
-	responseJSON, parseErr := json.Marshal(responseStruct)
+	enc := json.NewEncoder(w)
+	enc.SetEscapeHTML(false) // So we can have an & come through in our URL's
+	parseErr := enc.Encode(responseStruct)
 
 	if parseErr != nil {
 		ErrorHandler(w, r, "Could not parse response JSON", parseErr, http.StatusInternalServerError)
 		return
 	}
 
-	w.Write([]byte(responseJSON))
 	return
 }
 
@@ -61,4 +64,38 @@ func ErrorHandler(w http.ResponseWriter, r *http.Request, m string, e error, sta
 	ResponseHandler(w, r, m, false, &err, nil, nil)
 
 	return
+}
+
+func AccountNotFoundErrorHandler(w http.ResponseWriter, r *http.Request, ga *blockchain.GladiusAccountManager) error {
+	if !ga.HasAccount() {
+		err := errors.New("account not found")
+		ErrorHandler(w, r, "Account not found, please create an account", err, http.StatusBadRequest)
+		return err
+	}
+
+	return nil
+}
+
+func AccountUnlockedErrorHandler(w http.ResponseWriter, r *http.Request, ga *blockchain.GladiusAccountManager) error {
+	if !ga.Unlocked() {
+		err := errors.New("wallet locked")
+		ErrorHandler(w, r, "Wallet could not be opened, passphrase is incorrect", err, http.StatusMethodNotAllowed)
+		return err
+	}
+	return nil
+}
+
+// Account Manager Error Handler, checks required account permissions prior to accessing API endpoints
+func AccountErrorHandler(w http.ResponseWriter, r *http.Request, ga *blockchain.GladiusAccountManager) error {
+	err := AccountNotFoundErrorHandler(w, r, ga)
+	if err != nil {
+		return err
+	}
+
+	err = AccountUnlockedErrorHandler(w, r, ga)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

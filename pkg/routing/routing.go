@@ -2,10 +2,12 @@ package routing
 
 import (
 	"fmt"
-	"github.com/jinzhu/gorm"
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/jinzhu/gorm"
+	"github.com/spf13/viper"
 
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/peer"
@@ -14,31 +16,26 @@ import (
 	"github.com/gorilla/mux"
 )
 
-const (
-	PORT  = "3001"
-	DEBUG = false
-)
-
 var apiRouter *mux.Router
 var Database *gorm.DB
 
 type ControlRouter struct {
 	Router *mux.Router
 	Port   string
+	Debug  bool
 }
 
 func (cRouter *ControlRouter) Start() {
+	if cRouter.Debug {
+		cRouter.Router.Use(loggingMiddleware)
+	}
+
 	fmt.Println("Starting API at http://localhost:" + cRouter.Port)
 	log.Fatal(http.ListenAndServe(":"+cRouter.Port, ghandlers.CORS()(cRouter.Router)))
 }
 
 func InitializeRouter() (*mux.Router, error) {
-	// Main Router
 	router := mux.NewRouter()
-	if DEBUG {
-		router.Use(loggingMiddleware)
-	}
-
 	return router, nil
 }
 
@@ -72,7 +69,9 @@ func AppendP2PEndPoints(router *mux.Router, ga *blockchain.GladiusAccountManager
 	// P2P State Routes
 	p2pRouter.HandleFunc("/state/push_message", handlers.PushStateMessageHandler(peerStruct)).
 		Methods("POST")
-	p2pRouter.HandleFunc("/state/", handlers.GetFullStateHandler(peerStruct)).
+	p2pRouter.HandleFunc("/state", handlers.GetFullStateHandler(peerStruct)).
+		Methods("GET")
+	p2pRouter.HandleFunc("/state/{node_address}", handlers.GetNodeStateHandler(peerStruct)).
 		Methods("GET")
 	p2pRouter.HandleFunc("/state/signatures", handlers.GetSignatureListHandler(peerStruct)).
 		Methods("GET")
@@ -80,6 +79,12 @@ func AppendP2PEndPoints(router *mux.Router, ga *blockchain.GladiusAccountManager
 		Methods("POST")
 	p2pRouter.HandleFunc("/state/content_links", handlers.GetContentLinksHandler(peerStruct)).
 		Methods("POST")
+
+	// Only enable for testing
+	if viper.GetBool("NodeManager.Config.Debug") {
+		p2pRouter.HandleFunc("/state/set_state", handlers.SetStateDebugHandler(peerStruct)).
+			Methods("POST")
+	}
 
 	return nil
 }
@@ -174,8 +179,6 @@ func AppendPoolManagerEndpoints(router *mux.Router, ga *blockchain.GladiusAccoun
 	// Pool data, both public and private data can be set here
 	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/data", handlers.PoolPublicDataHandler(ga)).
 		Methods(http.MethodGet)
-	poolRouter.HandleFunc("/{poolAddress:0[xX][0-9a-fA-F]{40}}/data", handlers.PoolSetBlockchainDataHandler()).
-		Methods(http.MethodPost)
 	poolRouter.HandleFunc("/applications/pending/pool", handlers.PoolRetrievePendingPoolConfirmationApplicationsHandler(db)).
 		Methods(http.MethodGet)
 	poolRouter.HandleFunc("/applications/pending/node", handlers.PoolRetrievePendingNodeConfirmationApplicationsHandler(db)).
@@ -219,6 +222,8 @@ func AppendApplicationEndpoints(router *mux.Router, db *gorm.DB) error {
 		Methods(http.MethodPost)
 	applicationRouter.HandleFunc("/status", handlers.PoolStatusViewHandler(db)).
 		Methods(http.MethodPost)
+	applicationRouter.HandleFunc("/pool/contains/{walletAddress:0[xX][0-9a-fA-F]{40}}", handlers.PoolContainsNode(db))
+	applicationRouter.HandleFunc("/nodes", handlers.PoolNodes(db))
 
 	return nil
 }

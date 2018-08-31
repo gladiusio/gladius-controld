@@ -6,11 +6,13 @@ import (
 	"net/http"
 
 	"github.com/buger/jsonparser"
+	"github.com/gorilla/mux"
 
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/message"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/peer"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/signature"
+	"github.com/gladiusio/gladius-controld/pkg/p2p/state"
 )
 
 func parseSignedMessageFromBytes(smBytes []byte) (*signature.SignedMessage, error) {
@@ -130,6 +132,26 @@ func CreateSignedMessageHandler(ga *blockchain.GladiusAccountManager) func(w htt
 	}
 }
 
+func SetStateDebugHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			ErrorHandler(w, r, "Error decoding body", err, http.StatusBadRequest)
+			return
+		}
+
+		toUpdate, _, _, err := jsonparser.Get(body, "state")
+		if err != nil {
+			ErrorHandler(w, r, "Could not find `state` in body", err, http.StatusBadRequest)
+			return
+		}
+		s, _ := state.ParseNetworkState(toUpdate)
+		p.SetState(s)
+
+		ResponseHandler(w, r, "Updated state", true, nil, s, nil)
+	}
+}
+
 // PushStateMessageHandler updates state with signed update and pushes state to
 // a set of random peers. They then propigate it to their peers until the
 // network has a consistent state
@@ -201,6 +223,20 @@ func GetFullStateHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Reque
 	return func(w http.ResponseWriter, r *http.Request) {
 		state := p.GetState()
 		ResponseHandler(w, r, "Got full state", true, nil, state, nil)
+	}
+}
+
+// GetNodeStateHandler gets the current state of a specific node
+func GetNodeStateHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		na := vars["node_address"]
+		nodeState, exists := p.GetState().NodeDataMap[na]
+		if exists {
+			ResponseHandler(w, r, "Got state for: "+na, true, nil, nodeState, nil)
+			return
+		}
+		ErrorHandler(w, r, "That node doesn't exist", nil, http.StatusBadRequest)
 	}
 }
 

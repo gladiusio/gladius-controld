@@ -2,13 +2,16 @@ package blockchain
 
 import (
 	"encoding/json"
-	"log"
-
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/gladiusio/gladius-application-server/pkg/db/models"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain/generated"
+	"github.com/gladiusio/gladius-controld/pkg/routing/response"
+	"github.com/gladiusio/gladius-controld/pkg/utils"
 	"github.com/spf13/viper"
+	"log"
+	"net/http"
 )
 
 // ConnectMarket - Connect and return configured market
@@ -16,7 +19,7 @@ func ConnectMarket() *generated.Market {
 
 	conn := ConnectClient()
 
-	marketAddress := viper.GetString("BlockchainMarketAddress")
+	marketAddress := viper.GetString("blockchain.marketAddress")
 	market, err := generated.NewMarket(common.HexToAddress(marketAddress), conn)
 
 	if err != nil {
@@ -34,7 +37,7 @@ func MarketPoolsOwnedByUser(includeData bool, ga *GladiusAccountManager) (PoolAr
 		return PoolArrayResponse{}, err
 	}
 
-	pools, err := market.GetOwnedPools(&bind.CallOpts{From: *address}, *address)
+	pools, err := market.GetOwnerAllPools(&bind.CallOpts{From: *address}, *address)
 	if err != nil {
 		return PoolArrayResponse{}, err
 	}
@@ -47,8 +50,9 @@ type PoolArrayResponse struct {
 }
 
 type PoolResponse struct {
-	Address string          `json:"address"`
-	Data    *PoolPublicData `json:"data,omitempty"`
+	Address string                 `json:"address"`
+	Url     string                 `json:"url,omitempty"`
+	Data    models.PoolInformation `json:"data,omitempty"`
 }
 
 func (d *PoolResponse) String() string {
@@ -77,13 +81,23 @@ func MarketPoolAddressesToArrayResponse(poolAddresses []common.Address, includeD
 	for _, poolAddress := range poolAddresses {
 		var poolResponse PoolResponse
 		if includeData {
-			poolData, err := PoolRetrievePublicData(poolAddress.String(), ga)
-			poolResponse = PoolResponse{poolAddress.String(), poolData}
+			poolUrl, err := PoolRetrieveApplicationServerUrl(poolAddress.String(), ga)
+
+			poolInformationResponse, err := utils.SendRequest(http.MethodGet, poolUrl+"server/info", nil)
+			var defaultResponse response.DefaultResponse
+			json.Unmarshal([]byte(poolInformationResponse), &defaultResponse)
+
+			var poolInformation models.PoolInformation
+			poolInfoByteArray, err := json.Marshal(defaultResponse.Response)
+			json.Unmarshal(poolInfoByteArray, &poolInformation)
+			// poolInformation.Url = poolUrl
+
+			poolResponse = PoolResponse{poolAddress.String(), poolUrl, poolInformation}
 			if err != nil {
 				return PoolArrayResponse{}, err
 			}
 		} else {
-			poolResponse = PoolResponse{poolAddress.String(), nil}
+			poolResponse = PoolResponse{poolAddress.String(), "", models.PoolInformation{}}
 		}
 		pools.Pools = append(pools.Pools, poolResponse)
 	}
@@ -92,7 +106,7 @@ func MarketPoolAddressesToArrayResponse(poolAddresses []common.Address, includeD
 }
 
 //MarketCreatePool - Create new pool
-func MarketCreatePool(passphrase, publicKey string, ga *GladiusAccountManager) (*types.Transaction, error) {
+func MarketCreatePool(passphrase string, ga *GladiusAccountManager) (*types.Transaction, error) {
 	market := ConnectMarket()
 
 	auth, err := ga.GetAuth(passphrase)
@@ -100,7 +114,7 @@ func MarketCreatePool(passphrase, publicKey string, ga *GladiusAccountManager) (
 		return nil, err
 	}
 
-	transaction, err := market.CreatePool(auth, publicKey)
+	transaction, err := market.CreatePool(auth)
 	if err != nil {
 		return nil, err
 	}

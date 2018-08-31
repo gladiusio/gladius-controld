@@ -21,10 +21,13 @@ vendor/
 
 build/
 
+# config
+gladius-controld.toml
+
 ################
 # IntelliJ IDE #
 ################
-
+.idea/dataSources*
 go.mod
 
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and WebStorm

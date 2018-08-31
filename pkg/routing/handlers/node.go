@@ -1,23 +1,21 @@
 package handlers
 
 import (
-	"bytes"
 	"encoding/json"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/message"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/signature"
+	"github.com/gladiusio/gladius-controld/pkg/utils"
 	"net/http"
 
 	"github.com/gladiusio/gladius-application-server/pkg/db/models"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
 	"github.com/gladiusio/gladius-controld/pkg/routing/response"
 	"github.com/gorilla/mux"
-	"io/ioutil"
-	"time"
 )
 
 func PoolResponseForAddress(poolAddress string, ga *blockchain.GladiusAccountManager) (blockchain.PoolResponse, error) {
-	poolData, err := blockchain.PoolRetrievePublicData(poolAddress, ga)
-	poolResponse := blockchain.PoolResponse{Address: poolAddress, Data: poolData}
+	poolUrl, err := blockchain.PoolRetrieveApplicationServerUrl(poolAddress, ga)
+	poolResponse := blockchain.PoolResponse{Address: poolAddress, Url: poolUrl}
 	if err != nil {
 		return blockchain.PoolResponse{}, err
 	}
@@ -28,12 +26,17 @@ func PoolResponseForAddress(poolAddress string, ga *blockchain.GladiusAccountMan
 // New Routes
 func NodeNewApplicationHandler(ga *blockchain.GladiusAccountManager) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		err := AccountErrorHandler(w, r, ga)
+		if err != nil {
+			return
+		}
+
 		vars := mux.Vars(r)
 		poolAddress := vars["poolAddress"]
 
 		poolResponse, err := PoolResponseForAddress(poolAddress, ga)
 		if err != nil {
-			ErrorHandler(w, r, "Pool data could not be found for Pool: "+poolAddress, err, http.StatusBadRequest)
+			ErrorHandler(w, r, "Pool data could not be found for Pool: "+poolAddress, err, http.StatusNotFound)
 			return
 		}
 
@@ -66,7 +69,7 @@ func NodeNewApplicationHandler(ga *blockchain.GladiusAccountManager) func(w http
 			return
 		}
 
-		application, err := sendRequest(http.MethodPost, poolResponse.Data.URL+"applications/new", signedMessage)
+		application, err := utils.SendRequest(http.MethodPost, poolResponse.Url+"applications/new", signedMessage)
 		//application, err := sendRequest(http.MethodPost, "http://localhost:3333/api/applications/new", signedMessage)
 		if err != nil {
 			ErrorHandler(w, r, "Could not submit application to " + poolResponse.Address, err, http.StatusBadGateway)
@@ -81,6 +84,11 @@ func NodeNewApplicationHandler(ga *blockchain.GladiusAccountManager) func(w http
 
 func NodeViewApplicationHandler(ga *blockchain.GladiusAccountManager) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		err := AccountErrorHandler(w, r, ga)
+		if err != nil {
+			return
+		}
+
 		vars := mux.Vars(r)
 		poolAddress := vars["poolAddress"]
 
@@ -98,7 +106,7 @@ func NodeViewApplicationHandler(ga *blockchain.GladiusAccountManager) func(w htt
 			return
 		}
 
-		applicationResponse, err := sendRequest(http.MethodPost, poolResponse.Data.URL+"applications/view", signedMessage)
+		applicationResponse, err := utils.SendRequest(http.MethodPost, poolResponse.Url+"applications/view", signedMessage)
 		//applicationResponse, err := sendRequest(http.MethodPost, "http://localhost:3333/api/applications/view", signedMessage)
 		if err != nil {
 			ErrorHandler(w, r, "Could not view application", err, http.StatusForbidden)
@@ -113,9 +121,14 @@ func NodeViewApplicationHandler(ga *blockchain.GladiusAccountManager) func(w htt
 
 func NodeViewAllApplicationsHandler(ga *blockchain.GladiusAccountManager) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		err := AccountErrorHandler(w, r, ga)
+		if err != nil {
+			return
+		}
+
 		poolArrayResponse, err := blockchain.MarketPools(true, ga)
 		if err != nil {
-			ErrorHandler(w, r, "Could not retrieve pools", err, http.StatusBadRequest)
+			ErrorHandler(w, r, "Could not retrieve pools", err, http.StatusServiceUnavailable)
 			return
 		}
 
@@ -130,9 +143,8 @@ func NodeViewAllApplicationsHandler(ga *blockchain.GladiusAccountManager) func(w
 
 		for _, poolResponse := range poolArrayResponse.Pools {
 			//poolResponse.Data.URL
-			if poolResponse.Data.URL != "" {
-				applicationResponse, err := sendRequest(http.MethodPost, poolResponse.Data.URL+"applications/view", signedMessage)
-				//applicationResponse, err := sendRequest(http.MethodPost, "http://localhost:3333/api/applications/view", signedMessage)
+			if poolResponse.Url != "" {
+				applicationResponse, err := utils.SendRequest(http.MethodPost, poolResponse.Url+"applications/view", signedMessage)
 
 				if err == nil {
 					var responseStruct response.DefaultResponse
@@ -146,53 +158,4 @@ func NodeViewAllApplicationsHandler(ga *blockchain.GladiusAccountManager) func(w
 
 		ResponseHandler(w, r, "null", true, nil, responses, nil)
 	}
-}
-
-// For control over HTTP client headers,
-// redirect policy, and other settings,
-// create an HTTP client
-var client = &http.Client{
-	Timeout: time.Second * 10, //10 second timeout
-}
-
-// SendRequest - custom function to make sending api requests less of a pain
-// in the arse.
-func sendRequest(requestType, url string, data interface{}) (string, error) {
-
-	b := bytes.Buffer{}
-
-	// if data present, turn it into a bytesBuffer(jsonPayload)
-	if data != nil {
-		jsonPayload, err := json.Marshal(data)
-		if err != nil {
-			return "", err
-		}
-		b = *bytes.NewBuffer(jsonPayload)
-	}
-
-	// Build the request
-	req, err := http.NewRequest(requestType, url, &b)
-	if err != nil {
-		return "", err
-	}
-
-	req.Header.Set("User-Agent", "gladius-controld")
-	req.Header.Set("Content-Type", "application/json")
-
-	// Send the request via a client
-	res, err := client.Do(req)
-	if err != nil {
-		return "", err
-	}
-
-	// read the body of the response
-	body, readErr := ioutil.ReadAll(res.Body)
-	if readErr != nil {
-		return "", err
-	}
-
-	// Defer the closing of the body
-	defer res.Body.Close()
-
-	return string(body), nil //tx
 }

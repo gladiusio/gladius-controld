@@ -1,59 +1,12 @@
 [
     {
-        "constant": false,
-        "inputs": [
-            {
-                "name": "_amount",
-                "type": "uint256"
-            }
-        ],
-        "name": "work",
-        "outputs": [
-            {
-                "name": "",
-                "type": "bool"
-            }
-        ],
-        "payable": false,
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
         "constant": true,
-        "inputs": [
-            {
-                "name": "",
-                "type": "address"
-            },
-            {
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "name": "marketPools",
+        "inputs": [],
+        "name": "data",
         "outputs": [
             {
                 "name": "",
-                "type": "address"
-            }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "constant": true,
-        "inputs": [
-            {
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "name": "allPoolsList",
-        "outputs": [
-            {
-                "name": "",
-                "type": "address"
+                "type": "string"
             }
         ],
         "payable": false,
@@ -86,144 +39,7 @@
                 "type": "uint256"
             }
         ],
-        "name": "payouts",
-        "outputs": [
-            {
-                "name": "pool",
-                "type": "address"
-            },
-            {
-                "name": "user",
-                "type": "address"
-            },
-            {
-                "name": "amount",
-                "type": "uint256"
-            },
-            {
-                "name": "timestamp",
-                "type": "uint256"
-            }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "constant": true,
-        "inputs": [],
-        "name": "balance",
-        "outputs": [
-            {
-                "name": "owed",
-                "type": "uint256"
-            },
-            {
-                "name": "total",
-                "type": "uint256"
-            },
-            {
-                "name": "completed",
-                "type": "uint256"
-            },
-            {
-                "name": "paid",
-                "type": "uint256"
-            }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "constant": false,
-        "inputs": [
-            {
-                "name": "_amount",
-                "type": "uint256"
-            }
-        ],
-        "name": "pay",
-        "outputs": [
-            {
-                "name": "",
-                "type": "bool"
-            }
-        ],
-        "payable": false,
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "constant": false,
-        "inputs": [
-            {
-                "name": "_amount",
-                "type": "uint256"
-            }
-        ],
-        "name": "allocateFunds",
-        "outputs": [
-            {
-                "name": "",
-                "type": "bool"
-            }
-        ],
-        "payable": false,
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "constant": true,
-        "inputs": [
-            {
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "name": "clientToPool",
-        "outputs": [
-            {
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "constant": true,
-        "inputs": [
-            {
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "name": "poolToOwner",
-        "outputs": [
-            {
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "constant": true,
-        "inputs": [
-            {
-                "name": "",
-                "type": "address"
-            },
-            {
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "name": "ownedPools",
+        "name": "marketPoolOwners",
         "outputs": [
             {
                 "name": "",
@@ -260,16 +76,8 @@
                 "type": "address"
             },
             {
-                "name": "_gladiusToken",
+                "name": "_poolFactory",
                 "type": "address"
-            },
-            {
-                "name": "_joinCost",
-                "type": "uint256"
-            },
-            {
-                "name": "_maxPayout",
-                "type": "uint256"
             }
         ],
         "payable": false,
@@ -278,154 +86,12 @@
     },
     {
         "constant": false,
-        "inputs": [
-            {
-                "name": "_publicKey",
-                "type": "string"
-            }
-        ],
+        "inputs": [],
         "name": "createPool",
         "outputs": [
             {
                 "name": "",
                 "type": "address"
-            }
-        ],
-        "payable": false,
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "constant": true,
-        "inputs": [
-            {
-                "name": "_ownerAddress",
-                "type": "address"
-            }
-        ],
-        "name": "getOwnedPools",
-        "outputs": [
-            {
-                "name": "",
-                "type": "address[]"
-            }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "constant": true,
-        "inputs": [
-            {
-                "name": "_client",
-                "type": "address"
-            }
-        ],
-        "name": "getClientPool",
-        "outputs": [
-            {
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "constant": false,
-        "inputs": [
-            {
-                "name": "_pool",
-                "type": "address"
-            },
-            {
-                "name": "_node",
-                "type": "address"
-            },
-            {
-                "name": "_client",
-                "type": "address"
-            },
-            {
-                "name": "_amount",
-                "type": "uint256"
-            }
-        ],
-        "name": "logWorkFrom",
-        "outputs": [],
-        "payable": false,
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "constant": false,
-        "inputs": [
-            {
-                "name": "_pool",
-                "type": "address"
-            },
-            {
-                "name": "_node",
-                "type": "address"
-            },
-            {
-                "name": "_amount",
-                "type": "uint256"
-            }
-        ],
-        "name": "payout",
-        "outputs": [
-            {
-                "name": "",
-                "type": "bool"
-            }
-        ],
-        "payable": false,
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "constant": false,
-        "inputs": [
-            {
-                "name": "_poolAddress",
-                "type": "address"
-            }
-        ],
-        "name": "joinMarketplace",
-        "outputs": [
-            {
-                "name": "",
-                "type": "bool"
-            }
-        ],
-        "payable": false,
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "constant": false,
-        "inputs": [
-            {
-                "name": "_pool",
-                "type": "address"
-            },
-            {
-                "name": "_client",
-                "type": "address"
-            },
-            {
-                "name": "_amount",
-                "type": "uint256"
-            }
-        ],
-        "name": "allocateClientFundsTo",
-        "outputs": [
-            {
-                "name": "",
-                "type": "bool"
             }
         ],
         "payable": false,
@@ -458,6 +124,166 @@
         ],
         "payable": false,
         "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "getOwner",
+        "outputs": [
+            {
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "getData",
+        "outputs": [
+            {
+                "name": "",
+                "type": "string"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "getPoolFactory",
+        "outputs": [
+            {
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [
+            {
+                "name": "_ownerAddress",
+                "type": "address"
+            }
+        ],
+        "name": "getOwnerAllPools",
+        "outputs": [
+            {
+                "name": "",
+                "type": "address[]"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [
+            {
+                "name": "_ownerAddress",
+                "type": "address"
+            }
+        ],
+        "name": "getOwnerMarketPools",
+        "outputs": [
+            {
+                "name": "",
+                "type": "address[]"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [
+            {
+                "name": "_pool",
+                "type": "address"
+            }
+        ],
+        "name": "getPoolOwner",
+        "outputs": [
+            {
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "_owner",
+                "type": "address"
+            }
+        ],
+        "name": "changeOwner",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "_data",
+                "type": "string"
+            }
+        ],
+        "name": "setData",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "_factory",
+                "type": "address"
+            }
+        ],
+        "name": "changePoolFactory",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "_poolAddress",
+                "type": "address"
+            }
+        ],
+        "name": "addToMarketplace",
+        "outputs": [
+            {
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "nonpayable",
         "type": "function"
     }
 ]
