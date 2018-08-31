@@ -35,6 +35,25 @@ func PoolContainsNode(database *gorm.DB) func(w http.ResponseWriter, r *http.Req
 			return
 		}
 
-		ResponseHandler(w, r, "null", true, nil, PoolContainsWallet{ContainsWallet:containsWallet}, nil)
+		ResponseHandler(w, r, "null", true, nil, PoolContainsWallet{ContainsWallet: containsWallet}, nil)
+	}
+}
+
+func PoolNodes(database *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		nodes, err := controller.NodesAccepted(database)
+		if err != nil {
+			ErrorHandler(w, r, "Could not retrieve nodes", err, http.StatusInternalServerError)
+			return
+		}
+
+		var nodeAddresses []string
+
+		for _, node := range nodes {
+			nodeAddresses = append(nodeAddresses, node.Wallet)
+		}
+
+		ResponseHandler(w, r, "null", true, nil, nodeAddresses, nil)
+
 	}
 }
