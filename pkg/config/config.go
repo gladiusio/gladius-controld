@@ -109,11 +109,11 @@ func (configuration Configuration) defaults() Configuration {
 			Provider:           "https://mainnet.infura.io/tjqLYxxGIUp0NylVCiWw",
 			MarketAddress:      "0x27a9390283236f836a0b3c8dfdbed2ed854322fc",
 			PoolUrl:            "http://174.138.111.1/api/",
-			PoolManagerAddress: "0x9717eadbfe344457135a4f1fa8ae3b11b4cab0b7",
+			PoolManagerAddress: "0x9717EaDbfE344457135a4f1fA8AE3B11B4CAB0b7",
 		},
 		P2P: P2PConfig{
-			AdvertisePort: 7946,
-			BindPort:      7946,
+			AdvertisePort:  7946,
+			BindPort:       7946,
 			VerifyOverride: false,
 		},
 		Directory: struct {
