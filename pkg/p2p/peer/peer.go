@@ -25,11 +25,11 @@ func New(ga *blockchain.GladiusAccountManager) *Peer {
 	hostname, _ := os.Hostname()
 
 	c := memberlist.DefaultWANConfig()
-	c.PushPullInterval = 10 * time.Second
+	c.PushPullInterval = 60 * time.Second
 	c.GossipInterval = 200 * time.Millisecond
 	c.ProbeTimeout = 4 * time.Second
 	c.ProbeInterval = 7 * time.Second
-	c.GossipNodes = 4
+	c.GossipNodes = 5
 	c.Delegate = d
 	// FIXME: Renable this feature, problem now is that the challenges that nodes
 	// respond with seem to be wrong
