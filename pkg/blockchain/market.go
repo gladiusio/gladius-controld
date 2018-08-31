@@ -90,7 +90,7 @@ func MarketPoolAddressesToArrayResponse(poolAddresses []common.Address, includeD
 			var poolInformation models.PoolInformation
 			poolInfoByteArray, err := json.Marshal(defaultResponse.Response)
 			json.Unmarshal(poolInfoByteArray, &poolInformation)
-			poolInformation.Url = poolUrl
+			// poolInformation.Url = poolUrl
 
 			poolResponse = PoolResponse{poolAddress.String(), poolUrl, poolInformation}
 			if err != nil {

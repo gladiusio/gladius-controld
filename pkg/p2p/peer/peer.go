@@ -25,11 +25,11 @@ func New(ga *blockchain.GladiusAccountManager) *Peer {
 	hostname, _ := os.Hostname()
 
 	c := memberlist.DefaultWANConfig()
-	c.PushPullInterval = 15 * time.Second
-	c.GossipInterval = 300 * time.Millisecond
+	c.PushPullInterval = 10 * time.Second
+	c.GossipInterval = 200 * time.Millisecond
 	c.ProbeTimeout = 4 * time.Second
-	c.ProbeInterval = 8 * time.Second
-	c.GossipNodes = 3
+	c.ProbeInterval = 7 * time.Second
+	c.GossipNodes = 4
 	c.Delegate = d
 	// FIXME: Renable this feature, problem now is that the challenges that nodes
 	// respond with seem to be wrong
@@ -44,7 +44,7 @@ func New(ga *blockchain.GladiusAccountManager) *Peer {
 	}
 
 	queue := &memberlist.TransmitLimitedQueue{
-		RetransmitMult: 3,
+		RetransmitMult: 4,
 	}
 
 	peer := &Peer{
@@ -114,6 +114,12 @@ func (p *Peer) Join(ipList []string) error {
 	}
 
 	return nil
+}
+
+func (p *Peer) SetState(s *state.State) {
+	p.mux.Lock()
+	p.peerState = s
+	p.mux.Unlock()
 }
 
 // StopAndLeave will infomr the network of it leaving and shutdown
@@ -253,12 +259,13 @@ func (p *Peer) createContentLink(nodeAddress, contentFileName string) string {
 		return ""
 	}
 	u.Host = nodeIP.(string) + ":" + nodePort.(string)
+	u.Path = "/content"
 	u.Scheme = "http"
 
 	if len(contentData) == 2 {
 		q := u.Query()
-		q.Set("website", contentData[0]) // website name
-		q.Set("asset", contentData[1])   // "asset" or "route" to name of file
+		q.Add("website", contentData[0]) // website name
+		q.Add("asset", contentData[1])   // "asset" to name of file
 		u.RawQuery = q.Encode()
 		return u.String()
 	}
