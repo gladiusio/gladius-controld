@@ -3,7 +3,6 @@ package state
 import (
 	"encoding/json"
 	"errors"
-	"reflect"
 	"sync"
 
 	"github.com/buger/jsonparser"
@@ -12,9 +11,46 @@ import (
 
 // State is a type that represents the network state
 type State struct {
-	PoolData    *PoolData            `json:"pool_data"`
-	NodeDataMap map[string]*NodeData `json:"node_data_map"`
-	mux         sync.Mutex
+	// poolDataFields and nodeDataFields keep track of what fields are valid for
+	// the protocol, the map is just for fast lookup
+	poolDataFields map[string]bool
+	nodeDataFields map[string]bool
+
+	// Keeps track of the actual data
+	PoolData    PoolData            `json:"pool_data"`
+	NodeDataMap map[string]NodeData `json:"node_data_map"`
+
+	mux sync.Mutex
+}
+
+// New returns a pointer to a State object
+func New() *State {
+	s := &State{}
+	s.poolDataFields = make(map[string]bool)
+	s.nodeDataFields = make(map[string]bool)
+	return s
+}
+
+// RegisterPoolFields registers the fields as understood types to be recorded in
+// the state of the pool
+func (s *State) RegisterPoolFields(fields ...string) {
+	s.mux.Lock()
+	defer s.mux.Unlock()
+
+	for _, field := range fields {
+		s.poolDataFields[field] = true
+	}
+}
+
+// RegisterNodeFields registers the fields as understood types to be recorded in
+// the state of a node
+func (s *State) RegisterNodeFields(fields ...string) {
+	s.mux.Lock()
+	defer s.mux.Unlock()
+
+	for _, field := range fields {
+		s.nodeDataFields[field] = true
+	}
 }
 
 // GetJSON gets the JSON representation of the state including signatures
@@ -41,50 +77,47 @@ func (s *sigList) GetList() (values []*signature.SignedMessage) {
 	return values
 }
 
-// GetPoolField gets the field name from the pool
+// GetPoolField gets the field by name from the pool
 func (s *State) GetPoolField(key string) interface{} {
 	s.mux.Lock()
 	defer s.mux.Unlock()
-	var toReturn interface{}
+
 	if s.PoolData != nil {
-		v := reflect.ValueOf(*s.PoolData)
-		toReturn = v.FieldByName(key).Interface()
-	} else {
-		toReturn = nil
+		return s.PoolData[key]
 	}
-	return toReturn
+	return nil
 }
 
 // GetNodeFields gets the same field from all nodes
 func (s *State) GetNodeFields(key string) []interface{} {
-	toReturn := make([]interface{}, 0)
 	s.mux.Lock()
-	for _, value := range s.NodeDataMap {
-		v := reflect.ValueOf(*value)
-		toReturn = append(toReturn, v.FieldByName(key).Interface())
+	defer s.mux.Unlock()
+
+	toReturn := make([]interface{}, 0)
+	for _, node := range s.NodeDataMap {
+		toReturn = append(toReturn, node[key])
 	}
-	s.mux.Unlock()
 	return toReturn
 }
 
-// GetNodeFieldsMap gets a map of node address to that field
+// GetNodeFieldsMap gets a map of node address to the field referenced by key
 func (s *State) GetNodeFieldsMap(key string) map[string]interface{} {
-	toReturn := make(map[string]interface{})
 	s.mux.Lock()
-	for node, value := range s.NodeDataMap {
-		v := reflect.ValueOf(*value)
-		toReturn[node] = v.FieldByName(key).Interface()
+	defer s.mux.Unlock()
+
+	toReturn := make(map[string]interface{})
+
+	// Go through every node and get that specific field
+	for node, data := range s.NodeDataMap {
+		toReturn[node] = data[key]
 	}
-	s.mux.Unlock()
 	return toReturn
 }
 
 func (s *State) GetNodeField(address, key string) interface{} {
 	s.mux.Lock()
 	defer s.mux.Unlock()
-	node := s.NodeDataMap[address]
-	v := reflect.ValueOf(*node)
-	return v.FieldByName(key).Interface()
+	return s.NodeDataMap[address][key]
 }
 
 // GetSignatureList returns a list of all of the signed messages used to make
@@ -95,14 +128,15 @@ func (s *State) GetSignatureList() []*signature.SignedMessage {
 	sigs := &sigList{sigs: make(map[string]*signature.SignedMessage)}
 
 	if s.PoolData != nil {
-		// Get all of the pool signatures
-		sigs.Add(s.PoolData.RequiredContent.SignedMessage)
+		for _, field := range s.PoolData {
+			sigs.Add(field.SignedMessage)
+		}
 	}
 	// Get all of the node signatures
 	for _, nd := range s.NodeDataMap {
-		sigs.Add(nd.LastHeartbeat.SignedMessage)
-		sigs.Add(nd.DiskContent.SignedMessage)
-		sigs.Add(nd.IPAddress.SignedMessage)
+		for _, field := range nd {
+			sigs.Add(field.SignedMessage)
+		}
 	}
 
 	return sigs.GetList()
@@ -136,115 +170,94 @@ func (s *State) UpdateState(sm *signature.SignedMessage) error {
 			}
 			return nil
 		}
-		go jsonparser.ObjectEach(messageBytes, handler)
+		jsonparser.ObjectEach(messageBytes, handler)
 		return nil
 	}
 	return errors.New("message is not verified")
 }
 
-func (s *State) nodeHandler(nodeUpdate []byte, timestamp int64, sm *signature.SignedMessage) bool {
+func (s *State) isUnderstoodNodeField(key string) bool {
+	_, ok := s.nodeDataFields[key]
+	return ok
+}
+
+func (s *State) isUnderstoodPoolField(key string) bool {
+	_, ok := s.poolDataFields[key]
+	return ok
+}
+
+func (s *State) nodeHandler(nodeUpdate []byte, timestamp int64, sm *signature.SignedMessage) (bool, error) {
 	if s.NodeDataMap == nil {
-		s.NodeDataMap = make(map[string]*NodeData)
+		s.NodeDataMap = make(map[string]NodeData)
 	}
 	if s.NodeDataMap[sm.Address] == nil {
-		s.NodeDataMap[sm.Address] = &NodeData{}
+		s.NodeDataMap[sm.Address] = NodeData{}
 	}
 	// Keep track of if we update the state or not
 	updated := false
 	handler := func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
-		switch string(key) {
-		case "ip_address":
-			// Verify that the timestamp is newer on the incoming signed message
-			if s.NodeDataMap[sm.Address].IPAddress.SignedMessage == nil ||
-				s.NodeDataMap[sm.Address].IPAddress.SignedMessage.GetTimestamp() < timestamp {
-				updated = true
+		keyString := string(key)
+		// If it's a different protocol, or not an understood field, don't add it to
+		// our state
+		if s.isUnderstoodNodeField(keyString) {
+			// Check if the our node has never been updated, or the incomming message
+			// is newer than the one we have
+			if s.NodeDataMap[sm.Address][keyString] == nil ||
+				s.NodeDataMap[sm.Address][keyString].SignedMessage.GetTimestamp() < timestamp {
 
-				s.NodeDataMap[sm.Address].IPAddress = SignedField{Data: string(value), SignedMessage: sm}
-			}
-		case "content_port":
-			// Verify that the timestamp is newer on the incoming signed message
-			if s.NodeDataMap[sm.Address].ContentPort.SignedMessage == nil ||
-				s.NodeDataMap[sm.Address].ContentPort.SignedMessage.GetTimestamp() < timestamp {
+				// Actually update the field
+				s.NodeDataMap[sm.Address][keyString] = &SignedField{Data: string(value), SignedMessage: sm}
 				updated = true
-				s.NodeDataMap[sm.Address].ContentPort = SignedField{Data: string(value), SignedMessage: sm}
+				return nil
 			}
-		case "disk_content":
-			// Verify that the timestamp is newer on the incoming signed message
-			if s.NodeDataMap[sm.Address].DiskContent.SignedMessage == nil ||
-				s.NodeDataMap[sm.Address].DiskContent.SignedMessage.GetTimestamp() < timestamp {
-				contentList := make([]string, 0)
-				// Get all file names passed in
-				jsonparser.ArrayEach(value, func(v []byte, dataType jsonparser.ValueType, offset int, err error) {
-					contentList = append(contentList, string(v))
-				})
-
-				updated = true
-
-				s.NodeDataMap[sm.Address].DiskContent = SignedList{Data: contentList, SignedMessage: sm}
-			}
-		case "heartbeat":
-			// Verify that the timestamp is newer on the incoming signed message
-			if s.NodeDataMap[sm.Address].LastHeartbeat.SignedMessage == nil ||
-				s.NodeDataMap[sm.Address].LastHeartbeat.SignedMessage.GetTimestamp() < timestamp {
-				updated = true
-
-				s.NodeDataMap[sm.Address].LastHeartbeat = SignedField{Data: string(value), SignedMessage: sm}
-			}
+			return errors.New("Message was older than the current version")
 		}
-		return nil
+		return errors.New("Unsupported field in update message")
 	}
-	jsonparser.ObjectEach(nodeUpdate, handler)
-	return updated
+	err := jsonparser.ObjectEach(nodeUpdate, handler)
+	return updated, err
 }
 
-func (s *State) poolHandler(poolUpdate []byte, timestamp int64, sm *signature.SignedMessage) bool {
+func (s *State) poolHandler(poolUpdate []byte, timestamp int64, sm *signature.SignedMessage) (bool, error) {
 	if s.PoolData == nil {
-		s.PoolData = &PoolData{}
+		s.PoolData = PoolData{}
 	}
 
 	// Don't update the state
 	if !sm.IsPoolManagerAndVerified() {
-		return false
+		return false, errors.New("Message is not verified or not from pool manager")
 	}
 
 	// Keep track of if we update the state or not
 	updated := false
 	handler := func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
-		switch string(key) {
-		case "required_content":
-			// Verify that the timestamp is newer on the incoming signed message
-			if s.PoolData.RequiredContent.SignedMessage == nil ||
-				s.PoolData.RequiredContent.SignedMessage.GetTimestamp() < timestamp {
-				contentList := make([]string, 0)
-				// Get all file names passed in
-				jsonparser.ArrayEach(value, func(v []byte, dataType jsonparser.ValueType, offset int, err error) {
-					contentList = append(contentList, string(v))
-				})
+		keyString := string(key)
+		// If it's a different protocol, or not an understood field, don't add it to
+		// our state
+		if s.isUnderstoodPoolField(keyString) {
+			// Check if the our node has never been updated, or the incomming message
+			// is newer than the one we have
+			if s.PoolData[keyString] == nil ||
+				s.PoolData[keyString].SignedMessage.GetTimestamp() < timestamp {
 
+				// Actually update the field
+				s.PoolData[keyString] = &SignedField{Data: string(value), SignedMessage: sm}
 				updated = true
-
-				s.PoolData.RequiredContent = SignedList{Data: contentList, SignedMessage: sm}
+				return nil
 			}
-
+			return errors.New("Message was older than the current version")
 		}
-		return nil
+		return errors.New("Unsupported field in update message")
 	}
-	jsonparser.ObjectEach(poolUpdate, handler)
-	return updated
+	err := jsonparser.ObjectEach(poolUpdate, handler)
+	return updated, err
 }
 
 // PoolData is a type that stores information about the pool
-type PoolData struct {
-	RequiredContent SignedList `json:"required_content"`
-}
+type PoolData map[string]*SignedField
 
 // NodeData is a type that stores infomration about an indiviudal node
-type NodeData struct {
-	IPAddress     SignedField `json:"ip_address"`
-	ContentPort   SignedField `json:"content_port"`
-	LastHeartbeat SignedField `json:"last_heartbeat"`
-	DiskContent   SignedList  `json:"disk_content"`
-}
+type NodeData map[string]*SignedField
 
 // SignedField is a type that represents a string field that includes the
 // signature that last updated it

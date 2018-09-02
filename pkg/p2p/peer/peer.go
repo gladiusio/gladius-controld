@@ -48,7 +48,7 @@ func New(ga *blockchain.GladiusAccountManager) *Peer {
 	}
 
 	peer := &Peer{
-		peerState:           &state.State{},
+		peerState:           state.New(),
 		running:             false,
 		peerDelegate:        d,
 		member:              m,
@@ -56,6 +56,9 @@ func New(ga *blockchain.GladiusAccountManager) *Peer {
 		challengeReceiveMap: make(map[string]chan *signature.SignedMessage),
 		ga:                  ga,
 	}
+
+	peer.peerState.RegisterNodeFields("ip_address", "disk_content", "content_port", "heartbeat")
+	peer.peerState.RegisterPoolFields("required_content")
 
 	queue.NumNodes = func() int { return peer.member.NumMembers() }
 	d.peer = peer
@@ -198,7 +201,7 @@ func (p *Peer) CompareContent(contentList []string) []interface{} {
 	}
 	contentWeHaveSet := mapset.NewSetFromSlice(cl)
 
-	contentField := p.GetState().GetPoolField("RequiredContent")
+	contentField := p.GetState().GetPoolField("required_content")
 	if contentField == nil {
 		return make([]interface{}, 0)
 	}
@@ -220,7 +223,7 @@ func (p *Peer) CompareContent(contentList []string) []interface{} {
 // GetContentLinks returns a map mapping a file name to all the places it can
 // be found on the network
 func (p *Peer) GetContentLinks(contentList []string) map[string][]string {
-	allContent := p.GetState().GetNodeFieldsMap("DiskContent")
+	allContent := p.GetState().GetNodeFieldsMap("disk_content")
 	toReturn := make(map[string][]string)
 	for nodeAddress, diskContent := range allContent {
 		ourContent := diskContent.(state.SignedList).Data
@@ -250,8 +253,8 @@ func (p *Peer) GetContentLinks(contentList []string) map[string][]string {
 
 // Builds a URL to a node
 func (p *Peer) createContentLink(nodeAddress, contentFileName string) string {
-	nodeIP := p.GetState().GetNodeField(nodeAddress, "IPAddress").(state.SignedField).Data
-	nodePort := p.GetState().GetNodeField(nodeAddress, "ContentPort").(state.SignedField).Data
+	nodeIP := p.GetState().GetNodeField(nodeAddress, "ip_address").(state.SignedField).Data
+	nodePort := p.GetState().GetNodeField(nodeAddress, "content_port").(state.SignedField).Data
 
 	contentData := strings.Split(contentFileName, "/")
 	u := url.URL{}
