@@ -58,6 +58,15 @@ dependencies:
 test: $(CTL_SRC)
 	$(GOTEST) $(CTL_SRC)
 
+protobuf:
+	protoc -I=. -I=$(GOPATH)/src -I=$(GOPATH)/src/github.com/gogo/protobuf/protobuf --gogofaster_out=\
+	Mgoogle/protobuf/any.proto=github.com/gogo/protobuf/types,\
+	Mgoogle/protobuf/duration.proto=github.com/gogo/protobuf/types,\
+	Mgoogle/protobuf/struct.proto=github.com/gogo/protobuf/types,\
+	Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,\
+	Mgoogle/protobuf/wrappers.proto=github.com/gogo/protobuf/types:. \
+	./pkg/p2p/peer/messages/*.proto
+
 controld: test
 	$(GOBUILD) -o $(CTL_DEST) $(CTL_SRC)
 
