@@ -3,7 +3,6 @@ package peer
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/url"
 	"os"
 	"strings"
@@ -16,6 +15,7 @@ import (
 	"github.com/gladiusio/gladius-controld/pkg/p2p/state"
 	"github.com/hashicorp/memberlist"
 	"github.com/satori/go.uuid"
+	"github.com/spf13/viper"
 )
 
 // New returns a new peer type
@@ -25,14 +25,18 @@ func New(ga *blockchain.GladiusAccountManager) *Peer {
 	hostname, _ := os.Hostname()
 
 	c := memberlist.DefaultWANConfig()
-	c.PushPullInterval = 15 * time.Second
-	c.GossipInterval = 300 * time.Millisecond
+	c.PushPullInterval = 60 * time.Second
+	c.GossipInterval = 200 * time.Millisecond
 	c.ProbeTimeout = 4 * time.Second
-	c.ProbeInterval = 8 * time.Second
-	c.GossipNodes = 3
+	c.ProbeInterval = 7 * time.Second
+	c.GossipNodes = 5
 	c.Delegate = d
-	c.Merge = md
+	// FIXME: Renable this feature, problem now is that the challenges that nodes
+	// respond with seem to be wrong
+	// c.Merge = md
 	c.Name = hostname + "-" + uuid.NewV4().String()
+	c.AdvertisePort = viper.GetInt("P2P.AdvertisePort")
+	c.BindPort = viper.GetInt("P2P.BindPort")
 
 	m, err := memberlist.Create(c)
 	if err != nil {
@@ -40,11 +44,11 @@ func New(ga *blockchain.GladiusAccountManager) *Peer {
 	}
 
 	queue := &memberlist.TransmitLimitedQueue{
-		RetransmitMult: 3,
+		RetransmitMult: 4,
 	}
 
 	peer := &Peer{
-		peerState:           &state.State{},
+		peerState:           state.New(),
 		running:             false,
 		peerDelegate:        d,
 		member:              m,
@@ -53,7 +57,7 @@ func New(ga *blockchain.GladiusAccountManager) *Peer {
 		ga:                  ga,
 	}
 
-	peer.peerState.RegisterNodeFields("ip_address", "disk_content", "heartbeat", "content_port")
+	peer.peerState.RegisterNodeFields("ip_address", "disk_content", "content_port", "heartbeat")
 	peer.peerState.RegisterPoolFields("required_content")
 
 	queue.NumNodes = func() int { return peer.member.NumMembers() }
@@ -112,15 +116,18 @@ func (p *Peer) Join(ipList []string) error {
 		return err
 	}
 
-	node := p.member.LocalNode()
-	fmt.Printf("Local member %s:%d\n", node.Addr, node.Port)
-
 	return nil
+}
+
+func (p *Peer) SetState(s *state.State) {
+	p.mux.Lock()
+	p.peerState = s
+	p.mux.Unlock()
 }
 
 // StopAndLeave will infomr the network of it leaving and shutdown
 func (p *Peer) StopAndLeave() error {
-	err := p.member.Leave(1 * time.Millisecond)
+	err := p.member.Leave(1 * time.Second)
 	if err != nil {
 		return err
 	}
@@ -194,7 +201,7 @@ func (p *Peer) CompareContent(contentList []string) []interface{} {
 	}
 	contentWeHaveSet := mapset.NewSetFromSlice(cl)
 
-	contentField := p.GetState().GetPoolField("RequiredContent")
+	contentField := p.GetState().GetPoolField("required_content")
 	if contentField == nil {
 		return make([]interface{}, 0)
 	}
@@ -216,7 +223,7 @@ func (p *Peer) CompareContent(contentList []string) []interface{} {
 // GetContentLinks returns a map mapping a file name to all the places it can
 // be found on the network
 func (p *Peer) GetContentLinks(contentList []string) map[string][]string {
-	allContent := p.GetState().GetNodeFieldsMap("DiskContent")
+	allContent := p.GetState().GetNodeFieldsMap("disk_content")
 	toReturn := make(map[string][]string)
 	for nodeAddress, diskContent := range allContent {
 		ourContent := diskContent.(state.SignedList).Data
@@ -234,7 +241,10 @@ func (p *Peer) GetContentLinks(contentList []string) map[string][]string {
 					toReturn[contentWanted] = make([]string, 0)
 				}
 				// Add the URL to the map
-				toReturn[contentWanted] = append(toReturn[contentWanted], p.createContentLink(nodeAddress, contentWanted))
+				link := p.createContentLink(nodeAddress, contentWanted)
+				if link != "" {
+					toReturn[contentWanted] = append(toReturn[contentWanted], link)
+				}
 			}
 		}
 	}
@@ -243,16 +253,22 @@ func (p *Peer) GetContentLinks(contentList []string) map[string][]string {
 
 // Builds a URL to a node
 func (p *Peer) createContentLink(nodeAddress, contentFileName string) string {
-	nodeIP := p.GetState().GetNodeField(nodeAddress, "IPAddress").(state.SignedField).Data
+	nodeIP := p.GetState().GetNodeField(nodeAddress, "ip_address").(state.SignedField).Data
+	nodePort := p.GetState().GetNodeField(nodeAddress, "content_port").(state.SignedField).Data
+
 	contentData := strings.Split(contentFileName, "/")
 	u := url.URL{}
-	u.Host = nodeIP + ":8080"
+	if nodeIP == nil || nodePort == nil {
+		return ""
+	}
+	u.Host = nodeIP.(string) + ":" + nodePort.(string)
+	u.Path = "/content"
 	u.Scheme = "http"
 
-	if len(contentData) == 3 {
+	if len(contentData) == 2 {
 		q := u.Query()
-		q.Set("website", contentData[0])      // website name
-		q.Set(contentData[1], contentData[2]) // "asset" or "route" to name of file
+		q.Add("website", contentData[0]) // website name
+		q.Add("asset", contentData[1])   // "asset" to name of file
 		u.RawQuery = q.Encode()
 		return u.String()
 	}

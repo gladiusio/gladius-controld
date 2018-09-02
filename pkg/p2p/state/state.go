@@ -23,6 +23,14 @@ type State struct {
 	mux sync.Mutex
 }
 
+// New returns a pointer to a State object
+func New() *State {
+	s := &State{}
+	s.poolDataFields = make(map[string]bool)
+	s.nodeDataFields = make(map[string]bool)
+	return s
+}
+
 // RegisterPoolFields registers the fields as understood types to be recorded in
 // the state of the pool
 func (s *State) RegisterPoolFields(fields ...string) {
@@ -169,17 +177,11 @@ func (s *State) UpdateState(sm *signature.SignedMessage) error {
 }
 
 func (s *State) isUnderstoodNodeField(key string) bool {
-	s.mux.Lock()
-	defer s.mux.Unlock()
-
 	_, ok := s.nodeDataFields[key]
 	return ok
 }
 
 func (s *State) isUnderstoodPoolField(key string) bool {
-	s.mux.Lock()
-	defer s.mux.Unlock()
-
 	_, ok := s.poolDataFields[key]
 	return ok
 }
