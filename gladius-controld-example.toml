@@ -17,6 +17,7 @@ build                 = 20180821
 [P2P]
   bindPort            = 7946
   advertisePort       = 7946
+  BindAddress         = "0.0.0.0"
   verifyOverride      = true # Toggle IsInPoolAndVerified override, true == bypass
 
 [blockchain]
