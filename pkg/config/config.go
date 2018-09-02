@@ -64,6 +64,7 @@ type P2PConfig struct {
 	BindPort       int
 	AdvertisePort  int
 	VerifyOverride bool
+	BindAddress    string
 }
 
 type Configuration struct {
@@ -115,6 +116,7 @@ func (configuration Configuration) defaults() Configuration {
 			AdvertisePort:  7946,
 			BindPort:       7946,
 			VerifyOverride: false,
+			BindAddress:    "0.0.0.0",
 		},
 		Directory: struct {
 			Base   string
