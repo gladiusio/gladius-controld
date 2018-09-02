@@ -3,6 +3,7 @@ package peer
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/url"
 	"os"
 	"strings"
@@ -15,7 +16,6 @@ import (
 	"github.com/gladiusio/gladius-controld/pkg/p2p/state"
 	"github.com/hashicorp/memberlist"
 	"github.com/satori/go.uuid"
-	"github.com/spf13/viper"
 )
 
 // New returns a new peer type
@@ -25,18 +25,14 @@ func New(ga *blockchain.GladiusAccountManager) *Peer {
 	hostname, _ := os.Hostname()
 
 	c := memberlist.DefaultWANConfig()
-	c.PushPullInterval = 60 * time.Second
-	c.GossipInterval = 200 * time.Millisecond
+	c.PushPullInterval = 15 * time.Second
+	c.GossipInterval = 300 * time.Millisecond
 	c.ProbeTimeout = 4 * time.Second
-	c.ProbeInterval = 7 * time.Second
-	c.GossipNodes = 5
+	c.ProbeInterval = 8 * time.Second
+	c.GossipNodes = 3
 	c.Delegate = d
-	// FIXME: Renable this feature, problem now is that the challenges that nodes
-	// respond with seem to be wrong
-	// c.Merge = md
+	c.Merge = md
 	c.Name = hostname + "-" + uuid.NewV4().String()
-	c.AdvertisePort = viper.GetInt("P2P.AdvertisePort")
-	c.BindPort = viper.GetInt("P2P.BindPort")
 
 	m, err := memberlist.Create(c)
 	if err != nil {
@@ -44,7 +40,7 @@ func New(ga *blockchain.GladiusAccountManager) *Peer {
 	}
 
 	queue := &memberlist.TransmitLimitedQueue{
-		RetransmitMult: 4,
+		RetransmitMult: 3,
 	}
 
 	peer := &Peer{
@@ -56,6 +52,9 @@ func New(ga *blockchain.GladiusAccountManager) *Peer {
 		challengeReceiveMap: make(map[string]chan *signature.SignedMessage),
 		ga:                  ga,
 	}
+
+	peer.peerState.RegisterNodeFields("ip_address", "disk_content", "heartbeat", "content_port")
+	peer.peerState.RegisterPoolFields("required_content")
 
 	queue.NumNodes = func() int { return peer.member.NumMembers() }
 	d.peer = peer
@@ -113,18 +112,15 @@ func (p *Peer) Join(ipList []string) error {
 		return err
 	}
 
-	return nil
-}
+	node := p.member.LocalNode()
+	fmt.Printf("Local member %s:%d\n", node.Addr, node.Port)
 
-func (p *Peer) SetState(s *state.State) {
-	p.mux.Lock()
-	p.peerState = s
-	p.mux.Unlock()
+	return nil
 }
 
 // StopAndLeave will infomr the network of it leaving and shutdown
 func (p *Peer) StopAndLeave() error {
-	err := p.member.Leave(1 * time.Second)
+	err := p.member.Leave(1 * time.Millisecond)
 	if err != nil {
 		return err
 	}
@@ -238,10 +234,7 @@ func (p *Peer) GetContentLinks(contentList []string) map[string][]string {
 					toReturn[contentWanted] = make([]string, 0)
 				}
 				// Add the URL to the map
-				link := p.createContentLink(nodeAddress, contentWanted)
-				if link != "" {
-					toReturn[contentWanted] = append(toReturn[contentWanted], link)
-				}
+				toReturn[contentWanted] = append(toReturn[contentWanted], p.createContentLink(nodeAddress, contentWanted))
 			}
 		}
 	}
@@ -251,21 +244,15 @@ func (p *Peer) GetContentLinks(contentList []string) map[string][]string {
 // Builds a URL to a node
 func (p *Peer) createContentLink(nodeAddress, contentFileName string) string {
 	nodeIP := p.GetState().GetNodeField(nodeAddress, "IPAddress").(state.SignedField).Data
-	nodePort := p.GetState().GetNodeField(nodeAddress, "ContentPort").(state.SignedField).Data
-
 	contentData := strings.Split(contentFileName, "/")
 	u := url.URL{}
-	if nodeIP == nil || nodePort == nil {
-		return ""
-	}
-	u.Host = nodeIP.(string) + ":" + nodePort.(string)
-	u.Path = "/content"
+	u.Host = nodeIP + ":8080"
 	u.Scheme = "http"
 
-	if len(contentData) == 2 {
+	if len(contentData) == 3 {
 		q := u.Query()
-		q.Add("website", contentData[0]) // website name
-		q.Add("asset", contentData[1])   // "asset" to name of file
+		q.Set("website", contentData[0])      // website name
+		q.Set(contentData[1], contentData[2]) // "asset" or "route" to name of file
 		u.RawQuery = q.Encode()
 		return u.String()
 	}
