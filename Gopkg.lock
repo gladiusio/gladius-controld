@@ -95,34 +95,20 @@
   name = "github.com/gogo/protobuf"
   packages = [
     "gogoproto",
-    "plugin/compare",
-    "plugin/defaultcheck",
-    "plugin/description",
-    "plugin/embedcheck",
-    "plugin/enumstringer",
-    "plugin/equal",
-    "plugin/face",
-    "plugin/gostring",
-    "plugin/marshalto",
-    "plugin/oneofcheck",
-    "plugin/populate",
-    "plugin/size",
-    "plugin/stringer",
-    "plugin/testgen",
-    "plugin/union",
-    "plugin/unmarshal",
+    "jsonpb",
     "proto",
     "protoc-gen-gogo/descriptor",
-    "protoc-gen-gogo/generator",
-    "protoc-gen-gogo/generator/internal/remap",
-    "protoc-gen-gogo/grpc",
-    "protoc-gen-gogo/plugin",
-    "protoc-gen-gogofaster",
-    "vanity",
-    "vanity/command"
+    "sortkeys",
+    "types"
   ]
   revision = "636bf0302bc95575d69441b25a2603156ffdddf1"
   version = "v1.1.1"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/golang/glog"
+  packages = ["."]
+  revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
 
 [[projects]]
   branch = "master"
@@ -236,6 +222,18 @@
   revision = "8f267d80f2eb68998661a325c0e53fca4485e626"
 
 [[projects]]
+  name = "github.com/klauspost/cpuid"
+  packages = ["."]
+  revision = "ae7887de9fa5d2db4eaa8174a7eff2c1ac00f2da"
+  version = "v1.1"
+
+[[projects]]
+  name = "github.com/klauspost/reedsolomon"
+  packages = ["."]
+  revision = "6bb6130ff6a76a904c1841707d65603aec9cc288"
+  version = "v1.6"
+
+[[projects]]
   name = "github.com/lib/pq"
   packages = [
     ".",
@@ -264,6 +262,12 @@
   version = "v1.0.8"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/minio/blake2b-simd"
+  packages = ["."]
+  revision = "3f5f724cb5b182a5c278d6d3d55b40e7f8c2efb4"
+
+[[projects]]
   name = "github.com/mitchellh/mapstructure"
   packages = ["."]
   revision = "fa473d140ef3c6adf42d6b391fe76707f1f243c8"
@@ -282,6 +286,23 @@
   version = "v1.2.0"
 
 [[projects]]
+  name = "github.com/perlin-network/noise"
+  packages = [
+    "crypto",
+    "crypto/blake2b",
+    "crypto/ed25519",
+    "crypto/ed25519/internal/edwards25519",
+    "internal/protobuf",
+    "network",
+    "network/rpc",
+    "network/transport",
+    "peer",
+    "types/lru"
+  ]
+  revision = "43dc6beeb584116ae7c38763c950848026d621d2"
+  version = "v1.1.0"
+
+[[projects]]
   name = "github.com/pkg/errors"
   packages = ["."]
   revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
@@ -298,12 +319,6 @@
   packages = ["."]
   revision = "3fb1b69b103a84de38a19c3c6ec073dd6caa4d3f"
   version = "v1.5.0"
-
-[[projects]]
-  name = "github.com/satori/go.uuid"
-  packages = ["."]
-  revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
-  version = "v1.2.0"
 
 [[projects]]
   branch = "master"
@@ -385,12 +400,44 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/templexxx/cpufeat"
+  packages = ["."]
+  revision = "cef66df7f161dee20f4d650da7268d77eaaec82d"
+
+[[projects]]
+  name = "github.com/templexxx/xor"
+  packages = ["."]
+  revision = "0af8e873c554da75f37f2049cdffda804533d44c"
+  version = "0.1.2"
+
+[[projects]]
+  name = "github.com/tjfoc/gmsm"
+  packages = ["sm4"]
+  revision = "98aa888b79d8de04afe0fccf45ed10594efc858b"
+  version = "v1.1"
+
+[[projects]]
+  name = "github.com/xtaci/kcp-go"
+  packages = ["."]
+  revision = "60be01eef6f665151bfbcde38429ee1d8710f68f"
+  version = "v4.0"
+
+[[projects]]
+  branch = "master"
   name = "golang.org/x/crypto"
   packages = [
+    "blowfish",
+    "cast5",
     "ed25519",
     "ed25519/internal/edwards25519",
+    "internal/subtle",
     "pbkdf2",
-    "scrypt"
+    "salsa20",
+    "salsa20/salsa",
+    "scrypt",
+    "tea",
+    "twofish",
+    "xtea"
   ]
   revision = "182538f80094b6a8efaade63a8fd8e0d9d5843dd"
 
@@ -464,6 +511,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5757727dd81275ee2239f34bf75d8458c5357590cbf98aebaae0a11075dbd78a"
+  inputs-digest = "c92f5291ee02298ff418b5c91fd0455593d554053b07bc7da50cb4d76d4c2f14"
   solver-name = "gps-cdcl"
   solver-version = 1

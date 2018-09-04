@@ -158,20 +158,24 @@ func (s *State) UpdateState(sm *signature.SignedMessage) error {
 		timestamp := sm.GetTimestamp()
 
 		handler := func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
+			var err error
+			suc := false
 			switch string(key) {
 			case "node":
 				s.mux.Lock()
-				s.nodeHandler(value, timestamp, sm)
+				suc, err = s.nodeHandler(value, timestamp, sm)
 				s.mux.Unlock()
 			case "pool":
 				s.mux.Lock()
-				s.poolHandler(value, timestamp, sm)
+				suc, err = s.poolHandler(value, timestamp, sm)
 				s.mux.Unlock()
 			}
-			return nil
+			if !suc && err == nil {
+				return errors.New("Nothing was updated")
+			}
+			return err
 		}
-		jsonparser.ObjectEach(messageBytes, handler)
-		return nil
+		return jsonparser.ObjectEach(messageBytes, handler)
 	}
 	return errors.New("message is not verified")
 }
