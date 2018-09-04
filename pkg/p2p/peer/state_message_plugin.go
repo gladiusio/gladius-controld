@@ -28,6 +28,10 @@ func (state *StatePlugin) Receive(ctx *network.PluginContext) error {
 	return nil
 }
 
+func (state *StatePlugin) Startup(net *network.Network) {
+	// TODO: Create a push/pull sync for missed messages
+}
+
 func parseSignedMessage(sm string) (*signature.SignedMessage, error) {
 	smBytes := []byte(sm)
 
