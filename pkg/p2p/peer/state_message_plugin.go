@@ -1,7 +1,9 @@
 package peer
 
 import (
+	"encoding/json"
 	"errors"
+	"time"
 
 	"github.com/buger/jsonparser"
 	"github.com/perlin-network/noise/network"
@@ -16,6 +18,7 @@ type StatePlugin struct {
 	peerState *state.State
 }
 
+// Receive is called every time a new message is received
 func (state *StatePlugin) Receive(ctx *network.PluginContext) error {
 	switch msg := ctx.Message().(type) {
 	case *messages.StateMessage:
@@ -23,13 +26,36 @@ func (state *StatePlugin) Receive(ctx *network.PluginContext) error {
 		if err == nil {
 			state.peerState.UpdateState(sm)
 		}
+	case *messages.SyncRequest:
+		smList := state.peerState.GetSignatureList()
+		smStringList := make([]string, 0)
+		for _, sm := range smList {
+			smString, _ := json.Marshal(sm)
+			smStringList = append(smStringList, string(smString))
+		}
+		ctx.Reply(&messages.SyncResponse{SignedMessage: smStringList})
+	case *messages.SyncResponse:
+		smStringList := msg.SignedMessage
+		for _, smString := range smStringList {
+			sm, err := parseSignedMessage(smString)
+			if err != nil {
+				return errors.New("Invalid signed message sent")
+			}
+			state.peerState.UpdateState(sm)
+		}
 	}
 
 	return nil
 }
 
+// Startup is called once the network is bootstrapped. Every 60
+// seconds we ask a random peer for it's state. This is an anti
+// entropy method that might not be entirely needed.
 func (state *StatePlugin) Startup(net *network.Network) {
-	// TODO: Create a push/pull sync for missed messages
+	go func() {
+		net.BroadcastRandomly(&messages.SyncRequest{}, 1)
+		time.Sleep(60 * time.Second)
+	}()
 }
 
 func parseSignedMessage(sm string) (*signature.SignedMessage, error) {

@@ -28,6 +28,7 @@ func New(ga *blockchain.GladiusAccountManager) *Peer {
 	// Build the network
 	builder := network.NewBuilder()
 	builder.SetKeys(keys)
+
 	// Use KCP instead of TCP, and config bind address and bind port
 	builder.SetAddress(network.FormatAddress(
 		"kcp",
