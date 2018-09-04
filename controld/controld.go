@@ -11,6 +11,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"github.com/spf13/viper"
 )
 
 var Database *gorm.DB
@@ -50,7 +51,7 @@ func initializeNodeManagerService(router *mux.Router, configuration config.Confi
 	// Router Setup
 	cRouter := routing.ControlRouter{
 		Router: router,
-		Port:   configuration.Port,
+		Port:   viper.GetString("NodeManager.Config.Port"),
 		Debug:  configuration.Debug,
 	}
 

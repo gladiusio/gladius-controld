@@ -62,7 +62,6 @@ type BlockchainConfig struct {
 
 type P2PConfig struct {
 	BindPort       int
-	AdvertisePort  int
 	VerifyOverride bool
 	BindAddress    string
 }
@@ -113,7 +112,6 @@ func (configuration Configuration) defaults() Configuration {
 			PoolManagerAddress: "0x9717EaDbfE344457135a4f1fA8AE3B11B4CAB0b7",
 		},
 		P2P: P2PConfig{
-			AdvertisePort:  7946,
 			BindPort:       7946,
 			VerifyOverride: false,
 			BindAddress:    "0.0.0.0",

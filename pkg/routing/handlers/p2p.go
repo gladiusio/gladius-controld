@@ -209,12 +209,7 @@ func JoinHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
 
 func LeaveHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		err := p.StopAndLeave()
-		if err != nil {
-			ErrorHandler(w, r, "Couldn't leave network", err, http.StatusBadRequest)
-			return
-		}
-		ResponseHandler(w, r, "Left network", true, nil, nil, nil)
+		ResponseHandler(w, r, "Method no longer in use", false, nil, nil, nil)
 	}
 }
 
