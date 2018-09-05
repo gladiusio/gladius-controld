@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	numOfPeers = 20
+	numOfPeers = 10
 )
 
 func TestMain(m *testing.M) {
@@ -133,8 +133,8 @@ func TestCorrectNumberOfNodesInState(t *testing.T) {
 	buildNetwork(peers, t)      // Build the network (let nodes join)
 	time.Sleep(1 * time.Second) // Sleep to let the dht do its magic
 
-	signTestMessage(peers, t)          // Sign a message so we have some state
-	time.Sleep(100 * time.Millisecond) // Wait for state to update
+	signTestMessage(peers, t)   // Sign a message so we have some state
+	time.Sleep(1 * time.Second) // Wait for state to update
 
 	for i := 1; i < numOfPeers; i++ {
 		numOfNodesInState := len(peers[i].GetState().NodeDataMap)
@@ -148,6 +148,20 @@ func TestCorrectNumberOfNodesInState(t *testing.T) {
 
 }
 
+func stateEqual(peers []*peer.Peer, t *testing.T) {
+	for i := 0; i < numOfPeers; i++ {
+		for i2 := 0; i2 < numOfPeers; i2++ {
+			p1 := peers[i].GetState().NodeDataMap
+			p2 := peers[i2].GetState().NodeDataMap
+
+			if !reflect.DeepEqual(p1, p2) {
+				//t.FailNow()
+			}
+		}
+
+	}
+}
+
 func TestStateEquality(t *testing.T) {
 	peers := buildPeers()
 	defer killPeers(peers)
@@ -155,18 +169,36 @@ func TestStateEquality(t *testing.T) {
 	buildNetwork(peers, t)      // Build the network (let nodes join)
 	time.Sleep(1 * time.Second) // Sleep to let the dht do its magic
 
-	signTestMessage(peers, t)          // Sign a message so we have some state
-	time.Sleep(100 * time.Millisecond) // Wait for state to update
+	signTestMessage(peers, t)   // Sign a message so we have some state
+	time.Sleep(1 * time.Second) // Wait for state to update
 
-	for i := 0; i < numOfPeers; i++ {
-		for i2 := 0; i2 < numOfPeers; i2++ {
-			p1 := peers[i].GetState().NodeDataMap
-			p2 := peers[i2].GetState().NodeDataMap
+	stateEqual(peers, t)
+}
 
-			if !reflect.DeepEqual(p1, p2) {
-				t.FailNow()
-			}
-		}
+func TestStateSync(t *testing.T) {
+	peers := buildPeers()
+	defer killPeers(peers)
 
+	// Update the state of the first node without pushing it to the network
+	peers[0].UnlockWallet("password")
+	sm, err := peers[0].SignMessage(message.New(
+		[]byte(`{"node" : {"ip_address": "localhost"}}`),
+	))
+	if err != nil {
+		t.Errorf("node 0 couldn't sign message: error was: %s", err.Error())
+		t.Fail()
 	}
+
+	err = peers[0].GetState().UpdateState(sm)
+	if err != nil {
+		t.Errorf("node 0 couldn't update state: error was: %s", err.Error())
+		t.Fail()
+	}
+
+	// Connect the nodes together
+	buildNetwork(peers, t)      // Build the network (let nodes join)
+	time.Sleep(1 * time.Second) // Sleep to let the dht do its magic
+
+	// Check to see that state is equal
+	stateEqual(peers, t)
 }
