@@ -3,6 +3,7 @@ package peer
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/buger/jsonparser"
@@ -27,6 +28,7 @@ func (state *StatePlugin) Receive(ctx *network.PluginContext) error {
 			go state.peerState.UpdateState(sm)
 		}
 	case *messages.SyncRequest:
+		fmt.Println("Got sync request!")
 		smList := state.peerState.GetSignatureList()
 		smStringList := make([]string, 0)
 		for _, sm := range smList {
@@ -35,6 +37,7 @@ func (state *StatePlugin) Receive(ctx *network.PluginContext) error {
 		}
 		ctx.Reply(&messages.SyncResponse{SignedMessage: smStringList})
 	case *messages.SyncResponse:
+		fmt.Println("Got sync response!")
 		smStringList := msg.SignedMessage
 		for _, smString := range smStringList {
 			sm, err := parseSignedMessage(smString)
@@ -53,8 +56,8 @@ func (state *StatePlugin) Receive(ctx *network.PluginContext) error {
 // entropy method that might not be entirely needed.
 func (state *StatePlugin) Startup(net *network.Network) {
 	go func() {
-		net.BroadcastRandomly(&messages.SyncRequest{}, 1)
 		time.Sleep(60 * time.Second)
+		net.BroadcastRandomly(&messages.SyncRequest{}, 1)
 	}()
 }
 

@@ -97,8 +97,8 @@ func (p *Peer) Join(addressList []string) error {
 			return fmt.Errorf("protocol must be kcp, you have %s", addr.Protocol)
 		}
 	}
-	p.net.BlockUntilListening()
 	p.net.Bootstrap(addressList...)
+	p.net.BroadcastByAddresses(&messages.SyncRequest{}, addressList...)
 	return nil
 }
 
