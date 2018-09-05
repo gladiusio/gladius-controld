@@ -9,12 +9,6 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/armon/go-metrics"
-  packages = ["."]
-  revision = "3c58d8115a78a6879e5df75ae900846768d36895"
-
-[[projects]]
-  branch = "master"
   name = "github.com/btcsuite/btcd"
   packages = ["btcec"]
   revision = "79e00513b1011888b1e675157ab89f527f901cae"
@@ -135,42 +129,6 @@
   version = "v1.6.1"
 
 [[projects]]
-  name = "github.com/hashicorp/errwrap"
-  packages = ["."]
-  revision = "8a6fb523712970c966eefc6b39ed2c5e74880354"
-  version = "v1.0.0"
-
-[[projects]]
-  name = "github.com/hashicorp/go-immutable-radix"
-  packages = ["."]
-  revision = "27df80928bb34bb1b0d6d0e01b9e679902e7a6b5"
-  version = "v1.0.0"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/hashicorp/go-msgpack"
-  packages = ["codec"]
-  revision = "fa3f63826f7c23912c15263591e65d54d080b458"
-
-[[projects]]
-  name = "github.com/hashicorp/go-multierror"
-  packages = ["."]
-  revision = "886a7fbe3eb1c874d46f623bfa70af45f425b3d1"
-  version = "v1.0.0"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/hashicorp/go-sockaddr"
-  packages = ["."]
-  revision = "6d291a969b86c4b633730bfc6b8b9d64c3aafed9"
-
-[[projects]]
-  name = "github.com/hashicorp/golang-lru"
-  packages = ["simplelru"]
-  revision = "20f1fb78b0740ba8c3cb143a61e86ba5c8669768"
-  version = "v0.5.0"
-
-[[projects]]
   name = "github.com/hashicorp/hcl"
   packages = [
     ".",
@@ -186,12 +144,6 @@
   ]
   revision = "8cb6e5b959231cc1119e43259c4a608f9c51a241"
   version = "v1.0.0"
-
-[[projects]]
-  name = "github.com/hashicorp/memberlist"
-  packages = ["."]
-  revision = "ce8abaa0c60c2d6bee7219f5ddf500e0a1457b28"
-  version = "v0.1.0"
 
 [[projects]]
   name = "github.com/jinzhu/gorm"
@@ -256,12 +208,6 @@
   version = "v1.9.0"
 
 [[projects]]
-  name = "github.com/miekg/dns"
-  packages = ["."]
-  revision = "5a2b9fab83ff0f8bfc99684bd5f43a37abe560f1"
-  version = "v1.0.8"
-
-[[projects]]
   branch = "master"
   name = "github.com/minio/blake2b-simd"
   packages = ["."]
@@ -292,8 +238,11 @@
     "crypto/blake2b",
     "crypto/ed25519",
     "crypto/ed25519/internal/edwards25519",
+    "dht",
     "internal/protobuf",
     "network",
+    "network/backoff",
+    "network/discovery",
     "network/rpc",
     "network/transport",
     "peer",
@@ -319,12 +268,6 @@
   packages = ["."]
   revision = "3fb1b69b103a84de38a19c3c6ec073dd6caa4d3f"
   version = "v1.5.0"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/sean-/seed"
-  packages = ["."]
-  revision = "e2103e2c35297fb7e17febb81e49b312087a2372"
 
 [[projects]]
   name = "github.com/spf13/afero"
@@ -428,8 +371,6 @@
   packages = [
     "blowfish",
     "cast5",
-    "ed25519",
-    "ed25519/internal/edwards25519",
     "internal/subtle",
     "pbkdf2",
     "salsa20",
@@ -449,7 +390,6 @@
     "internal/iana",
     "internal/socket",
     "ipv4",
-    "ipv6",
     "websocket"
   ]
   revision = "8a410e7b638dca158bf9e766925842f6651ff828"
@@ -511,6 +451,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c92f5291ee02298ff418b5c91fd0455593d554053b07bc7da50cb4d76d4c2f14"
+  inputs-digest = "94fa96209048fbfa7e17802b9c9fca6148b470501d3e48ee5aed9587ae833121"
   solver-name = "gps-cdcl"
   solver-version = 1

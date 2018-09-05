@@ -34,6 +34,11 @@ func NewGladiusAccountManager() *GladiusAccountManager {
 	return &GladiusAccountManager{keystore: ks}
 }
 
+// NewGladiusAccountManagerCustomKeystore creates a new gladius account manager
+func NewGladiusAccountManagerCustomKeystore(ks *keystore.KeyStore) *GladiusAccountManager {
+	return &GladiusAccountManager{keystore: ks}
+}
+
 // Determines if account is unlocked by signing a blank hash
 func (ga GladiusAccountManager) Unlocked() bool {
 	if !ga.HasAccount() {

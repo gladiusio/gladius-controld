@@ -10,6 +10,7 @@ import (
 
 	"github.com/deckarep/golang-set"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
+	"github.com/gladiusio/gladius-controld/pkg/p2p/message"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/peer/messages"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/signature"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/state"
@@ -87,14 +88,33 @@ type challenge struct {
 
 // Join will request to join the network from a specific node
 func (p *Peer) Join(addressList []string) error {
-	for _, addr := range addressList {
-		_, err := network.ParseAddress(addr)
+	for _, addrString := range addressList {
+		addr, err := network.ParseAddress(addrString)
 		if err != nil {
-			return fmt.Errorf("address must look like proto://host:port, you have %s", addr)
+			return fmt.Errorf("address must look like kcp://host:port, you have %s", addr)
+		}
+		if addr.Protocol != "kcp" {
+			return fmt.Errorf("protocol must be kcp, you have %s", addr.Protocol)
 		}
 	}
+	p.net.BlockUntilListening()
 	p.net.Bootstrap(addressList...)
 	return nil
+}
+
+func (p *Peer) UnlockWallet(password string) error {
+	_, err := p.ga.UnlockAccount(password)
+	return err
+}
+
+// SignMessage signs the message with the peer's internal account manager
+func (p *Peer) SignMessage(m *message.Message) (*signature.SignedMessage, error) {
+	return signature.CreateSignedMessage(m, p.ga)
+}
+
+// Stop will stop the peer
+func (p *Peer) Stop() {
+	p.net.Close()
 }
 
 func (p *Peer) SetState(s *state.State) {
