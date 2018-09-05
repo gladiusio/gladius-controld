@@ -24,7 +24,7 @@ func (state *StatePlugin) Receive(ctx *network.PluginContext) error {
 	case *messages.StateMessage:
 		sm, err := parseSignedMessage(msg.Message)
 		if err == nil {
-			state.peerState.UpdateState(sm)
+			go state.peerState.UpdateState(sm)
 		}
 	case *messages.SyncRequest:
 		smList := state.peerState.GetSignatureList()
@@ -41,7 +41,7 @@ func (state *StatePlugin) Receive(ctx *network.PluginContext) error {
 			if err != nil {
 				return errors.New("Invalid signed message sent")
 			}
-			state.peerState.UpdateState(sm)
+			go state.peerState.UpdateState(sm)
 		}
 	}
 
