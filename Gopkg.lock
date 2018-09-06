@@ -9,12 +9,6 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/armon/go-metrics"
-  packages = ["."]
-  revision = "3c58d8115a78a6879e5df75ae900846768d36895"
-
-[[projects]]
-  branch = "master"
   name = "github.com/btcsuite/btcd"
   packages = ["btcec"]
   revision = "79e00513b1011888b1e675157ab89f527f901cae"
@@ -92,6 +86,25 @@
   version = "v1.8.0"
 
 [[projects]]
+  name = "github.com/gogo/protobuf"
+  packages = [
+    "gogoproto",
+    "jsonpb",
+    "proto",
+    "protoc-gen-gogo/descriptor",
+    "sortkeys",
+    "types"
+  ]
+  revision = "636bf0302bc95575d69441b25a2603156ffdddf1"
+  version = "v1.1.1"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/golang/glog"
+  packages = ["."]
+  revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
+
+[[projects]]
   branch = "master"
   name = "github.com/golang/snappy"
   packages = ["."]
@@ -116,42 +129,6 @@
   version = "v1.6.1"
 
 [[projects]]
-  name = "github.com/hashicorp/errwrap"
-  packages = ["."]
-  revision = "8a6fb523712970c966eefc6b39ed2c5e74880354"
-  version = "v1.0.0"
-
-[[projects]]
-  name = "github.com/hashicorp/go-immutable-radix"
-  packages = ["."]
-  revision = "27df80928bb34bb1b0d6d0e01b9e679902e7a6b5"
-  version = "v1.0.0"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/hashicorp/go-msgpack"
-  packages = ["codec"]
-  revision = "fa3f63826f7c23912c15263591e65d54d080b458"
-
-[[projects]]
-  name = "github.com/hashicorp/go-multierror"
-  packages = ["."]
-  revision = "886a7fbe3eb1c874d46f623bfa70af45f425b3d1"
-  version = "v1.0.0"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/hashicorp/go-sockaddr"
-  packages = ["."]
-  revision = "6d291a969b86c4b633730bfc6b8b9d64c3aafed9"
-
-[[projects]]
-  name = "github.com/hashicorp/golang-lru"
-  packages = ["simplelru"]
-  revision = "20f1fb78b0740ba8c3cb143a61e86ba5c8669768"
-  version = "v0.5.0"
-
-[[projects]]
   name = "github.com/hashicorp/hcl"
   packages = [
     ".",
@@ -167,12 +144,6 @@
   ]
   revision = "8cb6e5b959231cc1119e43259c4a608f9c51a241"
   version = "v1.0.0"
-
-[[projects]]
-  name = "github.com/hashicorp/memberlist"
-  packages = ["."]
-  revision = "ce8abaa0c60c2d6bee7219f5ddf500e0a1457b28"
-  version = "v0.1.0"
 
 [[projects]]
   name = "github.com/jinzhu/gorm"
@@ -203,6 +174,18 @@
   revision = "8f267d80f2eb68998661a325c0e53fca4485e626"
 
 [[projects]]
+  name = "github.com/klauspost/cpuid"
+  packages = ["."]
+  revision = "ae7887de9fa5d2db4eaa8174a7eff2c1ac00f2da"
+  version = "v1.1"
+
+[[projects]]
+  name = "github.com/klauspost/reedsolomon"
+  packages = ["."]
+  revision = "6bb6130ff6a76a904c1841707d65603aec9cc288"
+  version = "v1.6"
+
+[[projects]]
   name = "github.com/lib/pq"
   packages = [
     ".",
@@ -225,10 +208,10 @@
   version = "v1.9.0"
 
 [[projects]]
-  name = "github.com/miekg/dns"
+  branch = "master"
+  name = "github.com/minio/blake2b-simd"
   packages = ["."]
-  revision = "5a2b9fab83ff0f8bfc99684bd5f43a37abe560f1"
-  version = "v1.0.8"
+  revision = "3f5f724cb5b182a5c278d6d3d55b40e7f8c2efb4"
 
 [[projects]]
   name = "github.com/mitchellh/mapstructure"
@@ -249,6 +232,26 @@
   version = "v1.2.0"
 
 [[projects]]
+  name = "github.com/perlin-network/noise"
+  packages = [
+    "crypto",
+    "crypto/blake2b",
+    "crypto/ed25519",
+    "crypto/ed25519/internal/edwards25519",
+    "dht",
+    "internal/protobuf",
+    "network",
+    "network/backoff",
+    "network/discovery",
+    "network/rpc",
+    "network/transport",
+    "peer",
+    "types/lru"
+  ]
+  revision = "43dc6beeb584116ae7c38763c950848026d621d2"
+  version = "v1.1.0"
+
+[[projects]]
   name = "github.com/pkg/errors"
   packages = ["."]
   revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
@@ -265,18 +268,6 @@
   packages = ["."]
   revision = "3fb1b69b103a84de38a19c3c6ec073dd6caa4d3f"
   version = "v1.5.0"
-
-[[projects]]
-  name = "github.com/satori/go.uuid"
-  packages = ["."]
-  revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
-  version = "v1.2.0"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/sean-/seed"
-  packages = ["."]
-  revision = "e2103e2c35297fb7e17febb81e49b312087a2372"
 
 [[projects]]
   name = "github.com/spf13/afero"
@@ -352,12 +343,42 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/templexxx/cpufeat"
+  packages = ["."]
+  revision = "cef66df7f161dee20f4d650da7268d77eaaec82d"
+
+[[projects]]
+  name = "github.com/templexxx/xor"
+  packages = ["."]
+  revision = "0af8e873c554da75f37f2049cdffda804533d44c"
+  version = "0.1.2"
+
+[[projects]]
+  name = "github.com/tjfoc/gmsm"
+  packages = ["sm4"]
+  revision = "98aa888b79d8de04afe0fccf45ed10594efc858b"
+  version = "v1.1"
+
+[[projects]]
+  name = "github.com/xtaci/kcp-go"
+  packages = ["."]
+  revision = "60be01eef6f665151bfbcde38429ee1d8710f68f"
+  version = "v4.0"
+
+[[projects]]
+  branch = "master"
   name = "golang.org/x/crypto"
   packages = [
-    "ed25519",
-    "ed25519/internal/edwards25519",
+    "blowfish",
+    "cast5",
+    "internal/subtle",
     "pbkdf2",
-    "scrypt"
+    "salsa20",
+    "salsa20/salsa",
+    "scrypt",
+    "tea",
+    "twofish",
+    "xtea"
   ]
   revision = "182538f80094b6a8efaade63a8fd8e0d9d5843dd"
 
@@ -369,7 +390,6 @@
     "internal/iana",
     "internal/socket",
     "ipv4",
-    "ipv6",
     "websocket"
   ]
   revision = "8a410e7b638dca158bf9e766925842f6651ff828"
@@ -431,6 +451,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a87006115162daab3f0a828764eb04636402a31aeb57d622a3dbe74a121033bd"
+  inputs-digest = "94fa96209048fbfa7e17802b9c9fca6148b470501d3e48ee5aed9587ae833121"
   solver-name = "gps-cdcl"
   solver-version = 1

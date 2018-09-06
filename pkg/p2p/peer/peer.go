@@ -2,92 +2,83 @@ package peer
 
 import (
 	"encoding/json"
-	"errors"
+	"fmt"
+	"log"
 	"net/url"
-	"os"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/deckarep/golang-set"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
+	"github.com/gladiusio/gladius-controld/pkg/p2p/message"
+	"github.com/gladiusio/gladius-controld/pkg/p2p/peer/messages"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/signature"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/state"
-	"github.com/hashicorp/memberlist"
-	"github.com/satori/go.uuid"
+	"github.com/perlin-network/noise/crypto/ed25519"
+	"github.com/perlin-network/noise/network"
+	"github.com/perlin-network/noise/network/backoff"
+	"github.com/perlin-network/noise/network/discovery"
 	"github.com/spf13/viper"
 )
 
 // New returns a new peer type
 func New(ga *blockchain.GladiusAccountManager) *Peer {
-	d := &delegate{}
-	md := &mergeDelegate{}
-	hostname, _ := os.Hostname()
+	// TODO: Make this use ethereum keys from the GladiusAccountManager
+	keys := ed25519.RandomKeyPair()
 
-	c := memberlist.DefaultWANConfig()
-	c.PushPullInterval = 60 * time.Second
-	c.GossipInterval = 200 * time.Millisecond
-	c.ProbeTimeout = 4 * time.Second
-	c.ProbeInterval = 7 * time.Second
-	c.GossipNodes = 5
-	c.Delegate = d
-	// FIXME: Renable this feature, problem now is that the challenges that nodes
-	// respond with seem to be wrong
-	// c.Merge = md
-	c.Name = hostname + "-" + uuid.NewV4().String()
-	c.BindAddr = viper.GetString("P2P.BindAddress")
-	c.AdvertisePort = viper.GetInt("P2P.AdvertisePort")
-	c.BindPort = viper.GetInt("P2P.BindPort")
+	// Build the network
+	builder := network.NewBuilder()
+	builder.SetKeys(keys)
 
-	m, err := memberlist.Create(c)
+	// Use KCP instead of TCP, and config bind address and bind port
+	builder.SetAddress(network.FormatAddress(
+		"kcp",
+		viper.GetString("P2P.BindAddress"),
+		uint16(viper.GetInt("P2P.BindPort"))))
+
+	// Setup our state and register accepted fields
+	s := state.New()
+	s.RegisterNodeFields("ip_address", "disk_content", "content_port", "heartbeat")
+	s.RegisterPoolFields("required_content")
+
+	// Register peer discovery plugin.
+	// TODO: Setup an authorized DHT plugin
+	builder.AddPlugin(new(discovery.Plugin))
+
+	// Add the exponential backoff plugin
+	builder.AddPlugin(new(backoff.Plugin))
+
+	// Create our state plugin
+	statePlugin := new(StatePlugin)
+	statePlugin.peerState = s
+	builder.AddPlugin(statePlugin)
+
+	net, err := builder.Build()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
+		return nil
 	}
 
-	queue := &memberlist.TransmitLimitedQueue{
-		RetransmitMult: 4,
-	}
+	go net.Listen()
 
 	peer := &Peer{
-		peerState:           state.New(),
-		running:             false,
-		peerDelegate:        d,
-		member:              m,
-		PeerQueue:           queue,
-		challengeReceiveMap: make(map[string]chan *signature.SignedMessage),
-		ga:                  ga,
+		ga:        ga,
+		peerState: s,
+		net:       net,
+		running:   true,
+		mux:       sync.Mutex{},
 	}
-
-	peer.peerState.RegisterNodeFields("ip_address", "disk_content", "content_port", "heartbeat")
-	peer.peerState.RegisterPoolFields("required_content")
-
-	queue.NumNodes = func() int { return peer.member.NumMembers() }
-	d.peer = peer
-	md.peer = peer
 	return peer
 }
 
 // Peer is a type that represents a peer in the Gladius p2p network.
 type Peer struct {
-	ga                  *blockchain.GladiusAccountManager
-	peerDelegate        *delegate
-	PeerQueue           *memberlist.TransmitLimitedQueue
-	peerState           *state.State
-	member              *memberlist.Memberlist
-	running             bool
-	challengeReceiveMap map[string]chan *signature.SignedMessage // Map of challenge set ids to a receive channel of the responses from the questioned peers.
-	mux                 sync.Mutex
-}
-
-type broadcast struct {
-	msg    []byte
-	notify chan<- struct{}
-}
-
-type update struct {
-	From   memberlist.Node
-	Action string          // Can be "merge", "challenge_question", or "challenge_response"
-	Data   json.RawMessage // Usually a signed message, but can also be a challenge question
+	ga        *blockchain.GladiusAccountManager
+	peerState *state.State
+	net       *network.Network
+	running   bool
+	mux       sync.Mutex
 }
 
 // Used to send to a node through an "update"
@@ -96,64 +87,44 @@ type challenge struct {
 	Question    string
 }
 
-func (b *broadcast) Invalidates(other memberlist.Broadcast) bool {
-	return false
-}
-
-func (b *broadcast) Message() []byte {
-	return b.msg
-}
-
-func (b *broadcast) Finished() {
-	if b.notify != nil {
-		close(b.notify)
-	}
-}
-
 // Join will request to join the network from a specific node
-func (p *Peer) Join(ipList []string) error {
-	_, err := p.member.Join(ipList)
-	if err != nil {
-		return err
+func (p *Peer) Join(addressList []string) error {
+	for _, addrString := range addressList {
+		addr, err := network.ParseAddress(addrString)
+		if err != nil {
+			return fmt.Errorf("address must look like kcp://host:port, you have %s", addr)
+		}
+		if addr.Protocol != "kcp" {
+			return fmt.Errorf("protocol must be kcp, you have %s", addr.Protocol)
+		}
 	}
-
+	p.net.Bootstrap(addressList...)
+	go func() {
+		time.Sleep(100 * time.Millisecond)
+		p.net.BroadcastByAddresses(&messages.SyncRequest{}, addressList...)
+	}()
 	return nil
+}
+
+func (p *Peer) UnlockWallet(password string) error {
+	_, err := p.ga.UnlockAccount(password)
+	return err
+}
+
+// SignMessage signs the message with the peer's internal account manager
+func (p *Peer) SignMessage(m *message.Message) (*signature.SignedMessage, error) {
+	return signature.CreateSignedMessage(m, p.ga)
+}
+
+// Stop will stop the peer
+func (p *Peer) Stop() {
+	p.net.Close()
 }
 
 func (p *Peer) SetState(s *state.State) {
 	p.mux.Lock()
 	p.peerState = s
 	p.mux.Unlock()
-}
-
-// StopAndLeave will infomr the network of it leaving and shutdown
-func (p *Peer) StopAndLeave() error {
-	err := p.member.Leave(1 * time.Second)
-	if err != nil {
-		return err
-	}
-
-	err = p.member.Shutdown()
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (p *Peer) registerOutgoingChallenge(challengeID string) {
-	p.mux.Lock()
-	p.challengeReceiveMap[challengeID] = make(chan *signature.SignedMessage)
-	p.mux.Unlock()
-}
-
-func (p *Peer) getChallengeResponseChannel(challengeID string) (chan *signature.SignedMessage, error) {
-	p.mux.Lock()
-	defer p.mux.Unlock()
-	if challengeChan, ok := p.challengeReceiveMap[challengeID]; ok {
-		return challengeChan, nil
-	}
-	return nil, errors.New("Could not find channel")
 }
 
 // UpdateAndPushState updates the local state and pushes it to several other peers
@@ -168,20 +139,9 @@ func (p *Peer) UpdateAndPushState(sm *signature.SignedMessage) error {
 		return err
 	}
 
-	b, err := json.Marshal(&update{
-		Action: "merge",
-		Data:   signedBytes,
-		From:   *p.member.LocalNode(),
-	})
+	toSend := &messages.StateMessage{Message: string(signedBytes)}
 
-	if err != nil {
-		return err
-	}
-
-	p.PeerQueue.QueueBroadcast(&broadcast{
-		msg:    b,
-		notify: nil,
-	})
+	p.net.Broadcast(toSend)
 
 	return nil
 }

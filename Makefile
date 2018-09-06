@@ -51,12 +51,24 @@ dependencies:
 	# Deal with the ethereum cgo bindings
 	go get github.com/ethereum/go-ethereum
 
+	# Protobuf generation
+	go get -u github.com/gogo/protobuf/protoc-gen-gogofaster
+
 	cp -r \
 	"${GOPATH}/src/github.com/ethereum/go-ethereum/crypto/secp256k1/libsecp256k1" \
 	"vendor/github.com/ethereum/go-ethereum/crypto/secp256k1/"
 
 test: $(CTL_SRC)
 	$(GOTEST) $(CTL_SRC)
+
+protobuf:
+	protoc -I=. -I=$(GOPATH)/src -I=$(GOPATH)/src/github.com/gogo/protobuf/protobuf --gogofaster_out=\
+	Mgoogle/protobuf/any.proto=github.com/gogo/protobuf/types,\
+	Mgoogle/protobuf/duration.proto=github.com/gogo/protobuf/types,\
+	Mgoogle/protobuf/struct.proto=github.com/gogo/protobuf/types,\
+	Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,\
+	Mgoogle/protobuf/wrappers.proto=github.com/gogo/protobuf/types:. \
+	./pkg/p2p/peer/messages/*.proto
 
 controld: test
 	$(GOBUILD) -o $(CTL_DEST) $(CTL_SRC)
