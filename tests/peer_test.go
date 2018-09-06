@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	numOfPeers = 10
+	numOfPeers = 20
 )
 
 func TestMain(m *testing.M) {
@@ -74,7 +74,7 @@ func buildPeers() []*peer.Peer {
 		ga := blockchain.NewGladiusAccountManagerCustomKeystore(ks)
 		ga.CreateAccount("password")
 		// Kinda hacky but lets us configure each peer
-		viper.SetDefault("P2P.BindAddress", "localhost")
+		viper.SetDefault("P2P.BindAddress", "127.0.0.1")
 		viper.SetDefault("P2P.BindPort", 7946+i)
 		peers = append(peers, peer.New(ga))
 	}
@@ -92,7 +92,7 @@ func killPeers(peers []*peer.Peer) {
 func buildNetwork(peers []*peer.Peer, t *testing.T) {
 	// Let the first node be a seed node
 	for i := 1; i < numOfPeers; i++ {
-		err := peers[i].Join([]string{fmt.Sprintf("kcp://localhost:%d", 7946)})
+		err := peers[i].Join([]string{fmt.Sprintf("kcp://127.0.0.1:%d", 7946)})
 		if err != nil {
 			t.Errorf("node %d couldn't join network: error was: %s", i, err.Error())
 		}
@@ -155,7 +155,8 @@ func stateEqual(peers []*peer.Peer, t *testing.T) {
 			p2 := peers[i2].GetState().NodeDataMap
 
 			if !reflect.DeepEqual(p1, p2) {
-				//t.FailNow()
+				t.Errorf("state for nodes %d and %d is not equal", i, i2)
+				t.FailNow()
 			}
 		}
 
@@ -167,7 +168,7 @@ func TestStateEquality(t *testing.T) {
 	defer killPeers(peers)
 
 	buildNetwork(peers, t)      // Build the network (let nodes join)
-	time.Sleep(1 * time.Second) // Sleep to let the dht do its magic
+	time.Sleep(5 * time.Second) // Sleep to let the dht do its magic
 
 	signTestMessage(peers, t)   // Sign a message so we have some state
 	time.Sleep(1 * time.Second) // Wait for state to update
@@ -194,6 +195,8 @@ func TestStateSync(t *testing.T) {
 		t.Errorf("node 0 couldn't update state: error was: %s", err.Error())
 		t.Fail()
 	}
+
+	time.Sleep(1 * time.Second)
 
 	// Connect the nodes together
 	buildNetwork(peers, t)      // Build the network (let nodes join)

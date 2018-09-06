@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/deckarep/golang-set"
 	"github.com/gladiusio/gladius-controld/pkg/blockchain"
@@ -98,7 +99,10 @@ func (p *Peer) Join(addressList []string) error {
 		}
 	}
 	p.net.Bootstrap(addressList...)
-	p.net.BroadcastByAddresses(&messages.SyncRequest{}, addressList...)
+	go func() {
+		time.Sleep(100 * time.Millisecond)
+		p.net.BroadcastByAddresses(&messages.SyncRequest{}, addressList...)
+	}()
 	return nil
 }
 
