@@ -249,7 +249,7 @@ func (s *State) nodeHandler(nodeUpdate []byte, timestamp int64, sm *signature.Si
 			// is newer than the one we have
 			if s.fieldType(keyString) == 0 {
 				if s.NodeDataMap[sm.Address][keyString] == nil ||
-					s.NodeDataMap[sm.Address][keyString].(*SignedField).SignedMessage.GetTimestamp() <= timestamp {
+					s.NodeDataMap[sm.Address][keyString].(*SignedField).SignedMessage.GetTimestamp() < timestamp {
 
 					// Actually update the field
 					s.NodeDataMap[sm.Address][keyString] = &SignedField{Data: string(value), SignedMessage: sm}
@@ -258,7 +258,7 @@ func (s *State) nodeHandler(nodeUpdate []byte, timestamp int64, sm *signature.Si
 				}
 			} else {
 				if s.NodeDataMap[sm.Address][keyString] == nil ||
-					s.NodeDataMap[sm.Address][keyString].(*SignedList).SignedMessage.GetTimestamp() <= timestamp {
+					s.NodeDataMap[sm.Address][keyString].(*SignedList).SignedMessage.GetTimestamp() < timestamp {
 
 					// Create a string list
 					contentList := make([]string, 0)
@@ -302,7 +302,7 @@ func (s *State) poolHandler(poolUpdate []byte, timestamp int64, sm *signature.Si
 			// is newer than the one we have
 			if s.fieldType(keyString) == 0 {
 				if s.PoolData[keyString] == nil ||
-					s.PoolData[keyString].(*SignedField).SignedMessage.GetTimestamp() <= timestamp {
+					s.PoolData[keyString].(*SignedField).SignedMessage.GetTimestamp() < timestamp {
 
 					// Actually update the field
 					s.PoolData[keyString] = &SignedField{Data: string(value), SignedMessage: sm}
@@ -311,7 +311,7 @@ func (s *State) poolHandler(poolUpdate []byte, timestamp int64, sm *signature.Si
 				}
 			} else {
 				if s.PoolData[keyString] == nil ||
-					s.PoolData[keyString].(*SignedList).SignedMessage.GetTimestamp() <= timestamp {
+					s.PoolData[keyString].(*SignedList).SignedMessage.GetTimestamp() < timestamp {
 					// Create a string list
 					contentList := make([]string, 0)
 					// Get all file names passed in
