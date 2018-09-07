@@ -3,6 +3,7 @@ package state
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"sync"
 
 	"github.com/buger/jsonparser"
@@ -12,9 +13,9 @@ import (
 // State is a type that represents the network state
 type State struct {
 	// poolDataFields and nodeDataFields keep track of what fields are valid for
-	// the protocol, the map is just for fast lookup
-	poolDataFields map[string]bool
-	nodeDataFields map[string]bool
+	// the protocol, 0 is SignedField, 1 is SignedList
+	poolDataFields map[string]int
+	nodeDataFields map[string]int
 
 	// Keeps track of the actual data
 	PoolData    PoolData            `json:"pool_data"`
@@ -26,30 +27,52 @@ type State struct {
 // New returns a pointer to a State object
 func New() *State {
 	s := &State{}
-	s.poolDataFields = make(map[string]bool)
-	s.nodeDataFields = make(map[string]bool)
+	s.poolDataFields = make(map[string]int)
+	s.nodeDataFields = make(map[string]int)
 	return s
 }
 
-// RegisterPoolFields registers the fields as understood types to be recorded in
+// RegisterPoolListFields registers the fields as understood types to be recorded in
 // the state of the pool
-func (s *State) RegisterPoolFields(fields ...string) {
+func (s *State) RegisterPoolListFields(fields ...string) {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
 	for _, field := range fields {
-		s.poolDataFields[field] = true
+		s.poolDataFields[field] = 1
 	}
 }
 
-// RegisterNodeFields registers the fields as understood types to be recorded in
-// the state of a node
-func (s *State) RegisterNodeFields(fields ...string) {
+// RegisterPoolSingleFields registers the fields as understood types to be recorded in
+// the state of the pool
+func (s *State) RegisterPoolSingleFields(fields ...string) {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
 	for _, field := range fields {
-		s.nodeDataFields[field] = true
+		s.poolDataFields[field] = 0
+	}
+}
+
+// RegisterNodeListFields registers the fields as understood types to be recorded in
+// the state of a node
+func (s *State) RegisterNodeListFields(fields ...string) {
+	s.mux.Lock()
+	defer s.mux.Unlock()
+
+	for _, field := range fields {
+		s.nodeDataFields[field] = 1
+	}
+}
+
+// RegisterNodeSingleFields registers the fields as understood types to be recorded in
+// the state of a node
+func (s *State) RegisterNodeSingleFields(fields ...string) {
+	s.mux.Lock()
+	defer s.mux.Unlock()
+
+	for _, field := range fields {
+		s.nodeDataFields[field] = 0
 	}
 }
 
@@ -81,6 +104,8 @@ func (s *sigList) GetList() (values []*signature.SignedMessage) {
 func (s *State) GetPoolField(key string) interface{} {
 	s.mux.Lock()
 	defer s.mux.Unlock()
+
+	fmt.Println(s.PoolData[key])
 
 	if s.PoolData != nil {
 		return s.PoolData[key]
@@ -129,13 +154,23 @@ func (s *State) GetSignatureList() []*signature.SignedMessage {
 
 	if s.PoolData != nil {
 		for _, field := range s.PoolData {
-			sigs.Add(field.SignedMessage)
+			switch typedField := field.(type) {
+			case *SignedList:
+				sigs.Add(typedField.SignedMessage)
+			case *SignedField:
+				sigs.Add(typedField.SignedMessage)
+			}
 		}
 	}
 	// Get all of the node signatures
 	for _, nd := range s.NodeDataMap {
 		for _, field := range nd {
-			sigs.Add(field.SignedMessage)
+			switch typedField := field.(type) {
+			case *SignedList:
+				sigs.Add(typedField.SignedMessage)
+			case *SignedField:
+				sigs.Add(typedField.SignedMessage)
+			}
 		}
 	}
 
@@ -185,6 +220,13 @@ func (s *State) isUnderstoodNodeField(key string) bool {
 	return ok
 }
 
+func (s *State) fieldType(key string) int {
+	if _, ok := s.nodeDataFields[key]; ok {
+		return s.nodeDataFields[key]
+	}
+	return s.poolDataFields[key]
+}
+
 func (s *State) isUnderstoodPoolField(key string) bool {
 	_, ok := s.poolDataFields[key]
 	return ok
@@ -206,13 +248,31 @@ func (s *State) nodeHandler(nodeUpdate []byte, timestamp int64, sm *signature.Si
 		if s.isUnderstoodNodeField(keyString) {
 			// Check if the our node has never been updated, or the incomming message
 			// is newer than the one we have
-			if s.NodeDataMap[sm.Address][keyString] == nil ||
-				s.NodeDataMap[sm.Address][keyString].SignedMessage.GetTimestamp() < timestamp {
+			if s.fieldType(keyString) == 0 {
+				if s.NodeDataMap[sm.Address][keyString] == nil ||
+					s.NodeDataMap[sm.Address][keyString].(*SignedField).SignedMessage.GetTimestamp() < timestamp {
 
-				// Actually update the field
-				s.NodeDataMap[sm.Address][keyString] = &SignedField{Data: string(value), SignedMessage: sm}
-				updated = true
-				return nil
+					// Actually update the field
+					s.NodeDataMap[sm.Address][keyString] = &SignedField{Data: string(value), SignedMessage: sm}
+					updated = true
+					return nil
+				}
+			} else {
+				if s.NodeDataMap[sm.Address][keyString] == nil ||
+					s.NodeDataMap[sm.Address][keyString].(*SignedList).SignedMessage.GetTimestamp() < timestamp {
+
+					// Create a string list
+					contentList := make([]string, 0)
+					// Get all file names passed in
+					jsonparser.ArrayEach(value, func(v []byte, dataType jsonparser.ValueType, offset int, err error) {
+						contentList = append(contentList, string(v))
+					})
+
+					// Actually update the field
+					s.NodeDataMap[sm.Address][keyString] = &SignedList{Data: contentList, SignedMessage: sm}
+					updated = true
+					return nil
+				}
 			}
 			return errors.New("Message was older than the current version")
 		}
@@ -241,13 +301,30 @@ func (s *State) poolHandler(poolUpdate []byte, timestamp int64, sm *signature.Si
 		if s.isUnderstoodPoolField(keyString) {
 			// Check if the our node has never been updated, or the incomming message
 			// is newer than the one we have
-			if s.PoolData[keyString] == nil ||
-				s.PoolData[keyString].SignedMessage.GetTimestamp() < timestamp {
+			if s.fieldType(keyString) == 0 {
+				if s.PoolData[keyString] == nil ||
+					s.PoolData[keyString].(*SignedField).SignedMessage.GetTimestamp() < timestamp {
 
-				// Actually update the field
-				s.PoolData[keyString] = &SignedField{Data: string(value), SignedMessage: sm}
-				updated = true
-				return nil
+					// Actually update the field
+					s.PoolData[keyString] = &SignedField{Data: string(value), SignedMessage: sm}
+					updated = true
+					return nil
+				}
+			} else {
+				if s.PoolData[keyString] == nil ||
+					s.PoolData[keyString].(*SignedList).SignedMessage.GetTimestamp() < timestamp {
+					// Create a string list
+					contentList := make([]string, 0)
+					// Get all file names passed in
+					jsonparser.ArrayEach(value, func(v []byte, dataType jsonparser.ValueType, offset int, err error) {
+						contentList = append(contentList, string(v))
+					})
+
+					// Actually update the field
+					s.PoolData[keyString] = &SignedList{Data: contentList, SignedMessage: sm}
+					updated = true
+					return nil
+				}
 			}
 			return errors.New("Message was older than the current version")
 		}
@@ -258,10 +335,10 @@ func (s *State) poolHandler(poolUpdate []byte, timestamp int64, sm *signature.Si
 }
 
 // PoolData is a type that stores information about the pool
-type PoolData map[string]*SignedField
+type PoolData map[string]interface{}
 
 // NodeData is a type that stores infomration about an indiviudal node
-type NodeData map[string]*SignedField
+type NodeData map[string]interface{}
 
 // SignedField is a type that represents a string field that includes the
 // signature that last updated it
