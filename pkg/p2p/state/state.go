@@ -3,7 +3,6 @@ package state
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"sync"
 
 	"github.com/buger/jsonparser"
@@ -105,8 +104,6 @@ func (s *State) GetPoolField(key string) interface{} {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
-	fmt.Println(s.PoolData[key])
-
 	if s.PoolData != nil {
 		return s.PoolData[key]
 	}
@@ -134,7 +131,9 @@ func (s *State) GetNodeFieldsMap(key string) map[string]interface{} {
 
 	// Go through every node and get that specific field
 	for node, data := range s.NodeDataMap {
-		toReturn[node] = data[key]
+		if data[key] != nil {
+			toReturn[node] = data[key]
+		}
 	}
 	return toReturn
 }
