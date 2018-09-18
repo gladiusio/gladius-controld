@@ -102,7 +102,7 @@ func (p *Peer) Join(addressList []string) error {
 	}
 	p.net.Bootstrap(addressList...)
 	go func() {
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(1 * time.Second)
 		p.net.BroadcastByAddresses(&messages.SyncRequest{}, addressList...)
 	}()
 	return nil
