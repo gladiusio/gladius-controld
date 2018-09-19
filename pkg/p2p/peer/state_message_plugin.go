@@ -3,7 +3,6 @@ package peer
 import (
 	"encoding/json"
 	"errors"
-	"time"
 
 	"github.com/buger/jsonparser"
 	"github.com/perlin-network/noise/network"
@@ -52,10 +51,11 @@ func (state *StatePlugin) Receive(ctx *network.PluginContext) error {
 // seconds we ask a random peer for it's state. This is an anti
 // entropy method that might not be entirely needed.
 func (state *StatePlugin) Startup(net *network.Network) {
-	go func() {
-		time.Sleep(60 * time.Second)
-		net.BroadcastRandomly(&messages.SyncRequest{}, 1)
-	}()
+	// TODO: Find out why this crashes the network on ocassion
+	// go func() {
+	// 	time.Sleep(60 * time.Second)
+	// 	net.BroadcastRandomly(&messages.SyncRequest{}, 1)
+	// }()
 }
 
 func parseSignedMessage(sm string) (*signature.SignedMessage, error) {
