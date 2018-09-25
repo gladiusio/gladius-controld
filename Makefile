@@ -46,13 +46,13 @@ clean:
 # dependency management
 dependencies:
 	# install go packages
-	dep ensure
+	GO111MODULE=on go mod vendor
 
 	# Deal with the ethereum cgo bindings
-	go get github.com/ethereum/go-ethereum
+	GO111MODULE=on go get github.com/ethereum/go-ethereum
 
 	# Protobuf generation
-	go get -u github.com/gogo/protobuf/protoc-gen-gogofaster
+	GO111MODULE=on go get -u github.com/gogo/protobuf/protoc-gen-gogofaster
 
 	cp -r \
 	"${GOPATH}/src/github.com/ethereum/go-ethereum/crypto/secp256k1/libsecp256k1" \
