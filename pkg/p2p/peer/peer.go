@@ -183,8 +183,8 @@ func (p *Peer) CompareContent(contentList []string) []interface{} {
 	return contentWeNeed.Difference(contentWeHaveSet).ToSlice()
 }
 
-// GetContentLinks returns a map mapping a file name to all the places it can
-// be found on the network
+// GetContentLinks returns a map mapping a file name to all of the URLS it can
+// be found on from the network
 func (p *Peer) GetContentLinks(contentList []string) map[string][]string {
 	allContent := p.GetState().GetNodeFieldsMap("disk_content")
 	toReturn := make(map[string][]string)
@@ -248,4 +248,35 @@ func (p *Peer) createContentLink(nodeAddress, contentFileName string) string {
 		return u.String()
 	}
 	return ""
+}
+
+// GetContentLocations returns a map mapping a file name to all the content nodes it can
+// be found on in the network
+func (p *Peer) GetContentLocations(contentList []string) map[string][]interface{} {
+	nodeMap := p.GetState().GetNodeMultipleFieldsMap("ip_address", "content_port", "disk_content")
+	toReturn := make(map[string][]interface{}) // map file name to array of nodes
+	for nodeAddress, nodeInfo := range nodeMap {
+
+		ourContent := nodeInfo["disk_content"].(*state.SignedList).Data
+		// Convert to an interface array
+		s := make([]interface{}, len(ourContent))
+		for i, v := range ourContent {
+			s[i] = v
+		}
+		ourContentSet := mapset.NewSetFromSlice(s)
+		// Check to see if the current node we're iterating over has any of the
+		// content we want
+		for _, contentWanted := range contentList {
+			if ourContentSet.Contains(contentWanted) {
+				if toReturn[contentWanted] == nil {
+					toReturn[contentWanted] = make([]interface{}, 0)
+				}
+				// Add the node info to the map
+				toReturn[contentWanted] = append(toReturn[contentWanted],
+					nodeMap[nodeAddress])
+			}
+		}
+	}
+	fmt.Println(toReturn)
+	return toReturn
 }

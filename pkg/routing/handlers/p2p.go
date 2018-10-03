@@ -260,3 +260,11 @@ func GetContentLinksHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Re
 		ResponseHandler(w, r, "Got needed content links", true, nil, p.GetContentLinks(c), nil)
 	}
 }
+
+// GetContentLocationsHandler describes the nodes that host a given list of files in the network
+func GetContentLocationsHandler(p *peer.Peer) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		c := getContentListFromBody(w, r)
+		ResponseHandler(w, r, "Got needed content locations", true, nil, p.GetContentLocations(c), nil)
+	}
+}

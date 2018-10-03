@@ -138,6 +138,26 @@ func (s *State) GetNodeFieldsMap(key string) map[string]interface{} {
 	return toReturn
 }
 
+// GetNodeMultipleFieldsMap gets a map of node address to the fields referenced by keys
+func (s *State) GetNodeMultipleFieldsMap(keys ...string) map[string]map[string]interface{} {
+	s.mux.Lock()
+	defer s.mux.Unlock()
+
+	nodeMap := make(map[string]map[string]interface{})
+
+	// Go through every node and get the fields requested by keys
+	for node, data := range s.NodeDataMap {
+		newNode := make(map[string]interface{})
+		for _, key := range keys {
+			if data[key] != nil {
+				newNode[key] = data[key]
+			}
+		}
+		nodeMap[node] = newNode
+	}
+	return nodeMap
+}
+
 func (s *State) GetNodeField(address, key string) interface{} {
 	s.mux.Lock()
 	defer s.mux.Unlock()
