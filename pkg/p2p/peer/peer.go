@@ -277,6 +277,5 @@ func (p *Peer) GetContentLocations(contentList []string) map[string][]interface{
 			}
 		}
 	}
-	fmt.Println(toReturn)
 	return toReturn
 }
