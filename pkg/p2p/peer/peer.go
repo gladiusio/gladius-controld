@@ -253,11 +253,12 @@ func (p *Peer) createContentLink(nodeAddress, contentFileName string) string {
 // GetContentLocations returns a map mapping a file name to all the content nodes it can
 // be found on in the network
 func (p *Peer) GetContentLocations(contentList []string) map[string][]interface{} {
-	nodeMap := p.GetState().GetNodeMultipleFieldsMap("ip_address", "content_port", "disk_content")
+	nodeContentsMap := p.GetState().GetNodeFieldsMap("disk_content")
+	nodeInfoMap := p.GetState().GetNodeMultipleFieldsMap("ip_address", "content_port")
 	toReturn := make(map[string][]interface{}) // map file name to array of nodes
-	for nodeAddress, nodeInfo := range nodeMap {
+	for nodeAddress, nodeInfo := range nodeContentsMap {
 
-		ourContent := nodeInfo["disk_content"].(*state.SignedList).Data
+		ourContent := nodeInfo.(*state.SignedList).Data
 		// Convert to an interface array
 		s := make([]interface{}, len(ourContent))
 		for i, v := range ourContent {
@@ -272,8 +273,9 @@ func (p *Peer) GetContentLocations(contentList []string) map[string][]interface{
 					toReturn[contentWanted] = make([]interface{}, 0)
 				}
 				// Add the node info to the map
-				toReturn[contentWanted] = append(toReturn[contentWanted],
-					nodeMap[nodeAddress])
+				node := nodeInfoMap[nodeAddress]
+				node["address"] = nodeAddress
+				toReturn[contentWanted] = append(toReturn[contentWanted], node)
 			}
 		}
 	}
