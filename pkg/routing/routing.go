@@ -208,26 +208,6 @@ func AppendServerEndpoints(router *mux.Router, db *gorm.DB) error {
 	return nil
 }
 
-func AppendApplicationEndpoints(router *mux.Router, db *gorm.DB) error {
-	// Initialize Base API sub-route
-	InitializeAPISubRoutes(router)
-
-	// Applications
-	applicationRouter := apiRouter.PathPrefix("/applications").Subrouter()
-	applicationRouter.HandleFunc("/new", handlers.PoolNewApplicationHandler(db)).
-		Methods(http.MethodPost)
-	applicationRouter.HandleFunc("/edit", handlers.PoolEditApplicationHandler(db)).
-		Methods(http.MethodPost)
-	applicationRouter.HandleFunc("/view", handlers.PoolViewApplicationHandler(db)).
-		Methods(http.MethodPost)
-	applicationRouter.HandleFunc("/status", handlers.PoolStatusViewHandler(db)).
-		Methods(http.MethodPost)
-	applicationRouter.HandleFunc("/pool/contains/{walletAddress:0[xX][0-9a-fA-F]{40}}", handlers.PoolContainsNode(db))
-	applicationRouter.HandleFunc("/nodes", handlers.PoolNodes(db))
-
-	return nil
-}
-
 func responseMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/json")

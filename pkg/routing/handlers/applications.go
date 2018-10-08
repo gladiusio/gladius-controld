@@ -5,14 +5,12 @@ import (
 	"encoding/json"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/message"
 	"github.com/gladiusio/gladius-controld/pkg/p2p/signature"
-	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 	"net"
 	"net/http"
 	"strings"
 
-	"github.com/gladiusio/gladius-application-server/pkg/controller"
-	"github.com/gladiusio/gladius-application-server/pkg/db/models"
+	"github.com/gladiusio/gladius-common/pkg/db/models"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
@@ -20,67 +18,6 @@ type statusResponse struct {
 	Accepted     bool `json:"accepted"`
 	NodeAccepted bool `json:"nodeAcceptance"`
 	PoolAccepted bool `json:"poolAcceptance"`
-}
-
-func PoolStatusViewHandler(db *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		signedMessage, err := getSignedMessage(r)
-		if err != nil {
-			ErrorHandler(w, r, "Could not verify signature and address for request", err, http.StatusForbidden)
-			return
-		}
-
-		profile, err := getProfile(signedMessage, db)
-		if err != nil {
-			ErrorHandler(w, r, "Could not retrieve profile for wallet: "+signedMessage.Address, err, http.StatusBadRequest)
-			return
-		}
-
-		response := statusResponse{
-			Accepted:     profile.NodeProfile.Approved && !profile.NodeProfile.Pending,
-			NodeAccepted: profile.NodeProfile.NodeAccepted,
-			PoolAccepted: profile.NodeProfile.PoolAccepted,
-		}
-
-		ResponseHandler(w, r, "null", true, nil, response, nil)
-	}
-}
-
-func PoolNewApplicationHandler(db *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		requestPayload, err := getRequestPayload(r)
-		if err != nil {
-			ErrorHandler(w, r, "Could not verify request payload", err, http.StatusBadRequest)
-			return
-		}
-
-		profile, err := controller.NodeApplyToPool(db, requestPayload)
-		if err != nil {
-			ErrorHandler(w, r, "Could not apply to pool", err, http.StatusBadRequest)
-			return
-		}
-
-		ResponseHandler(w, r, "null", true, nil, profile, nil)
-	}
-}
-
-func PoolEditApplicationHandler(db *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		requestPayload, err := getRequestPayload(r)
-		if err != nil {
-			ErrorHandler(w, r, "Could not verify request payload", err, http.StatusBadRequest)
-			return
-		}
-
-		controller.NodeUpdateProfile(db, requestPayload)
-		viewApplication(w, r, db)
-	}
-}
-
-func PoolViewApplicationHandler(db *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		viewApplication(w, r, db)
-	}
 }
 
 func getSignedMessage(r *http.Request) (signature.SignedMessage, error) {
@@ -133,35 +70,6 @@ func getRequestPayload(r *http.Request) (models.NodeRequestPayload, error) {
 	requestPayload.IPAddress = getIPAddress(r)
 
 	return requestPayload, nil
-}
-
-func getProfile(signedMessage signature.SignedMessage, db *gorm.DB) (controller.FullProfile, error) {
-	if !signedMessage.IsVerified() {
-		return controller.FullProfile{}, errors.New("Message could not be verified")
-	}
-
-	profile, err := controller.NodePoolApplication(db, signedMessage.Address)
-	if err != nil {
-		return controller.FullProfile{}, err
-	}
-
-	return profile, err
-}
-
-func viewApplication(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
-	signedMessage, err := getSignedMessage(r)
-	if err != nil {
-		ErrorHandler(w, r, "Could not verify signature and address for request", err, http.StatusForbidden)
-		return
-	}
-
-	profile, err := getProfile(signedMessage, db)
-	if err != nil {
-		ErrorHandler(w, r, "Could not retrieve profile for wallet: "+signedMessage.Address, err, http.StatusBadRequest)
-		return
-	}
-
-	ResponseHandler(w, r, "null", true, nil, profile, nil)
 }
 
 type ipRange struct {

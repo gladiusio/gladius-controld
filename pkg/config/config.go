@@ -253,29 +253,3 @@ func PoolManagerRouter(db *gorm.DB) *mux.Router {
 
 	return router
 }
-
-func ApplicationServerRouter(db *gorm.DB) *mux.Router {
-	router, _ := setupRouter()
-
-	err := routing.AppendAccountManagementEndpoints(router)
-	if err != nil {
-		log.Fatalln("Failed to append Account Management Endpoints")
-	}
-
-	err = routing.AppendStatusEndpoints(router)
-	if err != nil {
-		log.Fatalln("Failed to append Status Endpoints")
-	}
-
-	err = routing.AppendServerEndpoints(router, db)
-	if err != nil {
-		log.Fatalln("Failed to append Server Endpoints")
-	}
-
-	err = routing.AppendApplicationEndpoints(router, db)
-	if err != nil {
-		log.Fatalln("Failed to append Application Endpoints")
-	}
-
-	return router
-}

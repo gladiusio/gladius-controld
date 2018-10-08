@@ -78,15 +78,3 @@ func InitializePoolManager() {
 	initializeDatabase(configuration.ApplicationServer.Database)
 	initializeService(config.PoolManagerRouter(Database), poolConfig)
 }
-
-func InitializeApplicationServer() {
-	// Grab default configuration
-	initializeConfiguration()
-
-	configuration := config.ViperConfiguration()
-
-	asConfig := configuration.ApplicationServer.Config
-
-	initializeDatabase(configuration.ApplicationServer.Database)
-	initializeService(config.ApplicationServerRouter(Database), asConfig)
-}
