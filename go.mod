@@ -27,7 +27,7 @@ require (
 	github.com/mitchellh/mapstructure v1.0.0 // indirect
 	github.com/pborman/uuid v0.0.0-20180906182336-adf5a7427709 // indirect
 	github.com/pelletier/go-toml v1.2.0 // indirect
-	github.com/perlin-network/noise v1.1.0
+	github.com/perlin-network/noise v1.1.1-0.20180919211059-35d0d411da2a
 	github.com/pkg/errors v0.8.0
 	github.com/rjeczalik/notify v0.9.1 // indirect
 	github.com/rs/cors v1.5.0 // indirect
