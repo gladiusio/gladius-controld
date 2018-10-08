@@ -5,7 +5,7 @@ require (
 	github.com/btcsuite/btcd v0.0.0-20180921031619-92494a5188cd // indirect
 	github.com/buger/jsonparser v0.0.0-20180910192245-6acdf747ae99
 	github.com/deckarep/golang-set v0.0.0-20171013212420-1d4478f51bed
-	github.com/ethereum/go-ethereum v1.8.15
+	github.com/ethereum/go-ethereum v1.8.16
 	github.com/fsnotify/fsnotify v1.4.7 // indirect
 	github.com/gladiusio/gladius-application-server v0.0.0-20180831154555-75ec8b96baa3
 	github.com/gladiusio/gladius-utils v0.0.0-20180827165816-9ab431d232e7
